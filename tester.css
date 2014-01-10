@@ -1,0 +1,6 @@
+.passed {
+	color: #008000;
+}
+.failed {
+	color: #ff0000;
+}
