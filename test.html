@@ -11,16 +11,14 @@ Tester.testAsync({
 		},
 	"Member Report Card List (All Tutors)": function(t,s,f){
 			iLearner.getMemberReportCardList({}, function(list){
-					if(list && list.length) {
-						return s();
-					}
-					f();
-				}, f);
+				if(list && list.length) {
+					return s();
+				}
+				f();
+			}, f);
 		},
 	"Member Report Card List (One Tutor)": function(t,s,f){
-			iLearner.getMemberReportCardList({
-				tutor: 3967
-			}, function(list){
+			iLearner.getMemberReportCardList({ tutor: 3967 }, function(list){
 				if(list && list.length == 84) {
 					return s();
 				}
