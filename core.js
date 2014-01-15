@@ -9,7 +9,9 @@
 		accountName,
 		adminStaff,
 		classrooms,
-		tutors;
+		tutors,
+
+		loading = $.Deferred();
 
 	getInitData();
 
@@ -42,12 +44,10 @@
 			"json")
 		.fail(error);
 	}
-	iLearner.Login = Login;
 
 	function Logout(){
 		$.post(API_ROOT + "process_logout.php");
 	}
-	iLearner.Logout = Logout;
 
 	function getInitData(){
 		$.post(API_ROOT + "process_getinitdata.php",
@@ -55,9 +55,19 @@
 			function(data){
 				adminStaff = data.AdminStaff;
 				classrooms = data.classroom;
-				tutors = data.tutor;
+				tutors = $.map(data.tutor, function(t){ return { name: t.n, id: t.mid }; });
+				loading.resolve();
 			},
 			"json");
+	}
+
+	function getTutors(){
+		var deferred = $.Deferred(),
+			promise = deferred.promise();
+		loading.done(function(){
+			deferred.resolve(tutors);
+		});
+		return promise;
 	}
 
 	function getMemberReportCardList(options, success, error){
@@ -91,11 +101,16 @@
 			"json")
 		.fail(error);
 	}
-	iLearner.getMemberReportCardList = getMemberReportCardList;
 
 	function formatDate(date){
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
+
+
+	iLearner.Login = Login;
+	iLearner.Logout = Logout;
+	iLearner.getTutors = getTutors;
+	iLearner.getMemberReportCardList = getMemberReportCardList;
 
 	window.iLearner = iLearner;
 }(window));
