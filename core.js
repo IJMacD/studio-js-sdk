@@ -70,17 +70,15 @@
 		return promise;
 	}
 
-	function getMemberReportCardList(options, success, error){
-		if(typeof success != "function"){
-			// Results need to be sent somewhere
-			return;
-		}
-		var post_data = {};
+	function getMemberReportCardList(options){
+		var deferred = $.Deferred(),
+			promise = deferred.promise(),
+			post_data = {};
 
 		options = options || {};
 
 		if(options.tutor){
-			post_data.searchTutor = options.tutor;
+			post_data.searchTutor = options.tutor.id || options.tutor;
 		}
 
 		if(options.from){
@@ -94,12 +92,42 @@
 		$.post(API_ROOT + "process_getMemberReportCardList.php",
 			post_data,
 			function(data){
+				var students;
 				if(data.MemberReportCardList){
-					success(data.MemberReportCardList);
+					students = $.map(data.MemberReportCardList, function(i){
+						i.id = i.memberID;
+						i.name = i.nickname;
+						i.courseName = i.coursename;
+						i.courseStartTime = i.starttime;
+						i.courseEndTime = i.endtime;
+
+						return i;
+					})
+					deferred.resolve(students);
 				}
 			},
 			"json")
-		.fail(error);
+		.fail(deferred.reject);
+
+		return promise;
+	}
+
+	function getMemberReportCardDetail(options){
+		var deferred = $.Deferred(),
+			promise = deferred.promise(),
+			post_data = { membercourseID: options.studentId };
+
+		$.post(API_ROOT + "process_getMemberReportCardDetail.php",
+			post_data,
+			function(data){
+				if(data.MemberReportCardDetail){
+					deferred.resolve(data.MemberReportCardDetail[0]);
+				}
+			},
+			"json")
+		.fail(deferred.reject);
+
+		return promise;
 	}
 
 	function formatDate(date){
@@ -111,6 +139,7 @@
 	iLearner.Logout = Logout;
 	iLearner.getTutors = getTutors;
 	iLearner.getMemberReportCardList = getMemberReportCardList;
+	iLearner.getMemberReportCardDetail = getMemberReportCardDetail;
 
 	window.iLearner = iLearner;
 }(window));

@@ -10,20 +10,24 @@ Tester.testAsync({
 			iLearner.Login("tutor", "badpass", f, s);
 		},
 	"Member Report Card List (All Tutors)": function(t,s,f){
-			iLearner.getMemberReportCardList({}, function(list){
-				if(list && list.length) {
-					return s();
-				}
-				f();
-			}, f);
+			iLearner.getMemberReportCardList({})
+				.done(function(list){
+					if(list && list.length) {
+						return s();
+					}
+					f();
+				})
+				.fail(f);
 		},
 	"Member Report Card List (One Tutor)": function(t,s,f){
-			iLearner.getMemberReportCardList({ tutor: 3967 }, function(list){
-				if(list && list.length == 84) {
-					return s();
-				}
-				f();
-			}, f);
+			iLearner.getMemberReportCardList({ tutor: 3967 })
+				.done(function(list){
+					if(list && list.length) {
+						return s();
+					}
+					f();
+				})
+				.fail(f);
 		}
 });
 </script>
