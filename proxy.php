@@ -8,6 +8,7 @@ if(strpos($request_uri,$script_name)===0){
 	$options = array(
 		'http' => array(
 			'method'  => 'POST',
+			'header' => "Content-type: application/x-www-form-urlencoded",
 			'content' => http_build_query($_POST),
 		),
 	);
