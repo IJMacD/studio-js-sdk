@@ -95,11 +95,14 @@
 				var students;
 				if(data.MemberReportCardList){
 					students = $.map(data.MemberReportCardList, function(i){
-						i.id = i.memberID;
+						i.id = i.membercourseid;
+						i.studentId = i.memberID;
 						i.name = i.nickname;
 						i.courseName = i.coursename;
 						i.courseStartTime = i.starttime;
 						i.courseEndTime = i.endtime;
+						i.memberCourseId = i.membercourseid;
+						i.complete = (i.completed == "1");
 
 						return i;
 					})
