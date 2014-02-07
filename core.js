@@ -115,7 +115,7 @@
 	function getMemberReportCardDetail(options){
 		var deferred = $.Deferred(),
 			promise = deferred.promise(),
-			post_data = { membercourseID: options.studentId };
+			post_data = { membercourseID: options.memberCourseId };
 
 		$.post(API_ROOT + "process_getMemberReportCardDetail.php",
 			post_data,
