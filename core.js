@@ -103,6 +103,7 @@
 						i.courseEndTime = i.endtime;
 						i.memberCourseId = i.membercourseid;
 						i.complete = (i.completed == "1");
+						i.tutor = options.tutor;
 
 						return i;
 					})
