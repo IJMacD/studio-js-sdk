@@ -3,6 +3,7 @@
 		Report = {},
 
 		reports = {},
+		learningObjectives = {},
 
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"};
 
@@ -74,18 +75,45 @@
 	 */
 	function get(item){
 		var deferred = $.Deferred(),
-			promise = deferred.promise(),
-			post_data = { membercourseID: item.id };
+			promise = deferred.promise();
 
-		$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php",
-			post_data,
-			function(data){
-				if(data.MemberReportCardDetail){
-					$.extend(item, data.MemberReportCardDetail[0], learningDefaults);
-					deferred.resolve(item);
+		$.when(
+			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.id },  null, "json"),
+			$.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: item.courseName }, null, "json")
+		)
+		.done(function(a1, a2){
+			var detail = a1[0].MemberReportCardDetail[0],
+				focus = a2[0].CourseFocusObject[0],
+				labels = "ap1label ap2label ap3label ap4label wh1label wh2label wh3label wh4label".split(" "),
+				o = {},
+				i;
+
+			// wh labels from code are lowest priority
+			$.extend(o, learningDefaults);
+
+			// ap labels from second query are next priority
+			if(focus){
+				o.ap1label = focus.ap1;
+				o.ap2label = focus.ap2;
+				o.ap3label = focus.ap3;
+				o.ap4label = focus.ap4;
+			}
+
+			// labels already set in detail object are highest priority
+			// but by default they are set as null which would overwrite our defaults
+			for(i in labels) {
+				if(!detail[labels[i]]){
+					detail[labels[i]] = undefined;
 				}
-			},
-			"json")
+			}
+
+			$.extend(o, detail);
+
+			// There should be no conflict with labels when merging into report stub
+			$.extend(item, o);
+
+			deferred.resolve(item);
+		})
 		.fail(deferred.reject);
 
 		return promise;
