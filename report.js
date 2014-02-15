@@ -5,7 +5,8 @@
 		reports = {},
 		learningObjectives = {},
 
-		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"};
+		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
+		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount".split(" ");
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -127,6 +128,14 @@
 	 * @param item Report
 	 * @return Promise can be used to wait for results
 	 */
-	function save(item){}
+	function save(item){
+		var post_data = {},
+			i, k;
+		for(i in saveFields){
+			k = saveFields[i];
+			post_data[k] = item[k];
+		}
+		return $.post(iL.API_ROOT + "process_updateMemberReportCardDetail.php", post_data, null, "json");
+	}
 	Report.save = save;
 }(window));
