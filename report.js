@@ -5,6 +5,8 @@
 		reports = {},
 		learningObjectives = {},
 
+		comments,
+
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
 		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount".split(" ");
 
@@ -53,6 +55,7 @@
 						item.memberCourseId = item.membercourseid;
 						item.complete = (item.completed == "1");
 						item.tutor = options.tutor;
+						item.firstName = item.name.match(/\w+/)[0];
 
 						// TODO: check if report already exists and don't replace it
 						reports[item.id] = item;
@@ -138,4 +141,49 @@
 		return $.post(iL.API_ROOT + "process_updateMemberReportCardDetail.php", post_data, null, "json");
 	}
 	Report.save = save;
+
+	/**
+	 * Static method to get comment templates
+	 * @return Promise
+	 */
+	function getComments(){
+
+		if(!comments){
+			comments = $.Deferred();
+
+			$.get(iL.API_ROOT + "comment.php")
+				.done(function(data){
+					var result = {
+						good: [],
+						average: [],
+						suggestions: [],
+						focus: []
+					};
+					result.good.regex = /good_comments\.push\("([^"]+)"\)/g;
+					result.average.regex = /average_comments\.push\("([^"]+)"\)/g;
+					result.suggestions.regex = /suggestions\.push\("([^"]+)"\)/g;
+					result.focus.regex = /focus\.push\("([^"]+)"\)/g;
+
+					$.each(result, function(i,item){
+						$.each(data.match(item.regex), function(i,comment){
+							item.regex.lastIndex = 0;
+							item.push(
+								item.regex.exec(comment)[1]
+									.replace("XXX",			"{ firstName }")
+									.replace(/\bshe\b/g,	"{ pronounSubject }")
+									.replace(/\bShe\b/g,	"{ pronounSubjectCapitalize }")
+									.replace(/\bherself\b/g,"{ reflexivePronoun }")
+									.replace(/\bher\b/g,	"{ pronounPossesive }")
+									.replace(/\bHer\b/g,	"{ pronounPossesiveCapitalize }")
+							);
+						});
+						item.regex = undefined;
+					});
+
+					comments.resolve(result);
+				});
+		}
+		return comments.promise();
+	}
+	Report.getComments = getComments;
 }(window));
