@@ -172,9 +172,15 @@
 									.replace("XXX",			"{ firstName }")
 									.replace(/\bshe\b/g,	"{ pronounSubject }")
 									.replace(/\bShe\b/g,	"{ pronounSubjectCapitalize }")
-									.replace(/\bherself\b/g,"{ reflexivePronoun }")
+									.replace(/\bherself\b/g,"{ pronounReflexive }")
 									.replace(/\bher\b/g,	"{ pronounPossesive }")
 									.replace(/\bHer\b/g,	"{ pronounPossesiveCapitalize }")
+									.replace(/\bhe\b/g,		"{ pronounSubject }")
+									.replace(/\bHe\b/g,		"{ pronounSubjectCapitalize }")
+									.replace(/\bhimself\b/g,"{ pronounReflexive }")
+									.replace(/\bhis\b/g,	"{ pronounPossesive }")
+									.replace(/\bHis\b/g,	"{ pronounPossesiveCapitalize }")
+									.replace(/\bhim\b/g,	"{ pronounObject }")
 							);
 						});
 						item.regex = undefined;
