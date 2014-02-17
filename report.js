@@ -56,10 +56,10 @@
 						item.memberCourseId = item.membercourseid;
 						item.complete = (item.completed == "1");
 						item.tutor = options.tutor;
-						item.firstName = item.name.match(/\w+/)[0];
+						item.firstName = item.name.match(/^\s*(\w+)/)[1];
 
 						if(topNames.indexOf(item.firstName) > -1){
-							item.firstName = item.name.match(/\w+$/)[0];
+							item.firstName = item.name.match(/(\w+)\s*$/)[1];
 						}
 
 						// TODO: check if report already exists and don't replace it
