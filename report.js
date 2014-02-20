@@ -112,6 +112,8 @@
 
 			$.extend(o, detail);
 
+			o.tutor = undefined;
+
 			// There should be no conflict with labels when merging into report stub
 			$.extend(item, o);
 
