@@ -88,11 +88,10 @@
 
 		$.when(
 			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.id },  null, "json"),
-			$.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: item.courseName }, null, "json")
+			getCourseLearningFocus(item.courseName)
 		)
-		.done(function(a1, a2){
+		.done(function(a1, focus){
 			var detail = a1[0].MemberReportCardDetail[0],
-				focus = a2[0].CourseFocusObject[0],
 				labels = "ap1label ap2label ap3label ap4label wh1label wh2label wh3label wh4label".split(" "),
 				o = {},
 				i;
@@ -101,12 +100,7 @@
 			$.extend(o, learningDefaults);
 
 			// ap labels from second query are next priority
-			if(focus){
-				o.ap1label = focus.ap1;
-				o.ap2label = focus.ap2;
-				o.ap3label = focus.ap3;
-				o.ap4label = focus.ap4;
-			}
+			$.extend(o, focus);
 
 			// labels already set in detail object are highest priority
 			// but by default they are set as null which would overwrite our defaults
@@ -197,4 +191,35 @@
 		return comments.promise();
 	}
 	Report.getComments = getComments;
+
+	function getCourseLearningFocus(courseName){
+		var deferred,
+			post;
+		if(!learningObjectives[courseName]){
+			deferred = $.Deferred();
+			post = $.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: courseName }, null, "json");
+			post.done(function(data){
+				var focus = data.CourseFocusObject[0],
+					o = {};
+				if(focus){
+					o.ap1label = focus.ap1;
+					o.ap2label = focus.ap2;
+					o.ap3label = focus.ap3;
+					o.ap4label = focus.ap4;
+				}
+				deferred.resolve(o);
+			});
+			learningObjectives[courseName] = deferred.promise();
+		}
+		return learningObjectives[courseName];
+	}
+
+	function setCourseLearningFocus(courseName, focus, objective){
+		getCourseLearningFocus(courseName)
+			.done(function(focii){
+				focii[focus] = objective;
+			});
+	}
+	Report.setCourseLearningFocus = setCourseLearningFocus;
+
 }(window));
