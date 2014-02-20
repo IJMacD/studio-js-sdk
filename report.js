@@ -177,12 +177,14 @@
 									.replace(/\bherself\b/g,"{ pronounReflexive }")
 									.replace(/\bher\b/g,	"{ pronounPossesive }")
 									.replace(/\bHer\b/g,	"{ pronounPossesiveCapitalize }")
+									.replace(/\bgirl\b/g,	"{ nounGender }")
 									.replace(/\bhe\b/g,		"{ pronounSubject }")
 									.replace(/\bHe\b/g,		"{ pronounSubjectCapitalize }")
 									.replace(/\bhimself\b/g,"{ pronounReflexive }")
 									.replace(/\bhis\b/g,	"{ pronounPossesive }")
 									.replace(/\bHis\b/g,	"{ pronounPossesiveCapitalize }")
 									.replace(/\bhim\b/g,	"{ pronounObject }")
+									.replace(/\bboy\b/g,	"{ nounGender }")
 							);
 						});
 						item.regex = undefined;
