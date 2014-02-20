@@ -135,6 +135,7 @@
 	function save(item){
 		var post_data = {},
 			i, k;
+		item.complete = true;
 		for(i in saveFields){
 			k = saveFields[i];
 			post_data[k] = item[k];
