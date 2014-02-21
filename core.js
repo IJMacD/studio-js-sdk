@@ -59,7 +59,11 @@
 			function(data){
 				adminStaff = data.AdminStaff;
 				classrooms = data.classroom;
-				tutors = $.map(data.tutor, function(t){ return { name: t.n, id: t.mid }; });
+				tutors = $.map(data.tutor, function(t){
+					var tutor = { name: t.n, id: t.mid };
+					tutor.colour = getTutorColour(tutor);
+					return tutor;
+				});
 				loading.resolve();
 			},
 			"json");
@@ -74,9 +78,31 @@
 		return promise;
 	}
 
+	function findTutor(name){
+		var tutor;
+		if(tutors){
+			$.each(tutors, function(i,t){
+				if(t.name == name){
+					tutor = t;
+					return false;
+				}
+			});
+			return tutor;
+		}
+	}
+	iLearner.findTutor = findTutor;
+
+	function getTutorColour(tutor){
+		if(!tutor.hash){
+			tutor.hash = SparkMD5.hash(tutor.name);
+		}
+		return "#"+tutor.hash.substr(0,6);
+	}
+
 	function formatDate(date){
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
+	iLearner.formatDate = formatDate;
 
 
 	iLearner.Login = Login;

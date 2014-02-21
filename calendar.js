@@ -15,7 +15,8 @@
 				var events = [];
 				$.each(data.CalendarCourse, function(i,item){
 					var start = new Date(item.ScheduleDate),
-						end = new Date(item.ScheduleDate);
+						end = new Date(item.ScheduleDate),
+						tutor = iL.findTutor(item.Tutor);
 					start.setHours(item.Starttime.substr(0,2));
 					start.setMinutes(item.Starttime.substr(2,2));
 					end.setHours(item.endtime.substr(0,2));
@@ -23,7 +24,8 @@
 					events.push({
 						title: item.Coursetitle,
 						start: start,
-						end: end
+						end: end,
+						color: tutor && tutor.colour
 					});
 				});
 				callback(events);
