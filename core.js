@@ -78,6 +78,16 @@
 		return promise;
 	}
 
+	function getRooms(){
+		var deferred = $.Deferred(),
+			promise = deferred.promise();
+		loading.done(function(){
+			deferred.resolve(classrooms);
+		});
+		return promise;
+	}
+	iLearner.getRooms = getRooms;
+
 	function findTutor(name, fallback){
 		var tutor;
 
