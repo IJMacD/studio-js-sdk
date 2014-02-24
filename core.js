@@ -78,8 +78,13 @@
 		return promise;
 	}
 
-	function findTutor(name){
+	function findTutor(name, fallback){
 		var tutor;
+
+		if(!name){
+			return { name: "", colour: "#999999" };
+		}
+
 		if(tutors){
 			$.each(tutors, function(i,t){
 				if(t.name == name){
@@ -87,8 +92,15 @@
 					return false;
 				}
 			});
-			return tutor;
 		}
+
+		if(!tutor && fallback){
+			tutor = { name: name };
+			tutor.colour = getTutorColour(tutor);
+			tutors.push(tutor);
+		}
+
+		return tutor;
 	}
 	iLearner.findTutor = findTutor;
 
