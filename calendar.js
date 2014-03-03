@@ -2,7 +2,12 @@
 	var iLearner = window.iLearner || {},
 		Calendar = {},
 
-		levelRegex = /\s*\w\d(?:\s?-\s?\w\d)?\s*/i;
+		levelRegex = /\s*\w\d(?:\s?-\s?\w\d)?\s*/i,
+		customLevels = [
+			{regex: /Trinity/, level: "K"},
+			{regex: /GCSE/, level: "S"},
+			{regex: /St\. Mary/, level: "P"}
+		];
 
 	window.iL = iLearner;
 	iLearner.Calendar = Calendar;
@@ -27,6 +32,14 @@
 					end.setHours(item.endtime.substr(0,2));
 					end.setMinutes(item.endtime.substr(2,2));
 					level = level && level[0].replace(" ", "");
+					if(!level){
+						$.each(customLevels, function(i,cItem){
+							if(cItem.regex.test(course)){
+								level = cItem.level;
+								return false;
+							}
+						});
+					}
 					events.push({
 						title: item.Coursetitle,
 						start: start,
