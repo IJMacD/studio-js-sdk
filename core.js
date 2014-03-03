@@ -59,7 +59,9 @@
 			null,
 			function(data){
 				adminStaff = data.AdminStaff;
-				classrooms = data.classroom;
+				classrooms = $.map(data.classroom, function(i){
+					return { id: i.crid, name: i.place }
+				});
 				tutors = $.map(data.tutor, function(t){
 					var tutor = { name: t.n, id: t.mid };
 					tutor.colour = getTutorColour(tutor);
@@ -114,6 +116,26 @@
 		return tutor;
 	}
 	iLearner.findTutor = findTutor;
+
+	function findRoom(name){
+		var room;
+
+		if(!name){
+			return { id: 0, name: "" };
+		}
+
+		if(classrooms){
+			$.each(classrooms, function(i,c){
+				if(c.name == name){
+					classroom = c;
+					return false;
+				}
+			});
+		}
+
+		return classroom;
+	}
+	iLearner.findRoom = findRoom;
 
 	function getTutorColour(tutor){
 		if(!tutor.hash){

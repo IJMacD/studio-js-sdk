@@ -19,7 +19,7 @@
 	window.iL = iLearner;
 	iLearner.Calendar = Calendar;
 
-	function getLessons(start, end){
+	function get(start, end){
 		var post_data = {
 				sDate: iL.formatDate(start)
 			},
@@ -51,7 +51,7 @@
 							title: courseTitle,
 							start: start,
 							end: end,
-							room: item.Location,
+							room: iL.findRoom(item.Location),
 							tutor: tutor,
 							course: course,
 							students: []
@@ -90,9 +90,12 @@
 						id: item.MemberID,
 						name: item.nickname,
 						photo: item.Accountname,
-						original: item
+						absent: item.Attendance == "0"
 					};
 					iL.parseName(student);
+					if(item.attendance){
+						console.log(item);
+					}
 					lessons[item.CourseScheduleID].students.push(student);
 				});
 
@@ -101,6 +104,56 @@
 			"json");
 		return deferred.promise();
 	}
-	Calendar.getLessons = getLessons;
+	Calendar.get = get;
+	Calendar.getLessons = get;
+
+	function save(lesson){
+		var startHour = lesson.start.getHours(),
+			endHour = lesson.end.getHours(),
+			startAP = startHour < 12 ? "AM" : "PM",
+			endAP = endHour < 12 ? "AM" : "PM",
+			post_data = {
+				Action: "update",
+				insertMode: null,
+				tid: lesson.tutor.id,
+				cstatus:0,
+				courseID: lesson.course.id,
+				coursescheduleID: lesson.id,
+				cssid: lesson.course.id,
+				csid: lesson.room.id,
+				sdate: iL.formatDate(lesson.start),
+				timefrom: pad(startHour),
+				minutesfrom: pad(lesson.start.getMinutes()),
+				fromdt: startAP,
+				timeto: pad(endHour),
+				minutesto: pad(lesson.end.getMinutes()),
+				todt: endAP,
+				mon:0,
+				tue:0,
+				wed:0,
+				thu:0,
+				fri:0,
+				sat:0,
+				sun:0,
+				coursetypechanged:0,
+				orignal_coursetype:0
+			},
+			deferred = $.Deferred();
+		$.post(iL.API_ROOT + 'process_updateCourseSchedule.php',
+			post_data,
+			function(data){
+				if(data.statuscode == 1){
+					deferred.resolve();
+				}
+				else {
+					deferred.reject();
+				}
+			},
+			"json").fail(deferred.reject);
+		return deferred.promise();
+	}
+	Calendar.save = save;
+
+	function pad(s){return (s<10)?"0"+s:s}
 
 }(window));
