@@ -4,6 +4,7 @@
 		$ = window.jQuery,
 
 		API_ROOT = "/c/studio/",
+		topNames = "Chan Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
 		memberID,
 		accountName,
@@ -125,6 +126,32 @@
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
 	iLearner.formatDate = formatDate;
+
+	function parseName(person){
+		var firstRegex = /^\s*(\w+)/,
+			firstName = person.name.match(firstRegex)[1],
+			lastRegex = /(\w+)\s*$/,
+			lastName,
+			chineseName;
+
+		if(topNames.indexOf(firstName) > -1){
+			lastName = person.name.match(lastRegex)[1];
+
+			person.forename = lastName;
+			person.surname = firstName;
+			person.englishName = person.forename + " " + person.surname;
+			person.chineseName = $.trim(person.name.replace(lastRegex, ""));
+		}
+		else {
+			chineseName = $.trim(person.name.replace(firstRegex,""));
+
+			person.forename = firstName;
+			person.surname = chineseName.match(firstRegex)[1];
+			person.englishName = person.forename + " " + person.surname;
+			person.chineseName = chineseName;
+		}
+	}
+	iLearner.parseName = parseName;
 
 
 	iLearner.Login = Login;

@@ -8,8 +8,7 @@
 		comments,
 
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
-		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount".split(" "),
-		topNames = "Chan Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" ");
+		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount".split(" ");
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -56,11 +55,8 @@
 						item.memberCourseId = item.membercourseid;
 						item.complete = (item.completed == "1");
 						item.tutor = options.tutor;
-						item.firstName = item.name.match(/^\s*(\w+)/)[1];
 
-						if(topNames.indexOf(item.firstName) > -1){
-							item.firstName = item.name.match(/(\w+)\s*$/)[1];
-						}
+						iL.parseName(item);
 
 						// TODO: check if report already exists and don't replace it
 						reports[item.id] = item;
@@ -171,7 +167,7 @@
 							item.regex.lastIndex = 0;
 							item.push(
 								item.regex.exec(comment)[1]
-									.replace("XXX",			"{ firstName }")
+									.replace("XXX",			"{ forename }")
 									.replace(/\bshe\b/g,	"{ pronounSubject }")
 									.replace(/\bShe\b/g,	"{ pronounSubjectCapitalize }")
 									.replace(/\bherself\b/g,"{ pronounReflexive }")

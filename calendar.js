@@ -89,8 +89,10 @@
 					var student = {
 						id: item.MemberID,
 						name: item.nickname,
-						photo: item.Accountname
+						photo: item.Accountname,
+						original: item
 					};
+					iL.parseName(student);
 					lessons[item.CourseScheduleID].students.push(student);
 				});
 
