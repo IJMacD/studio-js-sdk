@@ -91,6 +91,22 @@
 	}
 	iLearner.getRooms = getRooms;
 
+	function getRoom(id){
+		var classroom;
+
+		if(classrooms){
+			$.each(classrooms, function(i,c){
+				if(c.id == id){
+					classroom = c;
+					return false;
+				}
+			});
+		}
+
+		return classroom;
+	}
+	iLearner.getRoom = getRoom;
+
 	function findTutor(name, fallback){
 		var tutor;
 
