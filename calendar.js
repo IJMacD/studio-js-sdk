@@ -28,6 +28,7 @@
 			post_data,
 			function(data){
 				var events = [];
+
 				$.each(data.CalendarCourse, function(i,item){
 					var start = new Date(item.ScheduleDate),
 						end = new Date(item.ScheduleDate),
@@ -52,7 +53,8 @@
 							end: end,
 							room: item.Location,
 							tutor: tutor,
-							course: course
+							course: course,
+							students: []
 						};
 
 					start.setHours(item.Starttime.substr(0,2));
@@ -82,6 +84,16 @@
 
 					events.push(lesson);
 				});
+
+				$.each(data.CalendarStudent, function(i,item){
+					var student = {
+						id: item.MemberID,
+						name: item.nickname,
+						photo: item.Accountname
+					};
+					lessons[item.CourseScheduleID].students.push(student);
+				});
+
 				deferred.resolve(events);
 			},
 			"json");
