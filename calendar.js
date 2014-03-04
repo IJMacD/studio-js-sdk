@@ -119,15 +119,15 @@
 				cstatus:0,
 				courseID: lesson.course.id,
 				coursescheduleID: lesson.id,
-				cssid: lesson.course.id,
-				csid: lesson.room.id,
+				cssid: lesson.course.id,	// Duplicated Course ID, old and new possibly?
+				csid: lesson.room.id,		// Classroom ID
 				sdate: iL.formatDate(lesson.start),
-				timefrom: pad(startHour),
+				timefrom: pad(startHour),	// Yes, these *must* be padded strings and 24-hour!
 				minutesfrom: pad(lesson.start.getMinutes()),
-				fromdt: startAP,
-				timeto: pad(endHour),
+				fromdt: startAP,			// Not sure if required
+				timeto: pad(endHour),		// Yes, these *must* be padded strings and 24-hour!
 				minutesto: pad(lesson.end.getMinutes()),
-				todt: endAP,
+				todt: endAP,				// Not sure if required
 				mon:0,
 				tue:0,
 				wed:0,

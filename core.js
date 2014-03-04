@@ -3,6 +3,10 @@
 		iL = iLearner,
 		$ = window.jQuery,
 
+		Tutor = iLearner.Tutor || {},
+		Room = iLearner.Room || {},
+		Util = iLearner.Util || {},
+
 		API_ROOT = "/c/studio/",
 		topNames = "Chan Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
@@ -15,6 +19,10 @@
 		loading = $.Deferred();
 
 	window.iL = iLearner;
+
+	iLearner.Tutor = Tutor;
+	iLearner.Room = Room;
+	iLearner.Util = Util;
 
 	iL.API_ROOT = API_ROOT;
 
@@ -49,10 +57,12 @@
 			"json")
 		.fail(error);
 	}
+	iLearner.Login = Login;
 
 	function Logout(){
 		$.post(API_ROOT + "process_logout.php");
 	}
+	iLearner.Logout = Logout;
 
 	function getInitData(){
 		$.post(API_ROOT + "process_getinitdata.php",
@@ -80,32 +90,8 @@
 		});
 		return promise;
 	}
-
-	function getRooms(){
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
-		loading.done(function(){
-			deferred.resolve(classrooms);
-		});
-		return promise;
-	}
-	iLearner.getRooms = getRooms;
-
-	function getRoom(id){
-		var classroom;
-
-		if(classrooms){
-			$.each(classrooms, function(i,c){
-				if(c.id == id){
-					classroom = c;
-					return false;
-				}
-			});
-		}
-
-		return classroom;
-	}
-	iLearner.getRoom = getRoom;
+	Tutor.get = getTutors;
+	iLearner.getTutors = getTutors;
 
 	function findTutor(name, fallback){
 		var tutor;
@@ -131,7 +117,44 @@
 
 		return tutor;
 	}
+	Tutor.find = findTutor;
 	iLearner.findTutor = findTutor;
+
+	function getTutorColour(tutor){
+		if(!tutor.hash){
+			tutor.hash = SparkMD5.hash(tutor.name);
+		}
+		return "#"+tutor.hash.substr(0,6);
+	}
+	Tutor.colour = getTutorColour;
+
+	function getRooms(id){
+
+		if(classrooms && id){
+			$.each(classrooms, function(i,c){
+				if(c.id == id){
+					classroom = c;
+					return false;
+				}
+			});
+
+			return classroom;
+		}
+
+		var deferred = $.Deferred(),
+			promise = deferred.promise();
+		loading.done(function(){
+			deferred.resolve(classrooms);
+		});
+		return promise;
+	}
+	Room.get = getRooms;
+	iLearner.getRooms = getRooms;
+
+	function getRoom(id){
+		return getRooms(id);
+	}
+	iLearner.getRoom = getRoom;
 
 	function findRoom(name){
 		var room;
@@ -151,18 +174,13 @@
 
 		return classroom;
 	}
+	Room.find = findRoom;
 	iLearner.findRoom = findRoom;
-
-	function getTutorColour(tutor){
-		if(!tutor.hash){
-			tutor.hash = SparkMD5.hash(tutor.name);
-		}
-		return "#"+tutor.hash.substr(0,6);
-	}
 
 	function formatDate(date){
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
+	Util.formatDate = formatDate;
 	iLearner.formatDate = formatDate;
 
 	function parseName(person){
@@ -189,12 +207,8 @@
 			person.chineseName = chineseName;
 		}
 	}
+	Util.parseName = parseName;
 	iLearner.parseName = parseName;
-
-
-	iLearner.Login = Login;
-	iLearner.Logout = Logout;
-	iLearner.getTutors = getTutors;
 
 	window.iLearner = iLearner;
 }(window));
