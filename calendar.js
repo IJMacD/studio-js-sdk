@@ -214,39 +214,41 @@
 	Course.get = getCourse;
 
 	function courseLessons(course){
-		var deferred = $.Deferred();
-		$.post(iL.API_ROOT + "process_getCourseDetail.php",
-			{
-				courseID: course.id
-			},
-			function(data){
-				$.each(data.coursedetailschedule, function(i,item){
-					if(lessons[item.CourseScheduleID]){
-						return;
-					}
+		if(!course._lessons){
+			course._lessons = $.Deferred();
+			$.post(iL.API_ROOT + "process_getCourseDetail.php",
+				{
+					courseID: course.id
+				},
+				function(data){
+					$.each(data.coursedetailschedule, function(i,item){
+						if(lessons[item.CourseScheduleID]){
+							return;
+						}
 
-					var start = new Date(item.ScheduleDate),
-						end = new Date(item.ScheduleDate),
-						lesson = {
-							id: item.CourseScheduleID,
-							start: start,
-							end: end,
-							room: iL.Room.get(item.ClassroomID),
-							tutor: iL.Tutor.get(item.TutorMemberID),
-							course: course,
-							students: []
-						};
+						var start = new Date(item.ScheduleDate),
+							end = new Date(item.ScheduleDate),
+							lesson = {
+								id: item.CourseScheduleID,
+								start: start,
+								end: end,
+								room: iL.Room.get(item.ClassroomID),
+								tutor: iL.Tutor.get(item.TutorMemberID),
+								course: course,
+								students: []
+							};
 
-					_setTime(start, item.Starttime);
-					_setTime(end, item.Endtime);
+						_setTime(start, item.Starttime);
+						_setTime(end, item.Endtime);
 
-					course.lessons.push(lesson);
+						course.lessons.push(lesson);
 
-				});
-				deferred.resolve(course.lessons);
-			},
-			"json");
-		return deferred.promise();
+					});
+					deferred.resolve(course.lessons);
+				},
+				"json");
+		}
+		return course._lessons.promise();
 	}
 	Course.lessons = courseLessons;
 
