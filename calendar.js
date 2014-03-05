@@ -82,6 +82,7 @@
 					}
 					course.level = level;
 
+					// TODO: This is wasteful, find elegant way to merge
 					if(courses[course.id]){
 						course = courses[course.id];
 					}
@@ -89,6 +90,7 @@
 						courses[course.id] = course;
 					}
 
+					// TODO: This is wasteful, find elegant way to merge
 					if(lessons[lesson.id]){
 						lesson = lessons[lesson.id];
 						lesson.students.length = 0;
@@ -98,6 +100,13 @@
 						lesson.course = course;
 						course.lessons.push(lesson);
 					}
+
+					// lesson is about to get loaded with its known students
+					// so it is safe to set and immediatly resolve the deferred
+					// (no one has access to this object yet)
+					//  - OK not strictly true if it already existed
+					lesson._students = $.Deferred();
+					lesson._students.resolve(lesson.students);
 
 					events.push(lesson);
 				});
@@ -110,9 +119,6 @@
 						absent: item.Attendance == "0"
 					};
 					iL.Util.parseName(student);
-					if(item.attendance){
-						console.log(item);
-					}
 					lessons[item.CourseScheduleID].students.push(student);
 				});
 
@@ -216,6 +222,7 @@
 								photo: item.Accountname,
 								absent: item.absent == "1"
 							};
+						iL.Util.parseName(student);
 						lesson.students.push(student);
 					});
 					lesson._students.resolve(lesson.students);
