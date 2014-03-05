@@ -176,10 +176,28 @@
 	/* @deprecated */
 	Calendar.save = save;
 
-	function previousLesson(lesson){}
+	function previousLesson(lesson){
+		if(!lesson._prev){
+			lesson._prev = $.Deferred();
+			Course.lessons(lesson.course).done(function(lessons){
+				var index = lessons.indexOf(lesson);
+				lesson._prev.resolve(lessons[index-1]);
+			});
+		}
+		return lesson._prev.promise();
+	}
 	Lesson.prev = previousLesson;
 
-	function nextLesson(lesson){}
+	function nextLesson(lesson){
+		if(!lesson._next){
+			lesson._next = $.Deferred();
+			Course.lessons(lesson.course).done(function(lessons){
+				var index = lessons.indexOf(lesson);
+				lesson._next.resolve(lessons[index+1]);
+			});
+		}
+		return lesson._next.promise();
+	}
 	Lesson.next = nextLesson;
 
 	function lessonStudents(lesson){
@@ -244,7 +262,12 @@
 						course.lessons.push(lesson);
 
 					});
-					deferred.resolve(course.lessons);
+
+					course.lessons.sort(function(a,b){
+						return a.start.getTime() < b.start.getTime() ? -1 : 1;
+					});
+
+					course._lessons.resolve(course.lessons);
 				},
 				"json");
 		}
