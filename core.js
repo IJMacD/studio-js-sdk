@@ -83,7 +83,17 @@
 			"json");
 	}
 
-	function getTutors(){
+	function getTutors(id){
+		var tutor;
+		if(tutors && id){
+			$.each(tutors, function(i,t){
+				if(t.id == id){
+					tutor = t;
+					return false;
+				}
+			});
+			return tutor;
+		}
 		var deferred = $.Deferred(),
 			promise = deferred.promise();
 		loading.done(function(){

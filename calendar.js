@@ -1,6 +1,8 @@
 (function(window){
 	var iLearner = window.iLearner || {},
 		Calendar = {},
+		Lesson = {},
+		Course = {},
 
 		/* Constants */
 		levelRegex = /\s*\w\d(?:\s?-\s?\w\d)?\s*/i,
@@ -17,9 +19,17 @@
 		lessons = {};
 
 	window.iL = iLearner;
+	iLearner.Lesson = Lesson;
+	iLearner.Course = Course;
+	/* @deprecated */
 	iLearner.Calendar = Calendar;
 
-	function get(start, end){
+	function getLesson(id){
+		return lessons[id];
+	}
+	Lesson.get = getLesson;
+
+	function searchLessons(start, end){
 		var post_data = {
 				sDate: iL.formatDate(start)
 			},
@@ -44,23 +54,22 @@
 							day: start.getDay(),
 							startTime: item.Starttime,
 							endTime: item.endtime,
-							tutor: tutor
+							tutor: tutor,
+							lessons: []
 						},
 						lesson = {
 							id: item.CourseScheduleID,
-							title: courseTitle,
 							start: start,
 							end: end,
 							room: iL.findRoom(item.Location),
 							tutor: tutor,
-							course: course,
 							students: []
-						};
+						},
 
-					start.setHours(item.Starttime.substr(0,2));
-					start.setMinutes(item.Starttime.substr(2,2));
-					end.setHours(item.endtime.substr(0,2));
-					end.setMinutes(item.endtime.substr(2,2));
+						_lessons;
+
+					_setTime(start, item.Starttime);
+					_setTime(end, item.endtime);
 
 					level = level && level[0].replace(" ", "");
 					if(!level){
@@ -74,13 +83,21 @@
 					course.level = level;
 
 					if(courses[course.id]){
-						$.extend(courses[course.id], course);
-						lesson.course = courses[course.id];
+						course = courses[course.id];
 					}
 					else {
 						courses[course.id] = course;
 					}
-					lessons[lesson.id] = lesson;
+
+					if(lessons[lesson.id]){
+						lesson = lessons[lesson.id];
+						lesson.students.length = 0;
+					}
+					else {
+						lessons[lesson.id] = lesson;
+						lesson.course = course;
+						course.lessons.push(lesson);
+					}
 
 					events.push(lesson);
 				});
@@ -92,7 +109,7 @@
 						photo: item.Accountname,
 						absent: item.Attendance == "0"
 					};
-					iL.parseName(student);
+					iL.Util.parseName(student);
 					if(item.attendance){
 						console.log(item);
 					}
@@ -104,8 +121,11 @@
 			"json");
 		return deferred.promise();
 	}
-	Calendar.get = get;
-	Calendar.getLessons = get;
+	Lesson.search = searchLessons;
+	/* @deprecated */
+	Calendar.get = searchLessons;
+	/* @deprecated */
+	Calendar.getLessons = searchLessons;
 
 	function save(lesson){
 		var startHour = lesson.start.getHours(),
@@ -152,8 +172,89 @@
 			"json").fail(deferred.reject);
 		return deferred.promise();
 	}
+	Lesson.save = save;
+	/* @deprecated */
 	Calendar.save = save;
 
+	function previousLesson(lesson){}
+	Lesson.prev = previousLesson;
+
+	function nextLesson(lesson){}
+	Lesson.next = nextLesson;
+
+	function lessonStudents(lesson){
+		if(!lesson._students){
+			lesson._students = $.Deferred();
+			$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
+				{
+					scheduleID: lesson.id
+				},
+				function(data){
+					lesson.students.length = 0;
+					$.each(data.coursestudent, function(i,item){
+						var student = {
+								id: item.MemberID,
+								name: item.Lastname,
+								photo: item.Accountname,
+								absent: item.absent == "1"
+							};
+						lesson.students.push(student);
+					});
+					lesson._students.resolve(lesson.students);
+				},
+				"json");
+		}
+		return lesson._students.promise();
+	}
+	Lesson.students = lessonStudents;
+
+	function getCourse(id){
+		return courses[id];
+	}
+	Course.get = getCourse;
+
+	function courseLessons(course){
+		var deferred = $.Deferred();
+		$.post(iL.API_ROOT + "process_getCourseDetail.php",
+			{
+				courseID: course.id
+			},
+			function(data){
+				$.each(data.coursedetailschedule, function(i,item){
+					if(lessons[item.CourseScheduleID]){
+						return;
+					}
+
+					var start = new Date(item.ScheduleDate),
+						end = new Date(item.ScheduleDate),
+						lesson = {
+							id: item.CourseScheduleID,
+							start: start,
+							end: end,
+							room: iL.Room.get(item.ClassroomID),
+							tutor: iL.Tutor.get(item.TutorMemberID),
+							course: course,
+							students: []
+						};
+
+					_setTime(start, item.Starttime);
+					_setTime(end, item.Endtime);
+
+					course.lessons.push(lesson);
+
+				});
+				deferred.resolve(course.lessons);
+			},
+			"json");
+		return deferred.promise();
+	}
+	Course.lessons = courseLessons;
+
 	function pad(s){return (s<10)?"0"+s:s}
+
+	function _setTime(date, time){
+		date.setHours(time.substr(0,2));
+		date.setMinutes(time.substr(2,2));
+	}
 
 }(window));
