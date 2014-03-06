@@ -206,6 +206,18 @@
 	}
 	Lesson.next = nextLesson;
 
+	function futureLessons(lesson){
+		if(!lesson._future){
+			lesson._future = $.Deferred();
+			Course.lessons(lesson.course).done(function(lessons){
+				var index = lessons.indexOf(lesson);
+				lesson._future.resolve(lessons.slice(index));
+			});
+		}
+		return lesson._future.promise();
+	}
+	Lesson.future = futureLessons;
+
 	function lessonStudents(lesson){
 		if(!lesson._students){
 			lesson._students = $.Deferred();
