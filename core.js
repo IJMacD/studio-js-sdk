@@ -195,27 +195,50 @@
 	iLearner.formatDate = formatDate;
 
 	function parseName(person){
-		var firstRegex = /^\s*(\w+)/,
-			firstName = person.name.match(firstRegex)[1],
-			lastRegex = /(\w+)\s*$/,
-			lastName,
-			chineseName;
+		var names = person.name.match(/\w+/g);
 
-		if(topNames.indexOf(firstName) > -1){
-			lastName = person.name.match(lastRegex)[1];
+		if(!names){
+			return;
+		}
+		else if(names.length == 1){
+			// Not a lot else we can do
+			person.forename = names[0];
+			person.surname = "";
+			person.englishName = person.forename;
+			person.chineseName = person.englishName;
 
-			person.forename = lastName;
-			person.surname = firstName;
+		}
+		else if(names.length == 2){
+			// Assume just English name and surname
+
+			person.forename = names[0];
+			person.surname = names[1];
+			person.englishName = names[0] + " " + names[1];
+			person.chineseName = person.englishName;
+		}
+		else if(names.length == 3){
+			// Assume no English name
+
+			person.forename = "";
+			person.surname = names[0];
+			person.chineseName = names[0] + " " + names[1] + " " + names[2];
+			person.englishName = person.chineseName;
+		}
+		else if(topNames.indexOf(names[0]) > -1){
+			// Name provided with English name at end
+
+			person.forename = names[3];
+			person.surname = names[0];
 			person.englishName = person.forename + " " + person.surname;
-			person.chineseName = $.trim(person.name.replace(lastRegex, ""));
+			person.chineseName = names[0] + " " + names[1] + " " + names[2];
 		}
 		else {
-			chineseName = $.trim(person.name.replace(firstRegex,""));
+			// Name provided with English name at start
 
-			person.forename = firstName;
-			person.surname = chineseName.match(firstRegex)[1];
+			person.forename = names[0];
+			person.surname = names[1];
 			person.englishName = person.forename + " " + person.surname;
-			person.chineseName = chineseName;
+			person.chineseName = names[1] + " " + names[2] + " " + names[3];
 		}
 	}
 	Util.parseName = parseName;
