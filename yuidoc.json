@@ -1,0 +1,9 @@
+{
+    "name": "i-Learner Studio Admin API",
+    "description": "The SDK for interacting with the i-Learner Studio Admin system",
+    "version": "1.0.0",
+    "url": "http://127.0.0.1/c/Dashboard",
+    "options": {
+        "outdir": "./docs"
+    }
+}

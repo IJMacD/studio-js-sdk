@@ -1,4 +1,10 @@
 (function(window){
+
+	/**
+	 * Core module. Contains Tutor, Room classes as well as Utility submodule
+	 *
+	 * @module Core
+	 */
 	var iLearner = window.iLearner || {},
 		iL = iLearner,
 		$ = window.jQuery,
@@ -83,6 +89,19 @@
 			"json");
 	}
 
+	/**
+	 * Used for interacting with tutors
+	 *
+	 * @class Tutor
+	 */
+
+	/**
+	 * Get a single tutor specified by his ID
+	 *
+	 * @method get
+	 * @param id {int} ID of the tutor you with to fetch
+	 * @return {object} Object containing the details of the tutor
+	 */
 	function getTutors(id){
 		var tutor;
 		if(tutors && id){
@@ -104,6 +123,15 @@
 	Tutor.get = getTutors;
 	iLearner.getTutors = getTutors;
 
+	/**
+	 * Find a single tutor specified by his name
+	 *
+	 * @method find
+	 * @param name {string} Name of the tutor you with to fetch
+	 * @param [fallback] {boolean} If true will return a constructed object
+	 * even if a corresponding one  was not found on the server
+	 * @return {object} Object containing the details of the tutor
+	 */
 	function findTutor(name, fallback){
 		var tutor;
 
@@ -131,6 +159,13 @@
 	Tutor.find = findTutor;
 	iLearner.findTutor = findTutor;
 
+	/**
+	 * Get a colour associated with this tutor
+	 *
+	 * @method colour
+	 * @param tutor {object}
+	 * @return {string} Colour in the format `#FFFFFF`
+	 */
 	function getTutorColour(tutor){
 		if(!tutor.hash){
 			tutor.hash = SparkMD5.hash(tutor.name);
@@ -139,6 +174,30 @@
 	}
 	Tutor.colour = getTutorColour;
 
+	/**
+	 * Class for using rooms
+	 *
+	 * @class Room
+	 */
+
+	 /**
+	  * Get a room by ID
+	  * 
+	  * @method get
+	  * @param id {int} ID of the Room to get
+	  * @return {object} Object with details of the room
+	  */
+	function getRoom(id){
+		return getRooms(id);
+	}
+	iLearner.getRoom = getRoom;
+
+	/**
+	 * Get all rooms
+	 *
+	 * @method all
+	 * @return {Promise} Promise of an array rooms
+	 */
 	function getRooms(id){
 
 		if(classrooms && id){
@@ -159,14 +218,18 @@
 		});
 		return promise;
 	}
+	Room.all = getRooms;
+	/* @deprecated */
 	Room.get = getRooms;
 	iLearner.getRooms = getRooms;
 
-	function getRoom(id){
-		return getRooms(id);
-	}
-	iLearner.getRoom = getRoom;
-
+	/**
+	 * Find a room by name
+	 *
+	 * @method find
+	 * @param name {string}
+	 * @return {object} Object describing room
+	 */
 	function findRoom(name){
 		var room;
 
@@ -188,12 +251,39 @@
 	Room.find = findRoom;
 	iLearner.findRoom = findRoom;
 
+	/**
+	 * Utility Class
+	 *
+	 * @class Util
+	 */
+
+	/**
+	 * Format date in server specific format
+	 *
+	 * @method formatDate
+	 * @static
+	 * @param date {Date} Javascript Date object representing the date to format
+	 * @return {string} Date in format `YYYY/m/d`
+	 */
 	function formatDate(date){
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
 	Util.formatDate = formatDate;
 	iLearner.formatDate = formatDate;
 
+	/**
+	 * Useful function to set the name on any object with a `name` property.
+	 *
+	 * Parses names to extract forename and surname as well as combinations
+	 * for English and Chinese names. It recognises common Chinese surnames
+	 * to avoid confusion with English name first vs. English name last.
+	 *
+	 * This method modifies the original object by adding the properties:
+	 * `forename`, `surname`, `englishName` and `chineseName`.
+	 *
+	 * @method parseName
+	 * @param person {object} Object with a `name` property
+	 */
 	function parseName(person){
 		var names = person.name.match(/\w+/g);
 

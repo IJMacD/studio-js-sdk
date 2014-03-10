@@ -1,4 +1,10 @@
 (function(window){
+
+	/**
+	 * Report module. Contains Report class.
+	 *
+	 * @module Report
+	 */
 	var iLearner = window.iLearner || {},
 		Report = {},
 
@@ -14,13 +20,22 @@
 	iLearner.Report = Report;
 
 	/**
+	 * Class for dealing with report cards
+	 *
+	 * @class Report
+	 */
+
+	/**
 	 * Get an array of report card stubs
 	 *
-	 * Returns a promise object which can be used to wait for results
-	 * @param options Object describing search parameters
-	 * @return Promise
+	 * @method find
+	 * @param options {object} Object describing search parameters
+	 * @param [options.tutor] {object} Only get reports for this tutor
+	 * @param [options.from] {Date} Reports for lessons which occur after this date
+	 * @param [options.to] {Date} Reports for lessons which occur before this date
+	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
-	function search(options){
+	function find(options){
 		var deferred = $.Deferred(),
 			promise = deferred.promise(),
 			post_data = {};
@@ -69,14 +84,16 @@
 
 		return promise;
 	}
-	Report.search = search;
+	Report.find = find;
+	/* @deprecated */
+	Report.search = find;
 
 	/**
 	 * Given a report stub this method provides the full report card details
 	 *
-	 * Returns a promise object which can be used to wait for results
-	 * @param item Report
-	 * @return Promise
+	 * @method get
+	 * @param item {object} Report
+	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function get(item){
 		var deferred = $.Deferred(),
@@ -125,8 +142,9 @@
 	 * When provided with a full report object this method will save the report
 	 * back to the server.
 	 *
-	 * @param item Report
-	 * @return Promise can be used to wait for results
+	 * @method save
+	 * @param item {object} Report
+	 * @return {Promise} can be used to wait for results
 	 */
 	function save(item){
 		var post_data = {},
@@ -142,7 +160,10 @@
 
 	/**
 	 * Static method to get comment templates
-	 * @return Promise
+	 *
+	 * @method getComments
+	 * @static
+	 * @return {Promise} Promise of an array
 	 */
 	function getComments(){
 
@@ -193,6 +214,14 @@
 	}
 	Report.getComments = getComments;
 
+	/**
+	 * Get Learning focuses for courses
+	 *
+	 * @method getCourseLearningFocus
+	 * @static
+	 * @param courseName {string}
+	 * @return {Promise} Promise of an array
+	 */
 	function getCourseLearningFocus(courseName){
 		var deferred,
 			post;
@@ -215,6 +244,17 @@
 		return learningObjectives[courseName];
 	}
 
+	/**
+	 * Set course learning objective for a course
+	 *
+	 * DOES NOT save back to server, only for current session
+	 *
+	 * @method setCourseLearningFocus
+	 * @static
+	 * @param courseName {string}
+	 * @param focus {string} Which of the four fields to set
+	 * @param objective {string} Actual text of the objective
+	 */
 	function setCourseLearningFocus(courseName, focus, objective){
 		getCourseLearningFocus(courseName)
 			.done(function(focii){
