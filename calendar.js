@@ -37,6 +37,9 @@
 				sDate: iL.formatDate(options.start)
 			},
 			deferred = $.Deferred();
+		if(options.tutor){
+			post_data.Tutor = options.tutor.id;
+		}
 		$.post(iL.API_ROOT + 'process_getCalendarData.php',
 			post_data,
 			function(data){
@@ -123,13 +126,14 @@
 
 				$.each(data.CalendarStudent, function(i,item){
 					var student = {
-						id: item.MemberID,
-						name: item.nickname,
-						photo: item.Accountname,
-						absent: item.Attendance == "0"
-					};
+							id: item.MemberID,
+							name: item.nickname,
+							photo: item.Accountname,
+							absent: item.Attendance == "0"
+						},
+						lesson = lessons[item.CourseScheduleID];
 					iL.Util.parseName(student);
-					lessons[item.CourseScheduleID].students.push(student);
+					lesson && lesson.students.push(student);
 				});
 
 				if(!options.showEmpty){
