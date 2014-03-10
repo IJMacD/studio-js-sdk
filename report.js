@@ -36,56 +36,54 @@
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function find(options){
-		var deferred = $.Deferred(),
-			promise = deferred.promise(),
-			post_data = {};
+		return new Promise(function(resolve, reject){
+			var post_data = {};
 
-		options = options || {};
+			options = options || {};
 
-		if(options.tutor){
-			post_data.searchTutor = options.tutor.id || options.tutor;
-		}
+			if(options.tutor){
+				post_data.searchTutor = options.tutor.id || options.tutor;
+			}
 
-		if(options.from){
-			post_data.searchDateFrom = formatDate(options.from);
-		}
+			if(options.from){
+				post_data.searchDateFrom = formatDate(options.from);
+			}
 
-		if(options.to){
-			post_data.searchDateTo = formatDate(options.to);
-		}
+			if(options.to){
+				post_data.searchDateTo = formatDate(options.to);
+			}
 
-		$.post(iL.API_ROOT + "process_getMemberReportCardList.php",
-			post_data,
-			function(data){
-				var resultSet;
-				if(data.MemberReportCardList){
-					resultSet = data.MemberReportCardList;
-					$.each(resultSet, function(i,item){
-						item.id = item.membercourseid;
-						item.studentId = item.memberID;
-						item.name = item.nickname;
-						item.course = {
-							id: item.courseID,
-							title: item.coursename,
-							startTime: item.starttime,
-							endTime: item.endtime
-						};
-						item.memberCourseId = item.membercourseid;
-						item.complete = (item.completed == "1");
-						item.tutor = options.tutor;
+			$.post(iL.API_ROOT + "process_getMemberReportCardList.php",
+				post_data,
+				function(data){
+					var resultSet;
+					if(data.MemberReportCardList){
+						resultSet = data.MemberReportCardList;
+						$.each(resultSet, function(i,item){
+							item.id = item.membercourseid;
+							item.studentId = item.memberID;
+							item.name = item.nickname;
+							item.course = {
+								id: item.courseID,
+								title: item.coursename,
+								startTime: item.starttime,
+								endTime: item.endtime
+							};
+							item.memberCourseId = item.membercourseid;
+							item.complete = (item.completed == "1");
+							item.tutor = options.tutor;
 
-						iL.parseName(item);
+							iL.parseName(item);
 
-						// TODO: check if report already exists and don't replace it
-						reports[item.id] = item;
-					});
-					deferred.resolve(resultSet);
-				}
-			},
-			"json")
-		.fail(deferred.reject);
-
-		return promise;
+							// TODO: check if report already exists and don't replace it
+							reports[item.id] = item;
+						});
+						resolve(resultSet);
+					}
+				},
+				"json")
+			.fail(reject);
+		});
 	}
 	Report.find = find;
 	/* @deprecated */

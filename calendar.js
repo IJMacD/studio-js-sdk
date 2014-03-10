@@ -310,31 +310,33 @@
 	 */
 	function lessonStudents(lesson){
 		if(!lesson._students){
-			lesson._students = $.Deferred();
-			$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
-				{
-					scheduleID: lesson.id
-				},
-				function(data){
-					if(!lesson.students){
-						lesson.students = [];
-					}
-					lesson.students.length = 0;
-					$.each(data.coursestudent, function(i,item){
-						var student = {
-								id: item.MemberID,
-								name: item.Lastname,
-								photo: item.Accountname,
-								absent: item.absent == "1"
-							};
-						iL.Util.parseName(student);
-						lesson.students.push(student);
-					});
-					lesson._students.resolve(lesson.students);
-				},
-				"json");
+			lesson._students = new Promise(function(resolve, reject){
+				$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
+					{
+						scheduleID: lesson.id
+					},
+					function(data){
+						if(!lesson.students){
+							lesson.students = [];
+						}
+						lesson.students.length = 0;
+						$.each(data.coursestudent, function(i,item){
+							var student = {
+									id: item.MemberID,
+									name: item.Lastname,
+									photo: item.Accountname,
+									absent: item.absent == "1"
+								};
+							iL.Util.parseName(student);
+							lesson.students.push(student);
+						});
+						resolve(lesson.students);
+					},
+					"json")
+				.fail(reject);
+			});
 		}
-		return lesson._students.promise();
+		return lesson._students;
 	}
 	Lesson.students = lessonStudents;
 
@@ -346,7 +348,7 @@
 	 */
 
 	/**
-	 * Get a specifi course
+	 * Get a specific course
 	 *
 	 * @method get
 	 * @param id {int} ID of course to get
@@ -366,49 +368,51 @@
 	 */
 	function courseLessons(course){
 		if(!course._lessons){
-			course._lessons = $.Deferred();
-			$.post(iL.API_ROOT + "process_getCourseDetail.php",
-				{
-					courseID: course.id
-				},
-				function(data){
-					if(!course.lessons){
-						course.lessons = [];
-					}
-
-					$.each(data.coursedetailschedule, function(i,item){
-						if(lessons[item.CourseScheduleID]){
-							return;
+			course._lessons = new Promise(function(resolve, reject){
+				$.post(iL.API_ROOT + "process_getCourseDetail.php",
+					{
+						courseID: course.id
+					},
+					function(data){
+						if(!course.lessons){
+							course.lessons = [];
 						}
 
-						var start = new Date(item.ScheduleDate),
-							end = new Date(item.ScheduleDate),
-							lesson = {
-								id: item.CourseScheduleID,
-								start: start,
-								end: end,
-								room: iL.Room.get(item.ClassroomID),
-								tutor: iL.Tutor.get(item.TutorMemberID),
-								course: course,
-								students: []
-							};
+						$.each(data.coursedetailschedule, function(i,item){
+							if(lessons[item.CourseScheduleID]){
+								return;
+							}
 
-						_setTime(start, item.Starttime);
-						_setTime(end, item.Endtime);
+							var start = new Date(item.ScheduleDate),
+								end = new Date(item.ScheduleDate),
+								lesson = {
+									id: item.CourseScheduleID,
+									start: start,
+									end: end,
+									room: iL.Room.get(item.ClassroomID),
+									tutor: iL.Tutor.get(item.TutorMemberID),
+									course: course,
+									students: []
+								};
 
-						course.lessons.push(lesson);
+							_setTime(start, item.Starttime);
+							_setTime(end, item.Endtime);
 
-					});
+							course.lessons.push(lesson);
 
-					course.lessons.sort(function(a,b){
-						return a.start.getTime() < b.start.getTime() ? -1 : 1;
-					});
+						});
 
-					course._lessons.resolve(course.lessons);
-				},
-				"json");
+						course.lessons.sort(function(a,b){
+							return a.start.getTime() < b.start.getTime() ? -1 : 1;
+						});
+
+						resolve(course.lessons);
+					},
+					"json")
+				.fail(reject);
+			});
 		}
-		return course._lessons.promise();
+		return course._lessons;
 	}
 	Course.lessons = courseLessons;
 

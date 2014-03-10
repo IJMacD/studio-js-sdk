@@ -102,12 +102,11 @@
 	 * @return {Promise} Promise of an array containing the details of the tutors
 	 */
 	function allTutors(){
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
-		loading.done(function(){
-			deferred.resolve(tutors);
+		return new Promise(function(resolve,reject){
+			loading.done(function(){
+				resolve(tutors);
+			});
 		});
-		return promise;
 	}
 	Tutor.all = allTutors;
 
