@@ -30,14 +30,18 @@
 	Lesson.get = getLesson;
 
 	function searchLessons(start, end){
-		var post_data = {
-				sDate: iL.formatDate(start)
+		var options = $.isPlainObject(start) ? start : {
+				start: new Date()
+			},
+			post_data = {
+				sDate: iL.formatDate(options.start)
 			},
 			deferred = $.Deferred();
 		$.post(iL.API_ROOT + 'process_getCalendarData.php',
 			post_data,
 			function(data){
-				var events = [];
+				var lesson_ids = [],
+					events = [];
 
 				$.each(data.CalendarCourse, function(i,item){
 					var start = new Date(item.ScheduleDate),
@@ -100,6 +104,7 @@
 						lesson.course = course;
 						course.lessons.push(lesson);
 					}
+					lesson_ids.push(lesson.id);
 
 					// lesson is about to get loaded with its known students
 					// so it is safe to set and immediatly resolve the deferred
@@ -108,7 +113,12 @@
 					lesson._students = $.Deferred();
 					lesson._students.resolve(lesson.students);
 
-					events.push(lesson);
+					// If we don't care about empty lessons just add the lesson
+					// to the result set now; otherwise wait until later and add
+					// after being checked.
+					if(options.showEmpty){
+						events.push(lesson);
+					}
 				});
 
 				$.each(data.CalendarStudent, function(i,item){
@@ -121,6 +131,15 @@
 					iL.Util.parseName(student);
 					lessons[item.CourseScheduleID].students.push(student);
 				});
+
+				if(!options.showEmpty){
+					$.each(lesson_ids, function(i,item){
+						var lesson = lessons[item];
+						if(lesson.students.length){
+							events.push(lesson);
+						}
+					});
+				}
 
 				deferred.resolve(events);
 			},
