@@ -168,9 +168,12 @@
 						item.id = item.membercourseid;
 						item.studentId = item.memberID;
 						item.name = item.nickname;
-						item.courseName = item.coursename;
-						item.courseStartTime = item.starttime;
-						item.courseEndTime = item.endtime;
+						item.course = {
+							id: item.courseID,
+							title: item.coursename,
+							startTime: item.starttime,
+							endTime: item.endtime
+						};
 						item.memberCourseId = item.membercourseid;
 						item.complete = (item.completed == &quot;1&quot;);
 						item.tutor = options.tutor;

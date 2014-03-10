@@ -316,6 +316,9 @@
 					scheduleID: lesson.id
 				},
 				function(data){
+					if(!lesson.students){
+						lesson.students = [];
+					}
 					lesson.students.length = 0;
 					$.each(data.coursestudent, function(i,item){
 						var student = {
@@ -369,6 +372,10 @@
 					courseID: course.id
 				},
 				function(data){
+					if(!course.lessons){
+						course.lessons = [];
+					}
+
 					$.each(data.coursedetailschedule, function(i,item){
 						if(lessons[item.CourseScheduleID]){
 							return;

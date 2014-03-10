@@ -6,6 +6,7 @@
 		resultsList,
 		resultsCounter,
 
+		totalTestsStarted = 0,
 		totalTestsCompleted = 0,
 		totalTestsPassed = 0;
 
@@ -38,19 +39,25 @@
 							passed = false;
 							logResult(name, passed);
 						};
+					totalTestsStarted++;
 					returnValue = tests[name](this, success, failure);
 				}(name));
 			}
 		}
+		$(function(){logResult()});
 	}
 	Tester.testAsync = testAsync;
 
 	function logResult(name, passed){
-		totalTestsCompleted += 1;
-		totalTestsPassed += passed ? 1 : 0;
-		resultsCounter.text(totalTestsPassed + "/" + totalTestsCompleted);
+		if(name){
+			totalTestsCompleted += 1;
+			totalTestsPassed += passed ? 1 : 0;
 
-		resultsList.append("<dt>" + name + '</dt><dd class="' + (passed?'passed':'failed') + '">' + (passed?'Test Passed':'Test Failed'));
+			resultsList.append("<dt>" + name + '</dt><dd class="' + (passed?'passed':'failed') + '">' + (passed?'Test Passed':'Test Failed'));
+		}
+		resultsCounter.text("Started: " + totalTestsStarted
+			+ " Completed: "  + totalTestsCompleted
+			+ " Passed: " + totalTestsPassed);
 	}
 
 	window.Tester = Tester;

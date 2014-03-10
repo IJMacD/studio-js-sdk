@@ -1,6 +1,10 @@
 <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="tester.js"></script>
-<script src="core.js"></script>
+<script src="../../Dashboard/js/spark-md5.js"></script>
+<script src="../core.js"></script>
+<script src="../report.js"></script>
+<script src="../calendar.js"></script>
+<script src="test.js"></script>
 <script>
 Tester.testAsync({
 	"Correct Login": function(t,s,f){
@@ -10,7 +14,7 @@ Tester.testAsync({
 			iLearner.Login("tutor", "badpass", f, s);
 		},
 	"Member Report Card List (All Tutors)": function(t,s,f){
-			iLearner.getMemberReportCardList({})
+			iLearner.Report.find({})
 				.done(function(list){
 					if(list && list.length) {
 						return s();
@@ -20,7 +24,7 @@ Tester.testAsync({
 				.fail(f);
 		},
 	"Member Report Card List (One Tutor)": function(t,s,f){
-			iLearner.getMemberReportCardList({ tutor: 3967 })
+			iLearner.Report.find({ tutor: 3967 })
 				.done(function(list){
 					if(list && list.length) {
 						return s();
