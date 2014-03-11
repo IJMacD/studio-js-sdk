@@ -8,6 +8,7 @@
 	var iLearner = window.iLearner || {},
 		Report = {},
 
+		_reports = {},
 		reports = {},
 		learningObjectives = {},
 
@@ -33,29 +34,41 @@
 	 * @param [options.tutor] {object} Only get reports for this tutor
 	 * @param [options.from] {Date} Reports for lessons which occur after this date
 	 * @param [options.to] {Date} Reports for lessons which occur before this date
+	 * @param [options.clearCache] {boolean} Do not fetch from the cache, instead hit server
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function find(options){
-		return new Promise(function(resolve, reject){
-			var post_data = {};
+		var post_data = {},
+			hash;
 
-			options = options || {};
+		options = options || {};
 
-			if(options.tutor){
-				post_data.searchTutor = options.tutor.id || options.tutor;
-			}
+		if(options.tutor){
+			post_data.searchTutor = options.tutor.id || options.tutor;
+		}
 
-			if(options.from){
-				post_data.searchDateFrom = formatDate(options.from);
-			}
+		if(options.from){
+			post_data.searchDateFrom = formatDate(options.from);
+		}
 
-			if(options.to){
-				post_data.searchDateTo = formatDate(options.to);
-			}
+		if(options.to){
+			post_data.searchDateTo = formatDate(options.to);
+		}
 
-			$.post(iL.API_ROOT + "process_getMemberReportCardList.php",
-				post_data,
-				function(data){
+		hash = JSON.stringify(post_data);
+
+		if(options.clearCache){
+			_reports[hash] = undefined;
+		}
+
+		if(!_reports[hash]){
+			_reports[hash] = Promise.resolve(
+				$.post(iL.API_ROOT + "process_getMemberReportCardList.php",
+					post_data,
+					null,
+					"json")
+				)
+				.then(function(data){
 					var resultSet;
 					if(data.MemberReportCardList){
 						resultSet = data.MemberReportCardList;
@@ -78,12 +91,12 @@
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
 						});
-						resolve(resultSet);
+						return resultSet;
 					}
-				},
-				"json")
-			.fail(reject);
-		});
+				});
+		}
+
+		return _reports[hash];
 	}
 	Report.find = find;
 	/* @deprecated */
