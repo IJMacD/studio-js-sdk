@@ -28,8 +28,6 @@
 	window.iL = iLearner;
 	iLearner.Lesson = Lesson;
 	iLearner.Course = Course;
-	/* @deprecated */
-	iLearner.Calendar = Calendar;
 
 	/**
 	 * Lesson class for dealing with lesson instances happening
@@ -177,12 +175,6 @@
 		return _lessons[hash];
 	}
 	Lesson.find = findLessons;
-	/* @deprecated */	
-	Lesson.search = findLessons;
-	/* @deprecated */
-	Calendar.get = findLessons;
-	/* @deprecated */
-	Calendar.getLessons = findLessons;
 
 	/**
 	 * Save lesson changes back to the server
@@ -237,8 +229,6 @@
 		return deferred.promise();
 	}
 	Lesson.save = save;
-	/* @deprecated */
-	Calendar.save = save;
 
 	/**
 	 * Get previous lesson in series of course
@@ -249,13 +239,14 @@
 	 */
 	function previousLesson(lesson){
 		if(!lesson._prev){
-			lesson._prev = $.Deferred();
-			Course.lessons(lesson.course).done(function(lessons){
-				var index = lessons.indexOf(lesson);
-				lesson._prev.resolve(lessons[index-1]);
-			});
+			lesson._prev = Course
+				.lessons(lesson.course)
+				.then(function(lessons){
+					var index = lessons.indexOf(lesson);
+					return lessons[index-1];
+				});
 		}
-		return lesson._prev.promise();
+		return lesson._prev;
 	}
 	Lesson.prev = previousLesson;
 
@@ -268,13 +259,14 @@
 	 */
 	function nextLesson(lesson){
 		if(!lesson._next){
-			lesson._next = $.Deferred();
-			Course.lessons(lesson.course).done(function(lessons){
-				var index = lessons.indexOf(lesson);
-				lesson._next.resolve(lessons[index+1]);
-			});
+			lesson._next = Course
+				.lessons(lesson.course)
+				.then(function(lessons){
+					var index = lessons.indexOf(lesson);
+					return lessons[index+1];
+				});
 		}
-		return lesson._next.promise();
+		return lesson._next;
 	}
 	Lesson.next = nextLesson;
 
@@ -287,13 +279,14 @@
 	 */
 	function futureLessons(lesson){
 		if(!lesson._future){
-			lesson._future = $.Deferred();
-			Course.lessons(lesson.course).done(function(lessons){
-				var index = lessons.indexOf(lesson);
-				lesson._future.resolve(lessons.slice(index));
-			});
+			lesson._future = Course
+				.lessons(lesson.course)
+				.then(function(lessons){
+					var index = lessons.indexOf(lesson);
+					return lessons.slice(index);
+				});
 		}
-		return lesson._future.promise();
+		return lesson._future;
 	}
 	Lesson.future = futureLessons;
 
