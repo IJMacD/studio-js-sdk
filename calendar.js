@@ -6,7 +6,6 @@
 	 * @module Calendar
 	 */
 	var iLearner = window.iLearner || {},
-		Calendar = {},
 		Lesson = {},
 		Course = {},
 
@@ -23,6 +22,7 @@
 		/* data */
 		courses = {},
 		lessons = {},
+		_courses = {},
 		_lessons = {};
 
 	window.iL = iLearner;
@@ -81,18 +81,19 @@
 	                null,
 	                "json")
 	            ).then(function(data){
-					var lesson_ids = [],
-						events = [];
+					var events = [];
 
 					$.each(data.CalendarCourse, function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
-							tutor = iL.findTutor(item.Tutor, true),
+							tutor = iL.Tutor.find(item.Tutor, true),
 							level = item.Coursetitle.match(levelRegex),
 							courseTitle = item.Coursetitle.replace(levelRegex, ""),
+							courseID = item.CourseID,
+							lessonID = item.CourseScheduleID,
 
-							course = {
-								id: item.CourseID,
+							course = courses[courseID] || {
+								id: courseID,
 								code: item.CourseName,
 								title: courseTitle,
 								level: null,
@@ -102,16 +103,14 @@
 								tutor: tutor,
 								lessons: []
 							},
-							lesson = {
-								id: item.CourseScheduleID,
+							lesson = lessons[lessonID] || {
+								id: lessonID,
 								start: start,
 								end: end,
-								room: iL.findRoom(item.Location),
+								room: iL.Room.find(item.Location),
 								tutor: tutor,
 								students: []
-							},
-
-							_lessons;
+							};
 
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
@@ -127,25 +126,17 @@
 						}
 						course.level = level;
 
-						// TODO: This is wasteful, find elegant way to merge
-						if(courses[course.id]){
-							course = courses[course.id];
-						}
-						else {
-							courses[course.id] = course;
-						}
+						courses[course.id] = course;
 
 						// TODO: This is wasteful, find elegant way to merge
-						if(lessons[lesson.id]){
-							lesson = lessons[lesson.id];
-							lesson.students.length = 0;
-						}
-						else {
-							lessons[lesson.id] = lesson;
-							lesson.course = course;
+						lesson.students.length = 0;
+
+						lessons[lesson.id] = lesson;
+						lesson.course = course;
+
+						if(course.lessons.indexOf(lesson) == -1){
 							course.lessons.push(lesson);
 						}
-						lesson_ids.push(lesson.id);
 
 						// lesson is about to get loaded with its known students
 						// so it is safe to set and immediatly resolve the deferred
@@ -347,6 +338,107 @@
 		return courses[id];
 	}
 	Course.get = getCourse;
+
+	/**
+	 * Find courses matching given search parameters
+	 *
+	 * @method find
+	 * @param options {object}
+	 * @param [options.year] {int}
+	 * @param [options.month] {int}
+	 * @param [options.tutor] {object}
+	 * @return {Promise} Promise of an array
+	 */
+	function findCourses(options){
+		var now = new Date(),
+			post_data = {
+				searchCourseCourseYear: options.year || now.getFullYear(),
+				searchCourseCourseMonth: options.month || (now.getMonth() + 1),
+				searchTutor: options.tutor.id
+			},
+			hash = JSON.stringify(post_data);
+
+		if(!_courses[hash]){
+			_courses[hash] = Promise.resolve(
+				$.post(iL.API_ROOT + 'process_getCourseList.php',
+					post_data,
+					null,
+					"json")
+				).then(function(data){
+					var out = [];
+
+					$.each(data.courselist, function(i,item){
+						var id = item.CourseID,
+							level = item.CourseName.match(levelRegex),
+							courseTitle = item.CourseName.replace(levelRegex, ""),
+							course = courses[id] || {
+								id: id,
+								title: courseTitle,
+								code: item.coursecode,
+								level: level,
+								lessons: []
+							};
+
+						level = level && level[0].replace(" ", "");
+						if(!level){
+							$.each(customLevels, function(i,cItem){
+								if(cItem.regex.test(courseTitle)){
+									level = cItem.level;
+									return false;
+								}
+							});
+						}
+						course.level = level;
+
+						courses[id] = course;
+						out.push(course);
+					});
+
+					$.each(data.courseschedule, function(i,item){
+						var start = new Date(item.ScheduleDate),
+							end = new Date(item.ScheduleDate),
+							tutor = iL.Tutor.find(item.tutorname, true),
+							courseID = item.CourseID,
+							lessonID = item.CourseScheduleID,
+
+							course = courses[courseID] || {
+								id: courseID,
+								lessons: []
+							},
+							lesson = lessons[lessonID] || {
+								id: lessonID,
+								start: start,
+								end: end,
+								room: iL.Room.find(item.location),
+								tutor: tutor,
+								students: []
+							};
+
+						course.day = start.getDay();
+						course.startTime = item.Starttime;
+						course.endTime = item.endtime;
+						course.tutor = tutor;
+
+						_setTime(start, item.Starttime);
+						_setTime(end, item.endtime);
+
+						courses[course.id] = course;
+
+						lessons[lesson.id] = lesson;
+						lesson.course = course;
+
+						if(course.lessons.indexOf(lesson) == -1){
+							course.lessons.push(lesson);
+						}
+					});
+
+					return out;
+				});
+		}
+
+		return _courses[hash];
+	}
+	Course.find = findCourses;
 
 	/**
 	 * Get all lessons for this course
