@@ -22,7 +22,8 @@
 
 		/* data */
 		courses = {},
-		lessons = {};
+		lessons = {},
+		_lessons = {};
 
 	window.iL = iLearner;
 	iLearner.Lesson = Lesson;
@@ -63,122 +64,117 @@
 		options = $.isPlainObject(options) ? options : {
             start: new Date()
         };
+
 		var	post_data = {
 				sDate: iL.formatDate(options.start)
-			};
+			},
+			hash;
+
 		if(options.tutor){
 			post_data.Tutor = options.tutor.id;
 		}
-        return Promise.resolve(
-            $.post(iL.API_ROOT + 'process_getCalendarData.php',
-                post_data,
-                null,
-                "json")
-            ).then(function(data){
-				var lesson_ids = [],
-					events = [];
 
-				$.each(data.CalendarCourse, function(i,item){
-					var start = new Date(item.ScheduleDate),
-						end = new Date(item.ScheduleDate),
-						tutor = iL.findTutor(item.Tutor, true),
-						level = item.Coursetitle.match(levelRegex),
-						courseTitle = item.Coursetitle.replace(levelRegex, ""),
+		hash = JSON.stringify(post_data);
 
-						course = {
-							id: item.CourseID,
-							code: item.CourseName,
-							title: courseTitle,
-							level: null,
-							day: start.getDay(),
-							startTime: item.Starttime,
-							endTime: item.endtime,
-							tutor: tutor,
-							lessons: []
-						},
-						lesson = {
-							id: item.CourseScheduleID,
-							start: start,
-							end: end,
-							room: iL.findRoom(item.Location),
-							tutor: tutor,
-							students: []
-						},
+		if(!_lessons[hash]){
+	        _lessons[hash] = Promise.resolve(
+	            $.post(iL.API_ROOT + 'process_getCalendarData.php',
+	                post_data,
+	                null,
+	                "json")
+	            ).then(function(data){
+					var lesson_ids = [],
+						events = [];
 
-						_lessons;
+					$.each(data.CalendarCourse, function(i,item){
+						var start = new Date(item.ScheduleDate),
+							end = new Date(item.ScheduleDate),
+							tutor = iL.findTutor(item.Tutor, true),
+							level = item.Coursetitle.match(levelRegex),
+							courseTitle = item.Coursetitle.replace(levelRegex, ""),
 
-					_setTime(start, item.Starttime);
-					_setTime(end, item.endtime);
+							course = {
+								id: item.CourseID,
+								code: item.CourseName,
+								title: courseTitle,
+								level: null,
+								day: start.getDay(),
+								startTime: item.Starttime,
+								endTime: item.endtime,
+								tutor: tutor,
+								lessons: []
+							},
+							lesson = {
+								id: item.CourseScheduleID,
+								start: start,
+								end: end,
+								room: iL.findRoom(item.Location),
+								tutor: tutor,
+								students: []
+							},
 
-					level = level && level[0].replace(" ", "");
-					if(!level){
-						$.each(customLevels, function(i,cItem){
-							if(cItem.regex.test(courseTitle)){
-								level = cItem.level;
-								return false;
-							}
-						});
-					}
-					course.level = level;
+							_lessons;
 
-					// TODO: This is wasteful, find elegant way to merge
-					if(courses[course.id]){
-						course = courses[course.id];
-					}
-					else {
-						courses[course.id] = course;
-					}
+						_setTime(start, item.Starttime);
+						_setTime(end, item.endtime);
 
-					// TODO: This is wasteful, find elegant way to merge
-					if(lessons[lesson.id]){
-						lesson = lessons[lesson.id];
-						lesson.students.length = 0;
-					}
-					else {
-						lessons[lesson.id] = lesson;
-						lesson.course = course;
-						course.lessons.push(lesson);
-					}
-					lesson_ids.push(lesson.id);
-
-					// lesson is about to get loaded with its known students
-					// so it is safe to set and immediatly resolve the deferred
-					// (no one has access to this object yet)
-					//  - OK not strictly true if it already existed
-					lesson._students = $.Deferred();
-					lesson._students.resolve(lesson.students);
-
-					// If we don't care about empty lessons just add the lesson
-					// to the result set now; otherwise wait until later and add
-					// after being checked.
-					if(options.showEmpty){
-						events.push(lesson);
-					}
-				});
-
-				$.each(data.CalendarStudent, function(i,item){
-					var student = {
-							id: item.MemberID,
-							name: item.nickname,
-							photo: item.Accountname,
-							absent: item.Attendance == "0"
-						},
-						lesson = lessons[item.CourseScheduleID];
-					iL.Util.parseName(student);
-					lesson && lesson.students.push(student);
-				});
-
-				if(!options.showEmpty){
-					$.each(lesson_ids, function(i,item){
-						var lesson = lessons[item];
-						if(lesson.students.length){
-							events.push(lesson);
+						level = level && level[0].replace(" ", "");
+						if(!level){
+							$.each(customLevels, function(i,cItem){
+								if(cItem.regex.test(courseTitle)){
+									level = cItem.level;
+									return false;
+								}
+							});
 						}
-					});
-				}
+						course.level = level;
 
-				return events;
-			});
+						// TODO: This is wasteful, find elegant way to merge
+						if(courses[course.id]){
+							course = courses[course.id];
+						}
+						else {
+							courses[course.id] = course;
+						}
+
+						// TODO: This is wasteful, find elegant way to merge
+						if(lessons[lesson.id]){
+							lesson = lessons[lesson.id];
+							lesson.students.length = 0;
+						}
+						else {
+							lessons[lesson.id] = lesson;
+							lesson.course = course;
+							course.lessons.push(lesson);
+						}
+						lesson_ids.push(lesson.id);
+
+						// lesson is about to get loaded with its known students
+						// so it is safe to set and immediatly resolve the deferred
+						// (no one has access to this object yet)
+						//  - OK not strictly true if it already existed
+						lesson._students = Promise.resolve(lesson.students);
+
+						events.push(lesson);
+					});
+
+					$.each(data.CalendarStudent, function(i,item){
+						var student = {
+								id: item.MemberID,
+								name: item.nickname,
+								photo: item.Accountname,
+								absent: item.Attendance == "0"
+							},
+							lesson = lessons[item.CourseScheduleID];
+						iL.Util.parseName(student);
+						lesson && lesson.students.push(student);
+					});
+
+					return events;
+				});
+		}
+
+		return _lessons[hash];
 	}
 	Lesson.find = findLessons;
 	/* @deprecated */	
