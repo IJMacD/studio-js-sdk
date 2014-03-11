@@ -22,7 +22,7 @@
 		classrooms,
 		tutors,
 
-		loading = $.Deferred();
+		loading;
 
 	window.iL = iLearner;
 	window.iLearner = iLearner;
@@ -72,9 +72,13 @@
 	iLearner.Logout = Logout;
 
 	function getInitData(){
-		$.post(API_ROOT + "process_getinitdata.php",
-			null,
-			function(data){
+		loading = Promise.resolve(
+			$.post(API_ROOT + "process_getinitdata.php",
+				null,
+				null,
+				"json")
+			)
+			.then(function(data){
 				adminStaff = data.AdminStaff;
 				classrooms = $.map(data.classroom, function(i){
 					return { id: i.crid, name: i.place }
@@ -84,9 +88,7 @@
 					tutor.colour = getTutorColour(tutor);
 					return tutor;
 				});
-				loading.resolve();
-			},
-			"json");
+			});
 	}
 
 	/**
@@ -102,11 +104,9 @@
 	 * @return {Promise} Promise of an array containing the details of the tutors
 	 */
 	function allTutors(){
-		return new Promise(function(resolve,reject){
-			loading.done(function(){
-				resolve(tutors);
+		return Promise.resolve(loading).then(function(){
+				return tutors;
 			});
-		});
 	}
 	Tutor.all = allTutors;
 
@@ -130,7 +130,7 @@
 		}
 		var deferred = $.Deferred(),
 			promise = deferred.promise();
-		loading.done(function(){
+		loading.then(function(){
 			deferred.resolve(tutors);
 		});
 		return promise;
@@ -228,7 +228,7 @@
 
 		var deferred = $.Deferred(),
 			promise = deferred.promise();
-		loading.done(function(){
+		loading.then(function(){
 			deferred.resolve(classrooms);
 		});
 		return promise;
