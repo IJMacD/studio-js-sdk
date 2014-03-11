@@ -59,20 +59,22 @@
 	 * specified tutor
 	 * @return {Promise} Promise of an array of lesson objects
 	 */
-	function findLessons(start){
-		var options = $.isPlainObject(start) ? start : {
-				start: new Date()
-			},
-			post_data = {
+	function findLessons(options){
+		options = $.isPlainObject(options) ? options : {
+            start: new Date()
+        };
+		var	post_data = {
 				sDate: iL.formatDate(options.start)
-			},
-			deferred = $.Deferred();
+			};
 		if(options.tutor){
 			post_data.Tutor = options.tutor.id;
 		}
-		$.post(iL.API_ROOT + 'process_getCalendarData.php',
-			post_data,
-			function(data){
+        return Promise.resolve(
+            $.post(iL.API_ROOT + 'process_getCalendarData.php',
+                post_data,
+                null,
+                "json")
+            ).then(function(data){
 				var lesson_ids = [],
 					events = [];
 
@@ -175,10 +177,8 @@
 					});
 				}
 
-				deferred.resolve(events);
-			},
-			"json");
-		return deferred.promise();
+				return events;
+			});
 	}
 	Lesson.find = findLessons;
 	/* @deprecated */	
