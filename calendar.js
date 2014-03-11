@@ -368,49 +368,49 @@
 	 */
 	function courseLessons(course){
 		if(!course._lessons){
-			course._lessons = new Promise(function(resolve, reject){
+			course._lessons = Promise.resolve(
 				$.post(iL.API_ROOT + "process_getCourseDetail.php",
 					{
 						courseID: course.id
 					},
-					function(data){
-						if(!course.lessons){
-							course.lessons = [];
-						}
+                    null,
+                    "json")
+                )
+                .then(function(data){
+                    if(!course.lessons){
+                        course.lessons = [];
+                    }
 
-						$.each(data.coursedetailschedule, function(i,item){
-							if(lessons[item.CourseScheduleID]){
-								return;
-							}
+                    $.each(data.coursedetailschedule, function(i,item){
+                        if(lessons[item.CourseScheduleID]){
+                            return;
+                        }
 
-							var start = new Date(item.ScheduleDate),
-								end = new Date(item.ScheduleDate),
-								lesson = {
-									id: item.CourseScheduleID,
-									start: start,
-									end: end,
-									room: iL.Room.get(item.ClassroomID),
-									tutor: iL.Tutor.get(item.TutorMemberID),
-									course: course,
-									students: []
-								};
+                        var start = new Date(item.ScheduleDate),
+                            end = new Date(item.ScheduleDate),
+                            lesson = {
+                                id: item.CourseScheduleID,
+                                start: start,
+                                end: end,
+                                room: iL.Room.get(item.ClassroomID),
+                                tutor: iL.Tutor.get(item.TutorMemberID),
+                                course: course,
+                                students: []
+                            };
 
-							_setTime(start, item.Starttime);
-							_setTime(end, item.Endtime);
+                        _setTime(start, item.Starttime);
+                        _setTime(end, item.Endtime);
 
-							course.lessons.push(lesson);
+                        course.lessons.push(lesson);
 
-						});
+                    });
 
-						course.lessons.sort(function(a,b){
-							return a.start.getTime() < b.start.getTime() ? -1 : 1;
-						});
+                    course.lessons.sort(function(a,b){
+                        return a.start.getTime() < b.start.getTime() ? -1 : 1;
+                    });
 
-						resolve(course.lessons);
-					},
-					"json")
-				.fail(reject);
-			});
+                    return course.lessons;
+			    });
 		}
 		return course._lessons;
 	}

@@ -15,7 +15,7 @@ function testChain(a,b,c){
 		students.map(function(s){console.log("- " + s.englishName)});
 	})
 	.catch(function(err){
-		console.log("Error occured: " + err);
+		console.log("Error occured: " + err.stack);
 	});
 }
 
