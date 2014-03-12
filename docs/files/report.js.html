@@ -131,6 +131,18 @@
 	 */
 
 	/**
+	 * Get a specific report by ID
+	 *
+	 * @method get
+	 * @param id {int}
+	 * @return {object}
+	 */
+	function getReport(id){
+		return reports[id];
+	}
+	Report.get = getReport;
+
+	/**
 	 * Get an array of report card stubs
 	 *
 	 * @method find
@@ -203,17 +215,15 @@
 		return _reports[hash];
 	}
 	Report.find = find;
-	/* @deprecated */
-	Report.search = find;
 
 	/**
 	 * Given a report stub this method provides the full report card details
 	 *
-	 * @method get
+	 * @method fetch
 	 * @param item {object} Report
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
-	function get(item){
+	function fetchReport(item){
 		var deferred = $.Deferred(),
 			promise = deferred.promise();
 
@@ -254,7 +264,7 @@
 
 		return promise;
 	}
-	Report.get = get;
+	Report.fetch = fetchReport;
 
 	/**
 	 * When provided with a full report object this method will save the report
