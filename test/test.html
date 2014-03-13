@@ -15,23 +15,21 @@ Tester.testAsync({
 		},
 	"Member Report Card List (All Tutors)": function(t,s,f){
 			iLearner.Report.find({})
-				.done(function(list){
+				.then(function(list){
 					if(list && list.length) {
 						return s();
 					}
 					f();
-				})
-				.fail(f);
+				}, f);
 		},
 	"Member Report Card List (One Tutor)": function(t,s,f){
 			iLearner.Report.find({ tutor: 3967 })
-				.done(function(list){
+				.then(function(list){
 					if(list && list.length) {
 						return s();
 					}
 					f();
-				})
-				.fail(f);
+				}, f);
 		}
 });
 </script>

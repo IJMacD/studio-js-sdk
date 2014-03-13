@@ -112,6 +112,7 @@
 	var iLearner = window.iLearner || {},
 		Report = {},
 
+		_reports = {},
 		reports = {},
 		learningObjectives = {},
 
@@ -130,6 +131,18 @@
 	 */
 
 	/**
+	 * Get a specific report by ID
+	 *
+	 * @method get
+	 * @param id {int}
+	 * @return {object}
+	 */
+	function getReport(id){
+		return reports[id];
+	}
+	Report.get = getReport;
+
+	/**
 	 * Get an array of report card stubs
 	 *
 	 * @method find
@@ -137,12 +150,12 @@
 	 * @param [options.tutor] {object} Only get reports for this tutor
 	 * @param [options.from] {Date} Reports for lessons which occur after this date
 	 * @param [options.to] {Date} Reports for lessons which occur before this date
+	 * @param [options.clearCache] {boolean} Do not fetch from the cache, instead hit server
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function find(options){
-		var deferred = $.Deferred(),
-			promise = deferred.promise(),
-			post_data = {};
+		var post_data = {},
+			hash;
 
 		options = options || {};
 
@@ -158,51 +171,59 @@
 			post_data.searchDateTo = formatDate(options.to);
 		}
 
-		$.post(iL.API_ROOT + &quot;process_getMemberReportCardList.php&quot;,
-			post_data,
-			function(data){
-				var resultSet;
-				if(data.MemberReportCardList){
-					resultSet = data.MemberReportCardList;
-					$.each(resultSet, function(i,item){
-						item.id = item.membercourseid;
-						item.studentId = item.memberID;
-						item.name = item.nickname;
-						item.course = {
-							id: item.courseID,
-							title: item.coursename,
-							startTime: item.starttime,
-							endTime: item.endtime
-						};
-						item.memberCourseId = item.membercourseid;
-						item.complete = (item.completed == &quot;1&quot;);
-						item.tutor = options.tutor;
+		hash = JSON.stringify(post_data);
 
-						iL.parseName(item);
+		if(options.clearCache){
+			_reports[hash] = undefined;
+		}
 
-						// TODO: check if report already exists and don&#x27;t replace it
-						reports[item.id] = item;
-					});
-					deferred.resolve(resultSet);
-				}
-			},
-			&quot;json&quot;)
-		.fail(deferred.reject);
+		if(!_reports[hash]){
+			_reports[hash] = Promise.resolve(
+				$.post(iL.API_ROOT + &quot;process_getMemberReportCardList.php&quot;,
+					post_data,
+					null,
+					&quot;json&quot;)
+				)
+				.then(function(data){
+					var resultSet;
+					if(data.MemberReportCardList){
+						resultSet = data.MemberReportCardList;
+						$.each(resultSet, function(i,item){
+							item.id = item.membercourseid;
+							item.studentId = item.memberID;
+							item.name = item.nickname;
+							item.course = {
+								id: item.courseID,
+								title: item.coursename,
+								startTime: item.starttime,
+								endTime: item.endtime
+							};
+							item.memberCourseId = item.membercourseid;
+							item.complete = (item.completed == &quot;1&quot;);
+							item.tutor = options.tutor;
 
-		return promise;
+							iL.parseName(item);
+
+							// TODO: check if report already exists and don&#x27;t replace it
+							reports[item.id] = item;
+						});
+						return resultSet;
+					}
+				});
+		}
+
+		return _reports[hash];
 	}
 	Report.find = find;
-	/* @deprecated */
-	Report.search = find;
 
 	/**
 	 * Given a report stub this method provides the full report card details
 	 *
-	 * @method get
+	 * @method fetch
 	 * @param item {object} Report
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
-	function get(item){
+	function fetchReport(item){
 		var deferred = $.Deferred(),
 			promise = deferred.promise();
 
@@ -243,7 +264,7 @@
 
 		return promise;
 	}
-	Report.get = get;
+	Report.fetch = fetchReport;
 
 	/**
 	 * When provided with a full report object this method will save the report
