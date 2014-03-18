@@ -35,34 +35,33 @@
 
 	getInitData();
 
-	function Login(user, pass, success, error){
-		$.post(API_ROOT + "process_login.php",
-			{
-				login: user,
-				password: pass
-			},
-			function(data){
+	function Login(user, pass){
+		return Promise.resolve(
+				$.post(
+					API_ROOT + "process_login.php",
+					{
+						login: user,
+						password: pass
+					},
+					null,
+					"json"
+				)
+			)
+			.then(function(data){
 				if(data.result && data.result[0]){
 					memberID = parseInt(data.result[0].mid);
 					accountName = data.result[0].acc;
 
 					if(!memberID){
-						if(typeof error == "function"){
-							error();
-						}
-						return;
+						return Promise.reject(Error("No member ID"));
 					}
 
-					if(typeof success == "function"){
-						success(data.result[0]);
-					}
+					return data.result[0];
 				}
-				else if(typeof error == "function"){
-					error();
+				else{
+					return Promise.reject(Error("Invalid data from the server"));
 				}
-			},
-			"json")
-		.fail(error);
+			});
 	}
 	iLearner.Login = Login;
 
