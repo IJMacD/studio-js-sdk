@@ -1,0 +1,85 @@
+<link rel="stylesheet" href="qunit-1.14.0.css" />
+<script src="qunit-1.14.0.js"></script>
+<script src="jquery-2.1.0.min.js"></script>
+<script src="spark-md5.js"></script>
+<script src="../conf.js"></script>
+<script src="../core.js"></script>
+<script src="../report.js"></script>
+<script src="../calendar.js"></script>
+<script>
+asyncTest("Login", function(){
+	expect(2);
+
+	iL.Login("tutor", "itutor123")
+		.then(function(){
+			ok(true, "Login successful");
+			start();
+		})
+		.catch(function(){
+			ok(false, "Login failed");
+			start();
+		});
+
+	stop();
+	iL.Login("tutor", "")
+		.then(function(){
+			ok(false, "Invalid login allowed");
+			start();
+		})
+		.catch(function(){
+			ok(true, "Invalid login blocked");
+			start();
+		});
+});
+asyncTest("Tutor", function(){
+	expect(2);
+	
+	iL.Tutor.all()
+		.then(function(tutors){
+			ok(tutors.length, "Got all Tutors");
+			start();
+		})
+		.catch(function(){
+			ok(false, "Getting Tutors failed");
+			start();
+		});
+
+	stop();
+	iL.Tutor.all().then(function(){
+		var tutor = iL.Tutor.get(3639);
+		ok(!!tutor.name, "Get Tutor (" + tutor.name + ")");
+		start();
+	});
+});
+asyncTest("Big Chain", function(){
+	function testChain(a,b,c){
+		iL.Tutor.all().then(function(tutors){
+			console.log(tutors[a].name + ":");
+			return iL.Report.find({tutor:tutors[a]});
+		})
+		.then(function(reports){
+			console.log(reports[b].course.title);
+			return iL.Course.lessons(reports[b].course);
+		})
+		.then(function(lessons){
+			console.log("on " + lessons[c].start.getDate() + "/" + (lessons[c].start.getMonth() + 1));
+			return iL.Lesson.students(lessons[c]);
+		})
+		.then(function(students){
+			students.map(function(s){console.log("- " + s.englishName)});
+			ok(true, "Completed the chain");
+			start();
+		})
+		.catch(function(err){
+			console.log("Error occured: " + err.stack);
+			ok(false, "Broken chain");
+			start();
+		});
+	}
+
+	expect(1);
+	
+	testChain(4,1,0);
+});
+</script>
+<div id="qunit"></div>
