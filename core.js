@@ -128,12 +128,9 @@
 			});
 			return tutor;
 		}
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
-		loading.then(function(){
-			deferred.resolve(tutors);
-		});
-		return promise;
+		return Promise.resolve(
+			loading.then(function(){return tutors;})
+		);
 	}
 	Tutor.get = getTutors;
 	iLearner.getTutors = getTutors;

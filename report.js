@@ -103,8 +103,8 @@
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
 						});
-						return resultSet;
 					}
+					return resultSet;
 				});
 		}
 

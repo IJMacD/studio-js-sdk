@@ -23,7 +23,9 @@
 		courses = {},
 		lessons = {},
 		_courses = {},
-		_lessons = {};
+		_lessons = {},
+		_promises = {},
+		_students = {};
 
 	window.iL = iLearner;
 	iLearner.Lesson = Lesson;
@@ -53,20 +55,43 @@
 	 *
 	 * @method find
 	 * @param options {object} A map of options
-	 * @param options.start {Date} Only return lessons which start after this date
+	 * @param [options.start] {Date} Only return lessons which start after this date
 	 * @param [options.tutor] {object} Restrict lessons to only those taught by the
 	 * specified tutor
 	 * @return {Promise} Promise of an array of lesson objects
 	 */
-	function findLessons(options){
-		options = $.isPlainObject(options) ? options : {
-            start: new Date()
-        };
 
-		var	post_data = {
-				sDate: iL.formatDate(options.start)
-			},
+	/**
+	 * Find lessons relative to a specified lesson
+	 *
+	 * @method find
+	 * @param lesson {object} A lesson object
+	 * @param method {string} parameter decribing relationship. Can be one of the following:
+	 * * previous
+	 * * next
+	 * * future
+	 * * past
+	 * @return {Promise} Promise of an array of lesson objects
+	 */
+	function findLessons(){
+		var	args = Array.prototype.slice.call(arguments),
+			options,
+			post_data,
 			hash;
+
+		if(args.length == 2){
+			return _relativeLessons(args[0], args[1]);
+		}
+
+		options = $.isPlainObject(args[0]) ? args[0] : {};
+
+		if(!options.start){
+			options.start = new Date;
+		}
+
+		post_data = {
+			sDate: iL.formatDate(options.start)
+		};
 
 		if(options.tutor){
 			post_data.Tutor = options.tutor.id;
@@ -142,7 +167,7 @@
 						// so it is safe to set and immediatly resolve the deferred
 						// (no one has access to this object yet)
 						//  - OK not strictly true if it already existed
-						lesson._students = Promise.resolve(lesson.students);
+						_students[lesson.id] = Promise.resolve(lesson.students);
 
 						events.push(lesson);
 					});
@@ -221,6 +246,37 @@
 	}
 	Lesson.save = save;
 
+	function _relativeLessons(lesson, method){
+		var id = lesson.id;
+
+		if(!_promises[id]){
+			_promises[id] = {};
+		}
+
+		if(!_promises[id][method]){
+			_promises[id][method] = Course
+				.lessons(lesson.course)
+				.then(function(lessons){
+					var index = lessons.indexOf(lesson);
+					if(method == "previous"){
+						return lessons.slice(index-1,index);
+					}
+					else if(method == "next"){
+						return lessons.slice(index+1,index+2);
+					}
+					else if(method == "future"){
+						// lesson inclusive
+						return lessons.slice(index);
+					}
+					else if(method == "past"){
+						// lesson inclusive
+						return lessons.slice(0,index+1);
+					}
+				});
+		}
+		return _promises[id][method];
+	}
+
 	/**
 	 * Get previous lesson in series of course
 	 *
@@ -229,15 +285,7 @@
 	 * @return {Promise} Promise of lesson object
 	 */
 	function previousLesson(lesson){
-		if(!lesson._prev){
-			lesson._prev = Course
-				.lessons(lesson.course)
-				.then(function(lessons){
-					var index = lessons.indexOf(lesson);
-					return lessons[index-1];
-				});
-		}
-		return lesson._prev;
+		return findLessons(lesson, "previous").then(function(a){return a[0]});
 	}
 	Lesson.prev = previousLesson;
 
@@ -249,15 +297,7 @@
 	 * @return {Promise} Promise of a lesson
 	 */
 	function nextLesson(lesson){
-		if(!lesson._next){
-			lesson._next = Course
-				.lessons(lesson.course)
-				.then(function(lessons){
-					var index = lessons.indexOf(lesson);
-					return lessons[index+1];
-				});
-		}
-		return lesson._next;
+		return findLessons(lesson, "next").then(function(a){return a[0]});
 	}
 	Lesson.next = nextLesson;
 
@@ -269,15 +309,7 @@
 	 * @return {Promise} Promise of an array of lessons
 	 */
 	function futureLessons(lesson){
-		if(!lesson._future){
-			lesson._future = Course
-				.lessons(lesson.course)
-				.then(function(lessons){
-					var index = lessons.indexOf(lesson);
-					return lessons.slice(index);
-				});
-		}
-		return lesson._future;
+		return findLessons(lesson, "future");
 	}
 	Lesson.future = futureLessons;
 
@@ -289,8 +321,9 @@
 	 * @return {Promise} An array of students
 	 */
 	function lessonStudents(lesson){
-		if(!lesson._students){
-			lesson._students = new Promise(function(resolve, reject){
+		var id = lesson.id;
+		if(!_students[id]){
+			_students[id] = new Promise(function(resolve, reject){
 				$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
 					{
 						scheduleID: lesson.id
@@ -316,7 +349,7 @@
 				.fail(reject);
 			});
 		}
-		return lesson._students;
+		return _students[id];
 	}
 	Lesson.students = lessonStudents;
 

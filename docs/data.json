@@ -55,7 +55,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "calendar.js",
-            "line": 323,
+            "line": 356,
             "description": "Calendar module. Contains Lesson and Course classes."
         },
         "Core": {
@@ -70,7 +70,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "core.js",
-            "line": 269,
+            "line": 266,
             "description": "Core module. Contains Tutor, Room classes as well as Utility submodule"
         },
         "Report": {
@@ -99,7 +99,7 @@
             "module": "Calendar",
             "namespace": "",
             "file": "calendar.js",
-            "line": 32,
+            "line": 34,
             "description": "Lesson class for dealing with lesson instances happening\nat a specific time on a specific date"
         },
         "Course": {
@@ -113,7 +113,7 @@
             "module": "Calendar",
             "namespace": "",
             "file": "calendar.js",
-            "line": 323,
+            "line": 356,
             "description": "Class to deal with courses. Courses generally run for a number of weeks\nand contain lesson instances"
         },
         "Tutor": {
@@ -141,7 +141,7 @@
             "module": "Core",
             "namespace": "",
             "file": "core.js",
-            "line": 192,
+            "line": 189,
             "description": "Class for using rooms"
         },
         "Util": {
@@ -155,7 +155,7 @@
             "module": "Core",
             "namespace": "",
             "file": "core.js",
-            "line": 269,
+            "line": 266,
             "description": "Utility Class"
         },
         "Report": {
@@ -176,7 +176,7 @@
     "classitems": [
         {
             "file": "calendar.js",
-            "line": 39,
+            "line": 41,
             "description": "Get a lesson specified by its ID",
             "itemtype": "method",
             "name": "get",
@@ -196,7 +196,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 51,
+            "line": 53,
             "description": "Find a lesson with specific conditions",
             "itemtype": "method",
             "name": "find",
@@ -209,7 +209,8 @@
                         {
                             "name": "start",
                             "description": "Only return lessons which start after this date",
-                            "type": "Date"
+                            "type": "Date",
+                            "optional": true
                         },
                         {
                             "name": "tutor",
@@ -229,7 +230,32 @@
         },
         {
             "file": "calendar.js",
-            "line": 170,
+            "line": 64,
+            "description": "Find lessons relative to a specified lesson",
+            "itemtype": "method",
+            "name": "find",
+            "params": [
+                {
+                    "name": "lesson",
+                    "description": "A lesson object",
+                    "type": "Object"
+                },
+                {
+                    "name": "method",
+                    "description": "parameter decribing relationship. Can be one of the following:\n* previous\n* next\n* future\n* past",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Promise of an array of lesson objects",
+                "type": "Promise"
+            },
+            "class": "Lesson",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 195,
             "description": "Save lesson changes back to the server",
             "itemtype": "method",
             "name": "save",
@@ -249,7 +275,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 224,
+            "line": 280,
             "description": "Get previous lesson in series of course",
             "itemtype": "method",
             "name": "prev",
@@ -269,7 +295,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 244,
+            "line": 292,
             "description": "Get next lesson in series of course",
             "itemtype": "method",
             "name": "next",
@@ -289,7 +315,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 264,
+            "line": 304,
             "description": "Get a collection of all future lessons of the same course",
             "itemtype": "method",
             "name": "future",
@@ -309,7 +335,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 284,
+            "line": 316,
             "description": "Get details of the students registered for a lesson",
             "itemtype": "method",
             "name": "students",
@@ -329,7 +355,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 330,
+            "line": 363,
             "description": "Get a specific course",
             "itemtype": "method",
             "name": "get",
@@ -349,7 +375,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 342,
+            "line": 375,
             "description": "Find courses matching given search parameters",
             "itemtype": "method",
             "name": "find",
@@ -389,7 +415,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 443,
+            "line": 476,
             "description": "Get all lessons for this course",
             "itemtype": "method",
             "name": "lessons",
@@ -442,7 +468,7 @@
         },
         {
             "file": "core.js",
-            "line": 141,
+            "line": 138,
             "description": "Find a single tutor specified by his name",
             "itemtype": "method",
             "name": "find",
@@ -468,7 +494,7 @@
         },
         {
             "file": "core.js",
-            "line": 177,
+            "line": 174,
             "description": "Get a colour associated with this tutor",
             "itemtype": "method",
             "name": "colour",
@@ -488,7 +514,7 @@
         },
         {
             "file": "core.js",
-            "line": 198,
+            "line": 195,
             "description": "Get a room by ID",
             "itemtype": "method",
             "name": "get",
@@ -508,7 +534,7 @@
         },
         {
             "file": "core.js",
-            "line": 210,
+            "line": 207,
             "description": "Get all rooms",
             "itemtype": "method",
             "name": "all",
@@ -521,7 +547,7 @@
         },
         {
             "file": "core.js",
-            "line": 241,
+            "line": 238,
             "description": "Find a room by name",
             "itemtype": "method",
             "name": "find",
@@ -541,7 +567,7 @@
         },
         {
             "file": "core.js",
-            "line": 275,
+            "line": 272,
             "description": "Format date in server specific format",
             "itemtype": "method",
             "name": "formatDate",
@@ -562,7 +588,7 @@
         },
         {
             "file": "core.js",
-            "line": 289,
+            "line": 286,
             "description": "Useful function to set the name on any object with a `name` property.\n\nParses names to extract forename and surname as well as combinations\nfor English and Chinese names. It recognises common Chinese surnames\nto avoid confusion with English name first vs. English name last.\n\nThis method modifies the original object by adding the properties:\n`forename`, `surname`, `englishName` and `chineseName`.",
             "itemtype": "method",
             "name": "parseName",
