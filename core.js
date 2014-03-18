@@ -210,6 +210,7 @@
 	 * @return {Promise} Promise of an array rooms
 	 */
 	function getRooms(id){
+		var classroom;
 
 		if(classrooms && id){
 			$.each(classrooms, function(i,c){
@@ -222,12 +223,9 @@
 			return classroom;
 		}
 
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
-		loading.then(function(){
-			deferred.resolve(classrooms);
-		});
-		return promise;
+		return Promise.resolve(
+			loading.then(function(){return classrooms;})
+		);
 	}
 	Room.all = getRooms;
 	/* @deprecated */

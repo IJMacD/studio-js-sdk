@@ -32,11 +32,11 @@ asyncTest("Login", function(){
 		});
 });
 asyncTest("Tutor", function(){
-	expect(2);
+	expect(3);
 	
 	iL.Tutor.all()
 		.then(function(tutors){
-			ok(tutors.length, "Got all Tutors");
+			ok(tutors.length, "Get all Tutors");
 			start();
 		})
 		.catch(function(){
@@ -48,6 +48,122 @@ asyncTest("Tutor", function(){
 	iL.Tutor.all().then(function(){
 		var tutor = iL.Tutor.get(3639);
 		ok(!!tutor.name, "Get Tutor (" + tutor.name + ")");
+		start();
+
+
+		ok(iL.Tutor.find("Iain MacDonald"), 'Tutor.find("Iain MacDonald")');
+	});
+});
+asyncTest("Room", function(){
+	expect(3);
+
+	iL.Room.all()
+		.then(function(rooms){
+			ok(rooms.length, "Get all Rooms");
+			start();
+		})
+		.catch(function(){
+			ok(false, "Getting Rooms failed");
+			start();
+		});
+
+	stop();
+	iL.Room.all().then(function(){
+		var room = iL.Room.get(1);
+		ok(!!room.name, "Get Room (" + room.name + ")");
+		start();
+
+		ok(iL.Room.find("Room 1"), 'Room.find("Room 1")');
+	});
+});
+asyncTest("Lesson", function(){
+	expect(8);
+
+	iL.Lesson.find()
+		.then(function(lessons){
+			ok(lessons.length, "Lesson.find(): " + lessons.length);
+			start();
+		})
+		.catch(function(){
+			ok(false, "Lesson.find()");
+			start();
+		});
+
+	stop();
+	iL.Lesson.find({
+		start: new Date("2014-03-19")
+	}).then(function(lessons){
+		ok(lessons.length, "Lesson.find({start: Date}): " + lessons.length);
+		start();
+	}).catch(function(){
+		ok(false, "Lesson.find({start: Date})");
+		start();
+	});
+
+	stop();
+	iL.Lesson.find({
+		tutor: {id: 3639}
+	}).then(function(lessons){
+		ok(lessons.length, "Lesson.find({tutor: {id: 3639}}): " + lessons.length);
+		start();
+	}).catch(function(){
+		ok(false, "Lesson.find({tutor: {id: 3639}})");
+		start();
+	});
+
+	stop();
+	iL.Lesson.find().then(function(lessons){
+		start();
+
+		var lesson = lessons[0];
+
+		ok(iL.Lesson.get(35061).id == 35061, "Lesson.get(35061): [" + lesson.id + ']');
+
+		stop();
+		iL.Lesson.find(lesson, "next")
+			.then(function(_){
+				ok(_.length == 1, 'Lesson.find(lesson, "next"): [' + _[0].id + ']');
+				start();
+			})
+			.catch(function(){
+				ok(false, 'Lesson.find(lesson, "next")');
+				start();
+			});
+
+		stop();
+		iL.Lesson.find(lesson, "previous")
+			.then(function(_){
+				ok(_.length == 1, 'Lesson.find(lesson, "previous"): [' + _[0].id + ']');
+				start();
+			})
+			.catch(function(){
+				ok(false, 'Lesson.find(lesson, "previous")');
+				start();
+			});
+
+		stop();
+		iL.Lesson.find(lesson, "past")
+			.then(function(_){
+				ok(_.length, 'Lesson.find(lesson, "past"): ' + _.length);
+				start();
+			})
+			.catch(function(){
+				ok(false, 'Lesson.find(lesson, "past")');
+				start();
+			});
+
+		stop();
+		iL.Lesson.find(lesson, "future")
+			.then(function(_){
+				ok(_.length, 'Lesson.find(lesson, "future"): ' + _.length);
+				start();
+			})
+			.catch(function(){
+				ok(false, 'Lesson.find(lesson, "future")');
+				start();
+			});
+
+	}).catch(function(){
 		start();
 	});
 });
