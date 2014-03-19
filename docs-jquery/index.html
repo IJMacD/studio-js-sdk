@@ -1,0 +1,270 @@
+<link rel="stylesheet" href="../../Dashboard/css/bootstrap.min.css">
+<style>
+h1, h2, h3, h4, h5, h6 {
+	font-weight: 700;
+	font-family: "klavika-web", "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif !important;
+}
+ul {
+	list-style: none;
+	padding-left: 0;
+}
+li {
+	padding: 10px 20px;
+	margin: 15px 0;
+	border: 1px solid rgba( 0, 0, 0, 0.2 );
+	border-radius: 5px;
+	background-color: #eee;
+	position: relative;
+}
+.title {
+	color: #0769AD;
+	cursor: pointer;
+	font-size: 1.3em;
+	font-weight: 700;
+	font-family: "klavika-web", "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif !important;
+	margin-bottom: 0;
+	text-decoration: none;
+	text-shadow: 0 1px 1px #fff;
+}
+.title:hover {
+	text-decoration: none;
+}
+.method-header {
+	background: #333;
+	border: 1px solid #111;
+	padding: 8px 15px;
+	font-size: 16px;
+	color: white;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.5);
+	letter-spacing: 0;
+	border-radius: 5px 5px 0 0;
+	font-weight: normal;
+	margin-bottom: 0;
+	overflow: hidden;
+}
+.method-return {
+	float: right;
+}
+.method-body {
+	border: 1px solid #CCC;
+	border-top: 0;
+	padding: 10px;
+	border-radius: 0 0 5px 5px;
+}
+.description::before {
+	content: "Description: ";
+	font-weight: bold;
+}
+.method-signature {
+	background: #eee;
+	border: 1px solid #ccc;
+	margin: 10px auto 15px;
+	border-radius: 3px;
+	color: #333;
+	text-shadow: 0 1px 0 #fff;
+}
+.method-signature h2 {
+	background: #25649F;
+	font-size: 16px;
+	letter-spacing: 0;
+	padding: 8px 10px;
+	color: #fff;
+	text-shadow: 0 1px 0 #444;
+	border-radius: 3px 3px 0 0;
+	margin-top: 0;
+}
+.method-signature dl {
+	margin: 15px;
+}
+.type {
+	color: #0769AD;
+	display: inline-block;
+	width: 100px;
+}
+.type::before {
+	content: "Type: ";
+	color: #333;
+}
+</style>
+<body>
+<div class="container">
+	<h1>Studio JS SDK</h1>
+	<h2>Method Index</h2>
+	<ul>
+		<li>
+			<a class="title" href="#Tutor.get">Tutor.get()</a>
+			<p>Get a specific tutor</p>
+		</li>
+		<li>
+			<a class="title" href="#Tutor.find">Tutor.find()</a>
+			<p>Find a specific tutor</p>
+		</li>
+		<li>
+			<a class="title" href="#Room.get">Room.get()</a>
+			<p>Get a specific room</p>
+		</li>
+		<li>
+			<a class="title" href="#Room.find">Room.find()</a>
+			<p>Find a specific room</p>
+		</li>
+		<li>
+			<a class="title" href="#Lesson.get">Lesson.get()</a>
+			<p>Get a specific lesson</p>
+		</li>
+		<li>
+			<a class="title" href="#Lesson.find">Lesson.find()</a>
+			<p>Find certain lessons</p>
+		</li>
+	</ul>
+	<h2>Methods</h2>
+	<article id="Tutor.get">
+		<h1 class="method-header">
+			<span class="method-name">Tutor.get(id)</span>
+			<span class="method-return">Tutor</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get a single tutor specified by ID</div>
+			<div class="method-signature">
+				<h2>Tutor.get(id)</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> The integer ID associated with the tutor you wish to fetch</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Tutor.find">
+		<h1 class="method-header">
+			<span class="method-name">Tutor.find(options)</span>
+			<span class="method-return">Promise(Tutor)</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get a single tutor specified by options</div>
+			<div class="method-signature">
+				<h2>Tutor.find(options)</h2>
+				<dl>
+					<dt>options</dt>
+					<dd><span class="type">object</span> Map containing details of the tutor you wish to fetch</dd>
+					<dt>options.name</dt>
+					<dd><span class="type">string</span> The name of the tutor</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Room.get">
+		<h1 class="method-header">
+			<span class="method-name">Room.get(id)</span>
+			<span class="method-return">Room</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get a single room specified by ID</div>
+			<div class="method-signature">
+				<h2>Room.get(id)</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> The integer ID associated with the room you wish to fetch</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Room.find">
+		<h1 class="method-header">
+			<span class="method-name">Room.find(options)</span>
+			<span class="method-return">Promise(Room)</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get a single room specified by options</div>
+			<div class="method-signature">
+				<h2>Room.find(options)</h2>
+				<dl>
+					<dt>options</dt>
+					<dd><span class="type">object</span> Map containing details of the room you wish to fetch</dd>
+					<dt>options.name</dt>
+					<dd><span class="type">string</span> The name of the room</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="lesson.get">
+		<h1 class="method-header">
+			<span class="method-name">lesson.get(id)</span>
+			<span class="method-return">lesson</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get a single Lesson specified by ID</div>
+			<div class="method-signature">
+				<h2>lesson.get(id)</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> The integer ID associated with the Lesson you wish to fetch</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Lesson.find">
+		<h1 class="method-header">
+			<span class="method-name">Lesson.find(options)</span>
+			<span class="method-return">Promise([Lesson])</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get lessons specified by options</div>
+			<div class="method-signature">
+				<h2>Lesson.find(options)</h2>
+				<dl>
+					<dt>options</dt>
+					<dd><span class="type">object</span> Map containing details of the lessons you wish to fetch</dd>
+					<dt>options.start</dt>
+					<dd><span class="type">Date</span> Date object to fetch lessons on the same day as</dd>
+					<dt>options.tutor</dt>
+					<dd><span class="type">Tutor</span> Restrict lesson to only the specified tutor</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Lesson.find">
+		<h1 class="method-header">
+			<span class="method-name">Lesson.find(lesson, method)</span>
+			<span class="method-return">Promise([Lesson])</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">Get lessons relatice to a specified lesson</div>
+			<div class="method-signature">
+				<h2>Lesson.find(lesson, "previous")</h2>
+				<dl>
+					<dt>lesson</dt>
+					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dt>"previous"</dt>
+					<dd><span class="type">string</span> Fetch the lesson sequentially prior to the reference lesson</dd>
+				</dl>
+			</div>
+			<div class="method-signature">
+				<h2>Lesson.find(lesson, "next")</h2>
+				<dl>
+					<dt>lesson</dt>
+					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dt>"next"</dt>
+					<dd><span class="type">string</span> Fetch the lesson sequentially after to the reference lesson</dd>
+				</dl>
+			</div>
+			<div class="method-signature">
+				<h2>Lesson.find(lesson, "past")</h2>
+				<dl>
+					<dt>lesson</dt>
+					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dt>"past"</dt>
+					<dd><span class="type">string</span> Fetch all lessons sequentially prior to the reference lesson. Inclusive</dd>
+				</dl>
+			</div>
+			<div class="method-signature">
+				<h2>Lesson.find(lesson, "future")</h2>
+				<dl>
+					<dt>lesson</dt>
+					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dt>"future"</dt>
+					<dd><span class="type">string</span> Fetch all lessons sequentially after to the reference lesson. Inclusive</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+</div>
+</body>
