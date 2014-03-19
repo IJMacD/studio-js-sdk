@@ -240,7 +240,7 @@
 	 * @return {object} Object describing room
 	 */
 	function findRoom(name){
-		var room;
+		var classroom;
 
 		if(!name){
 			return { id: 0, name: "" };
