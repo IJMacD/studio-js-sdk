@@ -42,6 +42,10 @@ li {
 	margin-bottom: 0;
 	overflow: hidden;
 }
+.method-header a,
+.method-header a:hover {
+	color: white;
+}
 .method-return {
 	float: right;
 }
@@ -89,6 +93,33 @@ li {
 <body>
 <div class="container">
 	<h1>Studio JS SDK</h1>
+	<h2>Type Index</h2>
+	<ul>
+		<li>
+			<a class="title" href="#Tutor">Tutor</a>
+			<p>Contains details about a tutor</p>
+		</li>
+		<li>
+			<a class="title" href="#Room">Room</a>
+			<p>Details about a specific room</p>
+		</li>
+		<li>
+			<a class="title" href="#Course">Course</a>
+			<p>information on a on-going course of lessons</p>
+		</li>
+		<li>
+			<a class="title" href="#Lesson">Lesson</a>
+			<p>Information about a specific lesson</p>
+		</li>
+		<li>
+			<a class="title" href="#Student">Student</a>
+			<p>Details relating to an individual student</p>
+		</li>
+		<li>
+			<a class="title" href="#Report">Report</a>
+			<p>Details of an end of term report card</p>
+		</li>
+	</ul>
 	<h2>Method Index</h2>
 	<ul>
 		<li>
@@ -116,11 +147,121 @@ li {
 			<p>Find certain lessons</p>
 		</li>
 	</ul>
+	<h2>Types</h2>
+	<article id="Tutor">
+		<h1 class="method-header">
+			<span class="method-name">Tutor</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">A single tutor</div>
+			<div class="method-signature">
+				<h2>Properties</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> System ID of the tutor</dd>
+					<dt>name</dt>
+					<dd><span class="type">string</span> English name of the tutor</dd>
+					<dt>colour</dt>
+					<dd><span class="type">string</span> A unique colour associated with the tutor</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Room">
+		<h1 class="method-header">
+			<span class="method-name">Room</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">A single room</div>
+			<div class="method-signature">
+				<h2>Properties</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> System ID of the room</dd>
+					<dt>name</dt>
+					<dd><span class="type">string</span> English name of the room</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Course">
+		<h1 class="method-header">
+			<span class="method-name">Course</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">A series of lessons forms a course</div>
+			<div class="method-signature">
+				<h2>Properties</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> System ID of the course</dd>
+					<dt>title</dt>
+					<dd><span class="type">string</span> Title of the course</dd>
+					<dt>day</dt>
+					<dd><span class="type">int</span> 0-Sunday based day of the week this courses' lessons are usually on</dd>
+					<dt>startTime</dt>
+					<dd><span class="type">string</span> Usual start time of lessons in the format "0900"</dd>
+					<dt>endTime</dt>
+					<dd><span class="type">string</span> Usual end time of lessons in the format "1010"</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Lesson">
+		<h1 class="method-header">
+			<span class="method-name">Lesson</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">A single lesson</div>
+			<div class="method-signature">
+				<h2>Properties</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> System ID of the lesson</dd>
+					<dt>course</dt>
+					<dd><span class="type"><a href="#Course">Course</a></span> Course this lesson belongs to</dd>
+					<dt>start</dt>
+					<dd><span class="type">Date</span> Start time and date of lesson</dd>
+					<dt>end</dt>
+					<dd><span class="type">Date</span> End time and date of lesson</dd>
+					<dt>tutor</dt>
+					<dd><span class="type"><a href="#Tutor">Tutor</a></span> Tutor who will teach this lesson</dd>
+					<dt>room</dt>
+					<dd><span class="type"><a href="#Room">Room</a></span> Room this lesson will take place in</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
+	<article id="Student">
+		<h1 class="method-header">
+			<span class="method-name">Student</span>
+		</h1>
+		<div class="method-body">
+			<div class="description">A single student</div>
+			<div class="method-signature">
+				<h2>Properties</h2>
+				<dl>
+					<dt>id</dt>
+					<dd><span class="type">int</span> System ID of the student</dd>
+					<dt>name</dt>
+					<dd><span class="type">string</span> Student's name as it appears in the system, sanitised</dd>
+					<dt>forename</dt>
+					<dd><span class="type">string</span> Given English name, if student has one</dd>
+					<dt>surname</dt>
+					<dd><span class="type">string</span> Family name of student</dd>
+					<dt>englishName</dt>
+					<dd><span class="type">string</span> Forename + surname</dd>
+					<dt>chineseName</dt>
+					<dd><span class="type">string</span> Three chinese names, without forename</dd>
+				</dl>
+			</div>
+		</div>
+	</article>
 	<h2>Methods</h2>
 	<article id="Tutor.get">
 		<h1 class="method-header">
 			<span class="method-name">Tutor.get(id)</span>
-			<span class="method-return">Tutor</span>
+			<span class="method-return"><a href="#Tutor">Tutor</a></span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get a single tutor specified by ID</div>
@@ -136,7 +277,7 @@ li {
 	<article id="Tutor.find">
 		<h1 class="method-header">
 			<span class="method-name">Tutor.find(options)</span>
-			<span class="method-return">Promise(Tutor)</span>
+			<span class="method-return">Promise(<a href="#Tutor">Tutor</a>)</span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get a single tutor specified by options</div>
@@ -154,7 +295,7 @@ li {
 	<article id="Room.get">
 		<h1 class="method-header">
 			<span class="method-name">Room.get(id)</span>
-			<span class="method-return">Room</span>
+			<span class="method-return"><a href="#Room">Room</a></span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get a single room specified by ID</div>
@@ -170,7 +311,7 @@ li {
 	<article id="Room.find">
 		<h1 class="method-header">
 			<span class="method-name">Room.find(options)</span>
-			<span class="method-return">Promise(Room)</span>
+			<span class="method-return">Promise(<a href="#Room">Room</a>)</span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get a single room specified by options</div>
@@ -188,7 +329,7 @@ li {
 	<article id="lesson.get">
 		<h1 class="method-header">
 			<span class="method-name">lesson.get(id)</span>
-			<span class="method-return">lesson</span>
+			<span class="method-return"><a href="#Lesson">Lesson</a></span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get a single Lesson specified by ID</div>
@@ -204,7 +345,7 @@ li {
 	<article id="Lesson.find">
 		<h1 class="method-header">
 			<span class="method-name">Lesson.find(options)</span>
-			<span class="method-return">Promise([Lesson])</span>
+			<span class="method-return">Promise([<a href="#Lesson">Lesson</a>])</span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get lessons specified by options</div>
@@ -216,7 +357,7 @@ li {
 					<dt>options.start</dt>
 					<dd><span class="type">Date</span> Date object to fetch lessons on the same day as</dd>
 					<dt>options.tutor</dt>
-					<dd><span class="type">Tutor</span> Restrict lesson to only the specified tutor</dd>
+					<dd><span class="type"><a href="#Tutor">Tutor</a></span> Restrict lesson to only the specified tutor</dd>
 				</dl>
 			</div>
 		</div>
@@ -224,7 +365,7 @@ li {
 	<article id="Lesson.find">
 		<h1 class="method-header">
 			<span class="method-name">Lesson.find(lesson, method)</span>
-			<span class="method-return">Promise([Lesson])</span>
+			<span class="method-return">Promise([<a href="#Lesson">Lesson</a>])</span>
 		</h1>
 		<div class="method-body">
 			<div class="description">Get lessons relatice to a specified lesson</div>
@@ -232,7 +373,7 @@ li {
 				<h2>Lesson.find(lesson, "previous")</h2>
 				<dl>
 					<dt>lesson</dt>
-					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dd><span class="type"><a href="#Lesson">Lesson</a></span> Lesson to work relative to</dd>
 					<dt>"previous"</dt>
 					<dd><span class="type">string</span> Fetch the lesson sequentially prior to the reference lesson</dd>
 				</dl>
@@ -241,7 +382,7 @@ li {
 				<h2>Lesson.find(lesson, "next")</h2>
 				<dl>
 					<dt>lesson</dt>
-					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dd><span class="type"><a href="#Lesson">Lesson</a></span> Lesson to work relative to</dd>
 					<dt>"next"</dt>
 					<dd><span class="type">string</span> Fetch the lesson sequentially after to the reference lesson</dd>
 				</dl>
@@ -250,7 +391,7 @@ li {
 				<h2>Lesson.find(lesson, "past")</h2>
 				<dl>
 					<dt>lesson</dt>
-					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dd><span class="type"><a href="#Lesson">Lesson</a></span> Lesson to work relative to</dd>
 					<dt>"past"</dt>
 					<dd><span class="type">string</span> Fetch all lessons sequentially prior to the reference lesson. Inclusive</dd>
 				</dl>
@@ -259,7 +400,7 @@ li {
 				<h2>Lesson.find(lesson, "future")</h2>
 				<dl>
 					<dt>lesson</dt>
-					<dd><span class="type">Lesson</span> Lesson to work relative to</dd>
+					<dd><span class="type"><a href="#Lesson">Lesson</a></span> Lesson to work relative to</dd>
 					<dt>"future"</dt>
 					<dd><span class="type">string</span> Fetch all lessons sequentially after to the reference lesson. Inclusive</dd>
 				</dl>
