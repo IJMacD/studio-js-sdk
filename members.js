@@ -47,6 +47,8 @@
 		var now = new Date(),
 			post_data = {
 				searchStudentName: options.name,
+				searchStudentMobile: options.phone,
+				searchStudentSchool: options.school,
 				searchStudentCourseYear: now.getFullYear(),
 				searchStudentCourseMonth: (now.getMonth() + 1)
 			};
