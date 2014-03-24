@@ -156,12 +156,13 @@ li {
 	<li class="lesson returns">Lesson.findByCourse</li>
 	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
 	<li class="student returns">Student.findByLesson</li>
-	<li class="array">Array.forEach
-		<ul>
+	<li class="array returns">Array.map
+		<ul class="capture">
 			<li class="object returns">Object.toString <input class="param" type="text" value="- {{ name }}"/></li>
-			<li class="console">Console.log</li>
 		</ul>
 	</li>
+	<li class="array returns">Array.join <input class="param" type="text" value="\n"/></li>
+	<li class="console">Console.log</li>
 </ul>
 <h1>Student List</h1>
 <ul>
@@ -169,13 +170,14 @@ li {
 	<li class="array">Array.forEach
 		<ul>
 			<li class="report returns">Report.findByTutor</li>
-			<li class="array">Array.forEach
-				<ul>
+			<li class="array returns">Array.map
+				<ul class="capture">
 					<li class="report returns">Report.fetch</li>
 					<li class="object returns">Object.toString <input class="param" type="text" value="{{ name }},{{ suggestions }}"/></li>
-					<li class="console">Console.log</li>
 				</ul>
 			</li>
+			<li class="array returns">Array.join <input class="param" type="text" value="\n"/></li>
+			<li class="console">Console.log</li>
 		</ul>
 	</li>
 </ul>
@@ -191,14 +193,17 @@ li {
 <h1>Blocks</h1>
 <h2>Object</h2>
 <ul class="snippet">
-	<li class="object returns">Object.property <input class="param" type="text" value=""/></li>
+	<li class="object returns">Object.property <input class="param" type="text" value="" placeholder="property"/></li>
 </ul>
 <ul class="snippet">
-	<li class="object returns">Object.toString <input class="param" type="text" value=""/></li>
+	<li class="object returns">Object.toString <input class="param" type="text" value="" placeholder="template"/></li>
 </ul>
 <h2>Array</h2>
 <ul class="snippet">
 	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
+</ul>
+<ul class="snippet">
+	<li class="array returns">Array.join <input class="param" type="text" value="" placeholder="glue"/></li>
 </ul>
 <ul class="snippet">
 	<li class="array returns">Array.map
@@ -222,7 +227,7 @@ li {
 <h2>Control</h2>
 <ul class="snippet">
 	<li class="control">
-		if <input class="param" type="text" value=""/>
+		if <input class="param" type="text" value="" placeholder="condition"/>
 		<ul></ul>
 		else
 		<ul></ul>
