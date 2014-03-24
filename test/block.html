@@ -8,7 +8,7 @@ ul {
 	padding: 0;
 	position: relative;
 }
-.snippet:before,
+.snippet:not(:empty):before,
 li ul:before {
 	content: "";
 	position: absolute;
@@ -21,7 +21,7 @@ li ul:before {
 	width: 0;
 	z-index: 2;
 }
-.snippet:after,
+.snippet:not(:empty):after,
 li ul:after {
 	content: "";
 	position: absolute;
@@ -247,8 +247,22 @@ li {
 	</li>
 </ul>
 <script src="jquery-2.1.0.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 <script>
 $(function(){
+    $( "ul:not(.snippet)" ).sortable({
+      revert: true,
+      connectWith: "ul",
+      cursor: "move"
+    });
+    $( ".snippet li" ).draggable({
+      connectToSortable: "ul",
+      cursor: "move",
+      helper: "clone",
+      revert: "invalid",
+      zIndex: 100
+    });
+    $( "ul, li" ).disableSelection();
 	$('.control.multiple').on("change", "input", function(){
 		var $this = $(this),
 			block = $this.closest(".multiple"),
@@ -261,6 +275,6 @@ $(function(){
 		statements.slice(val).each(function(i,e){
 			$(e).remove();
 		});
-	})
+	});
 });
 </script>
