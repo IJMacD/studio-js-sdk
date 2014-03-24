@@ -46,6 +46,7 @@ li ul {
 li {
 	background: white;
     box-sizing: border-box;
+    color: #333;
     padding: 15px;
     border-radius: 5px;
     width: 250px;
@@ -78,7 +79,7 @@ li {
 	width: 0;
 	z-index: 2;
 }
-.map ul {
+.capture {
 	padding: 2px;
 	margin-bottom: 15px;
 }
@@ -171,8 +172,17 @@ li {
 			<li class="array">Array.forEach
 				<ul>
 					<li class="report returns">Report.fetch</li>
-					<li class="object returns">Object.property <input class="param" type="text" value="suggestions"/></li>
-					<li class="console">Console.log</li>
+					<li class="control">
+						mulitple statements <input class="param" type="number" value="2"/> 
+						<ul>
+							<li class="object returns">Object.property <input class="param" type="text" value="name"/></li>
+							<li class="console">Console.log</li>
+						</ul>
+						<ul>
+							<li class="object returns">Object.property <input class="param" type="text" value="suggestions"/></li>
+							<li class="console">Console.log</li>
+						</ul>
+					</li>
 				</ul>
 			</li>
 		</ul>
@@ -197,15 +207,17 @@ li {
 	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
 </ul>
 <ul class="snippet">
-	<li class="array returns map">Array.map
-		<ul>
+	<li class="array returns">Array.map
+		<ul class="capture">
 			<li class="stub returns"></li>
 		</ul>
 	</li>
 </ul>
 <ul class="snippet">
-	<li class="array returns">Array.reduce
-		<ul></ul>
+	<li class="array reduce returns">Array.reduce
+		<ul class="capture">
+			<li class="stub returns"></li>
+		</ul>
 	</li>
 </ul>
 <ul class="snippet">
@@ -224,7 +236,14 @@ li {
 </ul>
 <ul class="snippet">
 	<li class="control">
-		loop <input class="param" type="text" value=""/> times
+		loop <input class="param" type="number" value="0"/> times
+		<ul></ul>
+	</li>
+</ul>
+<ul class="snippet">
+	<li class="control">
+		mulitple statements <input class="param" type="number" value="2"/> 
+		<ul></ul>
 		<ul></ul>
 	</li>
 </ul>
