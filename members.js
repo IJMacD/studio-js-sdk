@@ -48,15 +48,14 @@
 	function findStudents(options){
 		var now = new Date(),
 			post_data = {
-				searchStudentName: options.name,
+				// Case-insensitive searching
+				searchStudentName: options.name && options.name.toLowerCase(),
 				searchStudentMobile: options.phone,
 				searchStudentSchool: options.school,
 				searchStudentCourseYear: now.getFullYear(),
 				searchStudentCourseMonth: (now.getMonth() + 1)
 			},
-			hash;
-
-		hash = JSON.stringify(post_data);
+			hash = JSON.stringify(post_data);
 
 		if(options.clearCache){
 			_reports[hash] = undefined;
