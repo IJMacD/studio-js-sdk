@@ -1,13 +1,18 @@
 <style>
+body {
+    font-family: 'Open Sans', sans-serif;
+}
 ul {
     list-style: none;
+    min-height: 50px;
+	padding: 0;
 	position: relative;
 }
 ul:before {
 	content: "";
 	position: absolute;
 	top: 0px;
-	left: 67px; /* 40px padding + 27px */
+	left: 27px;
 	border-width: 15px 13px 0;
 	border-style: solid;
 	border-color: rgba(0,0,0,0.5) transparent;
@@ -19,7 +24,7 @@ ul:after {
 	content: "";
 	position: absolute;
 	top: 0px;
-	left: 69px; /* 40px padding + 29px */
+	left: 29px;
 	border-width: 12px 11px 0;
 	border-style: solid;
 	border-color: white transparent;
@@ -27,7 +32,22 @@ ul:after {
 	width: 0;
 	z-index: 2;
 }
+li ul {
+	margin-top: 10px;
+}
+li ul:empty {
+	background-color: white;
+	border: 1px solid rgba(0,0,0,0.5);
+	border-radius: 5px 0 0 5px;
+	border-right-color: white;
+	width: 232px;
+}
+li ul:empty:before,
+li ul:empty:after {
+	top: -1px;
+}
 li {
+	background: white;
     box-sizing: border-box;
     padding: 15px;
     border-radius: 5px;
@@ -35,7 +55,6 @@ li {
     box-shadow: rgba(255,255,255,0.5) 0 5px 5px inset, rgba(0,0,0,0.5) 0 -2px 5px inset;
     border: 1px solid rgba(0,0,0,0.5);
     margin-bottom: 0px;
-    font-family: 'Open Sans', sans-serif;
     position: relative;
 }
 .returns:before {
@@ -83,6 +102,14 @@ li {
 .console ul:after {
 	border-color: #8f8 transparent;
 }
+.control {
+    background-color: #333;
+    color: #ECECEC;
+}
+.control.returns:after,
+.control ul:after {
+	border-color: #333 transparent;
+}
 .param {
 	display: inline-block;
 	width: 100px;
@@ -106,6 +133,7 @@ li {
 	width: 50px;
 }
 </style>
+<h1>The Chain</h1>
 <ul>
 	<li class="tutor returns">Tutor.all</li>
 	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
@@ -116,9 +144,64 @@ li {
 	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
 	<li class="student returns">Student.findByLesson</li>
 	<li class="array">Array.forEach
-		<ul class="branch">
+		<ul>
 			<li class="object returns">Object.property <input class="param" type="text" value="name"/></li>
 			<li class="console">Console.log</li>
 		</ul>
+	</li>
+</ul>
+<h1>Student List</h1>
+<ul>
+	<li class="tutor returns">Tutor.all</li>
+	<li class="array">Array.forEach
+		<ul>
+			<li class="report returns">Report.findByTutor</li>
+			<li class="array">Array.forEach
+				<ul>
+					<li class="report returns">Report.fetch</li>
+					<li class="object returns">Object.property <input class="param" type="text" value="suggestions"/></li>
+					<li class="console">Console.log</li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+</ul>
+<h1>Blocks</h1>
+<h2>Object</h2>
+<ul>
+	<li class="object returns">Object.property <input class="param" type="text" value=""/></li>
+</ul>
+<h2>Array</h2>
+<ul>
+	<li class="array returns">Array.get <input class="param" type="number" value="0"/></li>
+</ul>
+<ul>
+	<li class="array returns">Array.map
+		<ul></ul>
+	</li>
+</ul>
+<ul>
+	<li class="array returns">Array.reduce
+		<ul></ul>
+	</li>
+</ul>
+<ul>
+	<li class="array">Array.forEach
+		<ul></ul>
+	</li>
+</ul>
+<h2>Control</h2>
+<ul>
+	<li class="control">
+		if <input class="param" type="text" value=""/>
+		<ul></ul>
+		else
+		<ul></ul>
+	</li>
+</ul>
+<ul>
+	<li class="control">
+		loop <input class="param" type="text" value=""/> times
+		<ul></ul>
 	</li>
 </ul>
