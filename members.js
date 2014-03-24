@@ -13,7 +13,8 @@
 
 		/* data */
 		students = {},
-		_students = {};
+		_students = {},
+		_searches = {};
 
 	window.iL = iLearner;
 	iLearner.Student = Student;
@@ -52,36 +53,48 @@
 				searchStudentSchool: options.school,
 				searchStudentCourseYear: now.getFullYear(),
 				searchStudentCourseMonth: (now.getMonth() + 1)
-			};
-		return Promise.resolve(
-				$.post(iL.API_ROOT + "process_getMemberList.php", post_data, null, "json")
-			)
-			.then(function(data){
-				var out = [];
-				data.memberlist.forEach(function(item){
-					var id = item.memberID,
-						student = students[id] || {
-							id: id
-						},
-						name = (item.Lastname && item.nickname) ?
-							(item.Lastname.length > item.nickname.length ? item.Lastname : item.nickname) :
-							(item.Lastname || item.nickname);
+			},
+			hash;
 
-					student.name = name;
-					student.gender = item.Gender == "1" ? "male" : "female";
-					student.grade = item.Grade;
-					student.photo = PHOTO_ROOT + item.AccountName + ".jpg";
-					student.school = item.School;
-					student.phone = item.mobile;
-					student.registeredDate = new Date(item.RegDate);
+		hash = JSON.stringify(post_data);
 
-					iL.Util.parseName(student);
+		if(options.clearCache){
+			_reports[hash] = undefined;
+		};
 
-					students[id] = student;
-					out.push(student);
+		if(!_searches[hash]){
+			_searches[hash] = Promise.resolve(
+					$.post(iL.API_ROOT + "process_getMemberList.php", post_data, null, "json")
+				)
+				.then(function(data){
+					var out = [];
+					data.memberlist.forEach(function(item){
+						var id = item.memberID,
+							student = students[id] || {
+								id: id
+							},
+							name = (item.Lastname && item.nickname) ?
+								(item.Lastname.length > item.nickname.length ? item.Lastname : item.nickname) :
+								(item.Lastname || item.nickname);
+
+						student.name = name;
+						student.gender = item.Gender == "1" ? "male" : "female";
+						student.grade = item.Grade;
+						student.photo = PHOTO_ROOT + item.AccountName + ".jpg";
+						student.school = item.School;
+						student.phone = item.mobile;
+						student.registeredDate = new Date(item.RegDate);
+
+						iL.Util.parseName(student);
+
+						students[id] = student;
+						out.push(student);
+					});
+					return out;
 				});
-				return out;
-			});
+		}
+
+		return _searches[hash];
 	}
 	Student.find = findStudents;
 
