@@ -52,8 +52,8 @@
 				searchStudentName: options.name && options.name.toLowerCase(),
 				searchStudentMobile: options.phone,
 				searchStudentSchool: options.school,
-				searchStudentCourseYear: now.getFullYear(),
-				searchStudentCourseMonth: (now.getMonth() + 1)
+				searchStudentCourseYear: options.year === undefined ? now.getFullYear() : options.year,
+				searchStudentCourseMonth: options.month === undefined ? (now.getMonth() + 1) : options.month
 			},
 			hash = JSON.stringify(post_data);
 
@@ -115,6 +115,7 @@
 								student.photo = PHOTO_ROOT + item.AccountName + ".jpg";
 								student.school = item.School;
 								student.phone = item.Mobile;
+								student.notes = item.Remarks;
 
 								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
 
