@@ -33,17 +33,20 @@ ul:after {
 	z-index: 2;
 }
 li ul {
-	margin-top: 10px;
-}
-li ul:empty {
 	background-color: white;
 	border: 1px solid rgba(0,0,0,0.5);
 	border-radius: 5px 0 0 5px;
 	border-right-color: white;
-	width: 232px;
+	margin-top: 10px;
+	padding: 2px;
+	width: 228px;
 }
-li ul:empty:before,
-li ul:empty:after {
+li ul:before {
+	left: 29px;
+	top: -1px;
+}
+li ul:after {
+	left: 31px;
 	top: -1px;
 }
 li {
