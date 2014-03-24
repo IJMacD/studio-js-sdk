@@ -99,6 +99,7 @@
 	Student.find = findStudents;
 
 	function fetchStudent(student){
+		student = students[student.id] || student;
 		if(!_students[student.id]){
 			_students[student.id] = Promise.resolve(
 					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
