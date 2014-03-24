@@ -172,8 +172,8 @@ li {
 			<li class="array">Array.forEach
 				<ul>
 					<li class="report returns">Report.fetch</li>
-					<li class="control">
-						mulitple statements <input class="param" type="number" value="2"/> 
+					<li class="control multiple">
+						multiple statements <input class="param" type="number" value="2" min="2"/> 
 						<ul>
 							<li class="object returns">Object.property <input class="param" type="text" value="name"/></li>
 							<li class="console">Console.log</li>
@@ -241,9 +241,27 @@ li {
 	</li>
 </ul>
 <ul class="snippet">
-	<li class="control">
-		mulitple statements <input class="param" type="number" value="2"/> 
+	<li class="control multiple">
+		multiple statements <input class="param" type="number" value="2" min="2"/>
 		<ul></ul>
 		<ul></ul>
 	</li>
 </ul>
+<script src="jquery-2.1.0.min.js"></script>
+<script>
+$(function(){
+	$('.control.multiple').on("change", "input", function(){
+		var $this = $(this),
+			block = $this.closest(".multiple"),
+			val = $this.val(),
+			statements = block.children("ul"),
+			l = statements.length;
+		for (; l < val; l++) {
+			block.append("<ul>");
+		};
+		statements.slice(val).each(function(i,e){
+			$(e).remove();
+		});
+	})
+});
+</script>
