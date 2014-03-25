@@ -76,6 +76,7 @@
 								(item.Lastname.length > item.nickname.length ? item.Lastname : item.nickname) :
 								(item.Lastname || item.nickname);
 
+						name = $.trim(name);
 						student.name = name;
 						student.gender = item.Gender == "1" ? "male" : "female";
 						student.grade = item.Grade;
@@ -103,11 +104,13 @@
 			_students[student.id] = Promise.resolve(
 					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
 				).then(function(data){
+					var courses = {};
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
 							var name = (item.lastname && item.Nickname) ?
 								(item.lastname.length > item.Nickname.length ? item.lastname : item.Nickname) :
-								(item.lastname || item.Nickname)
+								(item.lastname || item.Nickname);
+							name = $.trim(name);
 							if(item.isStudent == "1"){
 								student.name = name;
 								student.gender = item.Gender == "1" ? "male" : "female";
@@ -127,6 +130,49 @@
 								return false;
 							}
 						})
+					}
+					if(data.memberCourseBalance){
+						$.each(data.memberCourseBalance, function(i,item){
+							var id = item.CourseID,
+								course = courses[id] || {
+									id: id,
+									title: item.Coursename,
+									unpaid: 0,
+									code: item.CourseCode
+								},
+								discount = parseInt(item.Discount || item.DiscountForOldStudent),
+								originalAmount = parseInt(item.Amount || item.shouldpaid),
+								finalAmount = parseInt(item.AmountAfterDiscount) || originalAmount - discount,
+								invoice = {
+									year: parseInt(item.invoiceyear),
+									month: parseInt(item.invoicemonth),
+									lessonCount: parseInt(item.Nooflesson),
+									paid: item.Paid == "1",
+									amount: finalAmount,
+									originalAmount: originalAmount,
+									discount: originalAmount - finalAmount,
+									handledBy: item.handleby
+								};
+
+							invoice.discountPercent = invoice.discount / originalAmount * 100;
+
+							if(parseInt(item.DiscountForOldStudent)){
+								course.existingStudent = true;
+							}
+
+							if(!course.invoices){
+								course.invoices = [];
+							}
+
+							course.invoices.push(invoice);
+
+							if(!invoice.paid){
+								course.unpaid += 1;
+							}
+
+							courses[id] = course;
+						});
+						student.courses = courses;
 					}
 					return student;
 				});
