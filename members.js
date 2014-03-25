@@ -7,6 +7,7 @@
 	 */
 	var iLearner = window.iLearner || {},
 		Student = {},
+		Invoice = {},
 
 		/* Constants */
 		PHOTO_ROOT = "/c/studio/photo/",
@@ -18,6 +19,7 @@
 
 	window.iL = iLearner;
 	iLearner.Student = Student;
+	iLearner.Invoice = Invoice;
 
 	/**
 	 * Student class for dealing with students
@@ -104,7 +106,9 @@
 			_students[student.id] = Promise.resolve(
 					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
 				).then(function(data){
-					var courses = {};
+					var courses = {},
+						guardians = [],
+						guardian;
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
 							var name = (item.lastname && item.Nickname) ?
@@ -119,46 +123,87 @@
 								student.school = item.School;
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
-
 								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
 
+								/* Not currently used but need to
+								   look after them in order to
+								   be able to save */
+								student.notesPayment = item.RemarkAboutPayment;
+								student.nameChinese = item.Chiname;
+								student.schoolStart = item.schooltimefrom;
+								student.schoolEnd = item.schooltimeto;
+								student.soco = item.isSOCO == "1";
+								student.entryChannel1 = item.whyjoinusextendtext1;
+								student.entryChannel2 = item.whyjoinusextendtext2;
+
 								iL.Util.parseName(student);
+
+								student.guardians = guardians;
 
 								students[student.id] = student;
 
 								// break loop
 								return false;
 							}
-						})
+							else if(item.isGuardian == "1"){
+								guardian = {
+									accountID: item.AccountName,
+									relationship: item.Relationship,
+									name: item.lastname,
+									nameChinese: item.Chiname,
+									nickname: item.Nickname,
+									email: item.emailaddress,
+									address: item.Address,
+									occupation: item.Occupation,
+									phone: item.Mobile,
+									phoneHome: item.HomeNo,
+									phoneOffice: item.OfficeNo
+								};
+								guardians.push(guardian);
+							}
+						});
 					}
 					if(data.memberCourseBalance){
 						$.each(data.memberCourseBalance, function(i,item){
 							var id = item.CourseID,
+								lessonCount = parseInt(item.Nooflesson),
+								fullPrice = parseInt(item.shouldpaid),
+								pricePerLesson = fullPrice / lessonCount,
 								course = courses[id] || {
 									id: id,
 									title: item.Coursename,
 									unpaid: 0,
-									code: item.CourseCode
+									code: item.CourseCode,
+									withdrawn: item.withdrawal == "1",
+									/* This is the potential discount for existing students,
+									   on this course.
+									   The student is *not* necessarily entitled to this */
+									existingDiscount: parseInt(item.DiscountForOldStudent),
+									pricePerLesson: pricePerLesson
 								},
-								discount = parseInt(item.Discount || item.DiscountForOldStudent),
-								originalAmount = parseInt(item.Amount || item.shouldpaid),
+
+								/*
+									- Discount, Amount, AmountAfterDiscount are for *PAID* invoices
+									- shouldpaid is full price for future lesson
+								*/
+
+								discount = parseInt(item.Discount) || 0,
+								originalAmount = parseInt(item.Amount) || fullPrice,
 								finalAmount = parseInt(item.AmountAfterDiscount) || originalAmount - discount,
 								invoice = {
+									id: item.MemberCourseInvoiceID,
 									year: parseInt(item.invoiceyear),
 									month: parseInt(item.invoicemonth),
-									lessonCount: parseInt(item.Nooflesson),
+									lessonCount: lessonCount,
 									paid: item.Paid == "1",
 									amount: finalAmount,
 									originalAmount: originalAmount,
 									discount: originalAmount - finalAmount,
-									handledBy: item.handleby
+									/* discountPercent: (1 - finalAmount / originalAmount) * 100, */
+									handledBy: item.handleby,
+									memberID: item.memberID,
+									memberCourseID: item.membercourseID
 								};
-
-							invoice.discountPercent = invoice.discount / originalAmount * 100;
-
-							if(parseInt(item.DiscountForOldStudent)){
-								course.existingStudent = true;
-							}
 
 							if(!course.invoices){
 								course.invoices = [];
@@ -180,4 +225,77 @@
 		return _students[student.id];
 	}
 	Student.fetch = fetchStudent;
+
+	function saveStudent(student){
+		var guardian = student.guardians[0],
+			post_data = {
+				Action:"update",
+				MemberID: student.id,
+				MemberDetailNameinEnglish: student.englishName,
+				MemberDetailRemark: student.notes,
+				MemberDetailRemarkPayment: student.notesPayment,
+				MemberDetailNameinChinese: student.nameChinese,
+				MemberDetailNickname: student.name,
+				MemberDetailBirthDay: iL.Util.formatDate(student.birthDate),
+				MemberDetailGender: student.gender == "male" ? "1" : "0",
+				MemberDetailGrade: student.grade,
+				MemberDetailSchool: student.school,
+				MemberDetailSchooltimefrom: student.schoolStart,
+				MemberDetailSchooltimeto: student.schoolEnd,
+				isSOCO: student.soco ? 1 : 0,
+				GuardianDetailMemberID: guardian.accountID,
+				GuardianDetailRelationship: guardian.relationship,
+				GuardianDetailNameinEnglish: guardian.name,
+				GuardianDetailNameinChinese: guardian.nameChinese,
+				GuardianDetailNickname: guardian.nickname,
+				GuardianDetailEmail: guardian.email,
+				GuardianDetailAddress: guardian.address,
+				GuardianDetailOccupation: guardian.occupation,
+				GuardianDetailHomeNo: guardian.phoneHome,
+				GuardianDetailMobileNo: student.phone,	/* Be careful! At the moment this is echoed back for both the
+														   student and guardian but it is only saved under the guardian. We
+														   keep track of it as part of the student for simplicity, which is
+														   why we're using that value here - just incase it has been modified
+														   on the student */
+				GuardianDetailOfficeNo: guardian.phoneOffice,
+				whyjoinusextendtext1: student.entryChannel1,
+				whyjoinusextendtext2: student.entryChannel2
+			};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
+		);
+	}
+	Student.save = saveStudent;
+
+
+	/**
+	 * Invoice class for dealing with invoices
+	 *
+	 * @class Student
+	 */
+
+	/**
+	 * Function to commit invoices to the server
+	 */
+	function saveInvoice(invoice){
+		var post_data = {
+				MemberCourseID: invoice.memberCourseID,
+				InvoiceYear: invoice.year,
+				InvoiceMonth: invoice.month,
+				shouldpay: invoice.originalAmount,
+				AmountAfterDiscount: invoice.amount,
+				paymentmethod: invoice.paymentMethod == "cash" ? 1 : 2,
+				ChequeNo: invoice.chequeNumber,
+				CouponCode: invoice.coupons.join(","),
+				issuedate: invoice.date
+			};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_updateMemberInvoice.php", post_data, null, "json")
+		).then(function(data){
+			invoice.id = data.iID;
+			invoice.handledBy = data.handle;
+		});
+	}
+	Invoice.save = saveInvoice;
+
 }(window));
