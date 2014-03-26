@@ -10,13 +10,21 @@ if(strpos($request_uri,$script_name)===0){
 
 	$method = $_SERVER['REQUEST_METHOD'];
 	$response = proxy_request(BASE_URL.$path, ($method == "GET" ? $_GET : $_POST), $method);
-	$headerArray = explode("\r\n", $response['header']);
 
-	foreach($headerArray as $headerLine) {
-		header($headerLine);
+	if($response['status'] == "ok"){
+
+		$headerArray = explode("\r\n", $response['header']);
+		foreach($headerArray as $headerLine) {
+			header($headerLine);
+		}
+
+		echo $response['content'];
 	}
+	else {
+		header("HTTP/1.1 400 Bad Request");
 
-	echo $response['content'];
+		echo $response['error'];
+	}
 
 }
 
@@ -62,7 +70,7 @@ function proxy_request($url, $data, $method) {
 	$path = $url['path'];
 
 	// open a socket connection on port 80 - timeout: 30 sec
-	$fp = fsockopen($host, 80, $errno, $errstr, 30);
+	$fp = @fsockopen($host, 80, $errno, $errstr, 30);
 
 	if ($fp){
 		// send the request headers:
@@ -98,7 +106,9 @@ function proxy_request($url, $data, $method) {
 	else {
 		return array(
 			'status' => 'err',
-			'error' => "$errstr ($errno)"
+			'error' => "$errstr ($errno)",
+			'errorstr' => $errstr,
+			'errno' => $errno
 		);
 	}
 
