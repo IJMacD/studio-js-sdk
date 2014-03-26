@@ -295,6 +295,7 @@
 		).then(function(data){
 			invoice.id = data.iID;
 			invoice.handledBy = data.handle;
+			invoice.paid = true;
 		});
 	}
 	Invoice.save = saveInvoice;
