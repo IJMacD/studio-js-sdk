@@ -8,8 +8,8 @@ if(strpos($request_uri,$script_name)===0){
 	$options = array(
 		'http' => array(
 			'method'  => 'POST',
-			'header' => "Content-type: application/x-www-form-urlencoded\r\n"
-						"Cookie: ".http_build_cookie($_COOKIE)."\r\n",
+			'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+						(isset($_SERVER['HTTP_COOKIE'])) ? "Cookie: ".$_SERVER['HTTP_COOKIE']."\r\n" : "",
 			'content' => http_build_query($_POST),
 		),
 	);

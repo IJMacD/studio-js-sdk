@@ -10,7 +10,8 @@
 		Invoice = {},
 
 		/* Constants */
-		PHOTO_ROOT = "/c/studio/photo/",
+		//PHOTO_ROOT = "/c/studio/photo/",
+		PHOTO_ROOT = "http://192.168.0.138/studio/photo/",
 
 		/* data */
 		students = {},
