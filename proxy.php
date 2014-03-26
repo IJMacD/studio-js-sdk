@@ -8,12 +8,19 @@ if(strpos($request_uri,$script_name)===0){
 	$options = array(
 		'http' => array(
 			'method'  => 'POST',
-			'header' => "Content-type: application/x-www-form-urlencoded",
+			'header' => "Content-type: application/x-www-form-urlencoded\r\n"
+						"Cookie: ".http_build_cookie($_COOKIE)."\r\n",
 			'content' => http_build_query($_POST),
 		),
 	);
 	$context  = stream_context_create($options);
 	$result = file_get_contents($url, false, $context);
+
+	$headers = get_headers($url, 1);
+
+	if(isset($headers['Cookie'])){
+		header("Cookie: ".$headers['Cookie']);
+	}
 
 	echo $result;
 }
