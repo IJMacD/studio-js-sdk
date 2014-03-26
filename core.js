@@ -193,7 +193,7 @@
 
 	 /**
 	  * Get a room by ID
-	  * 
+	  *
 	  * @method get
 	  * @param id {int} ID of the Room to get
 	  * @return {object} Object with details of the room
@@ -294,6 +294,8 @@
 	 * @param person {object} Object with a `name` property
 	 */
 	function parseName(person){
+		person.name = $.trim(person.name);
+
 		var names = person.name.match(/\w+/g);
 
 		if(!names){
