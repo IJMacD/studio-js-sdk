@@ -10,8 +10,6 @@
 		Invoice = {},
 
 		/* Constants */
-		//PHOTO_ROOT = "/c/studio/photo/",
-		PHOTO_ROOT = "http://192.168.0.138/studio/photo/",
 
 		/* data */
 		students = {},
@@ -120,7 +118,7 @@
 								student.name = name;
 								student.gender = item.Gender == "1" ? "male" : "female";
 								student.grade = item.Grade;
-								student.photo = PHOTO_ROOT + item.AccountName + ".jpg";
+								student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
 								student.school = item.School;
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
