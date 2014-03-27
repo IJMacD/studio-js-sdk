@@ -81,7 +81,8 @@
 						student.name = name;
 						student.gender = item.Gender == "1" ? "male" : "female";
 						student.grade = item.Grade;
-						student.photo = PHOTO_ROOT + item.AccountName + ".jpg";
+						student.account = item.AccountName;
+						student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
 						student.school = item.School;
 						student.phone = item.mobile;
 						student.registeredDate = new Date(item.RegDate);
@@ -118,6 +119,7 @@
 								student.name = name;
 								student.gender = item.Gender == "1" ? "male" : "female";
 								student.grade = item.Grade;
+								student.account = item.AccountName;
 								student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
 								student.school = item.School;
 								student.phone = item.Mobile;
