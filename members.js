@@ -170,6 +170,7 @@
 								lessonCount = parseInt(item.Nooflesson),
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
+								dateIndex,
 								course = courses[id] || {
 									id: id,
 									title: item.Coursename,
@@ -181,7 +182,8 @@
 									   The student is *not* necessarily entitled to this */
 									existingDiscount: parseInt(item.DiscountForOldStudent),
 									pricePerLesson: pricePerLesson,
-									existingStudent: false
+									existingStudent: false,
+									lastPaymentIndex: 0
 								},
 
 								/*
@@ -206,9 +208,12 @@
 									memberCourseID: item.membercourseID
 								};
 
-							if(invoice.paid){
+							dateIndex = invoice.year * 100 + invoice.month;
+
+							if(invoice.paid && dateIndex > course.lastPaymentIndex){
 								course.existingStudent =
 									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
+								course.lastPaymentIndex = dateIndex;
 							}
 
 							if(!course.invoices){
