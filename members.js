@@ -180,7 +180,8 @@
 									   on this course.
 									   The student is *not* necessarily entitled to this */
 									existingDiscount: parseInt(item.DiscountForOldStudent),
-									pricePerLesson: pricePerLesson
+									pricePerLesson: pricePerLesson,
+									existingStudent: false
 								},
 
 								/*
@@ -200,11 +201,15 @@
 									amount: finalAmount,
 									originalAmount: originalAmount,
 									discount: originalAmount - finalAmount,
-									/* discountPercent: (1 - finalAmount / originalAmount) * 100, */
 									handledBy: item.handleby,
 									memberID: item.memberID,
 									memberCourseID: item.membercourseID
 								};
+
+							if(invoice.paid){
+								course.existingStudent =
+									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
+							}
 
 							if(!course.invoices){
 								course.invoices = [];
