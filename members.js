@@ -288,7 +288,9 @@
 				paymentmethod: invoice.paymentMethod == "cash" ? 1 : 2,
 				ChequeNo: invoice.chequeNumber,
 				CouponCode: invoice.coupons.join(","),
-				issuedate: invoice.date
+				issuedate: invoice.date,
+				htmlselect_Discountvalue_val: invoice.originalAmount - invoice.amount,
+				htmlselect_Discounttype_val: 1	// dollars
 			};
 		return Promise.resolve(
 			$.post(iL.API_ROOT + "process_updateMemberInvoice.php", post_data, null, "json")
