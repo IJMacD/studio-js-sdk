@@ -210,7 +210,8 @@
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
-							if(invoice.paid && dateIndex > course.lastPaymentIndex){
+							if(invoice.paid && dateIndex > course.lastPaymentIndex
+								&& course.existingDiscount){
 								course.existingStudent =
 									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
 								course.lastPaymentIndex = dateIndex;
