@@ -39,6 +39,18 @@
 	Student.get = getStudent;
 
 	/**
+	 * Set a student here for tracking which may have been generated elsewhere
+	 * (single homogenous module solves this)
+	 *
+	 * @method set
+	 * @param student {objcet} Student object
+	 */
+	function addStudent(student){
+		students[student.id] = student;
+	}
+	Student.add = addStudent;
+
+	/**
 	 * Find students with specific conditions
 	 *
 	 * @method find
@@ -59,7 +71,7 @@
 			hash = JSON.stringify(post_data);
 
 		if(options.clearCache){
-			_reports[hash] = undefined;
+			_searches[hash] = undefined;
 		};
 
 		if(!_searches[hash]){
@@ -99,6 +111,50 @@
 		return _searches[hash];
 	}
 	Student.find = findStudents;
+
+
+	/**
+	 * Get details of the students registered for a lessonS
+	 */
+	function lessonStudents(lesson){
+		var id = lesson.id;
+		if(!_students[id]){
+			_students[id] = new Promise(function(resolve, reject){
+				$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
+					{
+						scheduleID: lesson.id
+					},
+					function(data){
+						if(!lesson.students){
+							lesson.students = [];
+						}
+						lesson.students.length = 0;
+						$.each(data.coursestudent, function(i,item){
+							var student = {
+									id: item.MemberID,
+									name: item.Lastname,
+									photo: item.Accountname
+								},
+								attendance = {
+									memberCourseID: item.MemberCourseID,
+									lesson: lesson,
+									student: student,
+									absent: item.absent == "1"
+								};
+							iL.Util.parseName(student);
+
+							students[student.id] = student;
+							lesson.students.push(attendance);
+							attendances[attendanceKey(lesson, student)] = attendance;
+						});
+						resolve(lesson.students);
+					},
+					"json")
+				.fail(reject);
+			});
+		}
+		return _students[id];
+	}
 
 	function fetchStudent(student){
 		student = students[student.id] || student;
