@@ -313,4 +313,19 @@
 	}
 	Invoice.save = saveInvoice;
 
+	function voidInvoice(invoice, reason){
+		var post_data = {
+				membercourseinvoiceID: invoice.id,
+				reason: reason
+			};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_removeMemberInvoice.php", post_data, null, "json")
+		).then(function(data){
+			invoice.id = 0;
+			invoice.handledBy = undefined;
+			invoice.paid = false;
+		});
+	}
+	Invoice.voidInvoice = voidInvoice;
+
 }(window));
