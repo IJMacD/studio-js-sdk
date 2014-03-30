@@ -513,7 +513,9 @@
 	                        _setTime(end, item.Endtime);
 	                    }
 
-                        course.lessons.push(lesson);
+						if(course.lessons.indexOf(lesson) == -1){
+							course.lessons.push(lesson);
+						}
 
 						lessons[lesson.id] = lesson;
                     });
