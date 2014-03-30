@@ -227,19 +227,8 @@
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
 								dateIndex,
-								course = courses[id] || {
-									id: id,
-									title: item.Coursename,
-									unpaid: 0,
-									code: item.CourseCode,
-									withdrawn: item.withdrawal == "1",
-									/* This is the potential discount for existing students,
-									   on this course.
-									   The student is *not* necessarily entitled to this */
-									existingDiscount: parseInt(item.DiscountForOldStudent),
-									pricePerLesson: pricePerLesson,
-									existingStudent: false,
-									lastPaymentIndex: 0
+								course = iL.Course.get(id) || {
+									id: id
 								},
 
 								/*
@@ -263,6 +252,20 @@
 									memberID: item.memberID,
 									memberCourseID: item.membercourseID
 								};
+
+								course.title = item.Coursename;
+								course.unpaid = 0;
+								course.code = item.CourseCode;
+								course.withdrawn = item.withdrawal == "1";
+								/* This is the potential discount for existing students,
+								   on this course.
+								   The student is *not* necessarily entitled to this */
+								course.existingDiscount = parseInt(item.DiscountForOldStudent);
+								course.pricePerLesson = pricePerLesson;
+								course.existingStudent = false;
+								course.lastPaymentIndex = 0;
+
+								iL.Course.add(course);
 
 							dateIndex = invoice.year * 100 + invoice.month;
 

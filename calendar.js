@@ -362,6 +362,17 @@
 	Course.get = getCourse;
 
 	/**
+	 * Add a course
+	 *
+	 * @method add
+	 * @param course {object} course to add
+	 */
+	function addCourse(course){
+		courses[course.id] = course;
+	}
+	Course.add = addCourse;
+
+	/**
 	 * Find courses matching given search parameters
 	 *
 	 * @method find
