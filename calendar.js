@@ -197,6 +197,7 @@
 						iL.Util.parseName(student);
 						lesson && lesson.attendees.push(attendance);
 						attendances[key] = attendance;
+						iL.Student.add(student);
 					});
 
 					return events;
