@@ -6,6 +6,7 @@
 <script src="../core.js"></script>
 <script src="../report.js"></script>
 <script src="../calendar.js"></script>
+<script src="../members.js"></script>
 <script>
 asyncTest("Login", function(){
 	expect(2);
@@ -33,7 +34,7 @@ asyncTest("Login", function(){
 });
 asyncTest("Tutor", function(){
 	expect(3);
-	
+
 	iL.Tutor.all()
 		.then(function(tutors){
 			equal(tutors.length, 16, "Get all Tutors");
@@ -100,9 +101,10 @@ asyncTest("Lesson", function(){
 	}).then(function(lessons){
 		equal(lessons.length, 2, "Lesson.find({tutor: {id: 3639}})");
 		start();
-	}).catch(function(){
+	}).catch(function(err){
 		ok(false, "Lesson.find({tutor: {id: 3639}})");
 		start();
+		console.error(err.stack);
 	});
 
 	stop();
@@ -191,7 +193,7 @@ asyncTest("Big Chain", function(){
 	}
 
 	expect(1);
-	
+
 	testChain(4,1,0);
 });
 </script>

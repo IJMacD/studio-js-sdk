@@ -9,12 +9,20 @@
 		iL = iLearner,
 		$ = window.jQuery,
 
+		defaults = {
+			API_ROOT: "/",
+			PHOTO_URL: "/photos"
+		},
+
 		Tutor = iLearner.Tutor || {},
 		Room = iLearner.Room || {},
 		Util = iLearner.Util || {},
 
-		API_ROOT = (iL.Conf && iL.Conf.API_ROOT) || "/c/studio/",
-		topNames = "Chan Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
+		topNames = "Chan Chang Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung"
+			+ " Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay"
+			+ " Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung"
+			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui"
+			+ " Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
 		memberID,
 		accountName,
@@ -27,18 +35,21 @@
 	window.iL = iLearner;
 	window.iLearner = iLearner;
 
+	iL.Conf = $.extend({}, defaults, iL.Conf);
+
 	iLearner.Tutor = Tutor;
 	iLearner.Room = Room;
 	iLearner.Util = Util;
 
-	iL.API_ROOT = API_ROOT;
+	/* legacy */
+	iL.API_ROOT = iL.Conf.API_ROOT;
 
 	getInitData();
 
 	function Login(user, pass){
 		return Promise.resolve(
 				$.post(
-					API_ROOT + "process_login.php",
+					iL.Conf.API_ROOT + "process_login.php",
 					{
 						login: user,
 						password: pass
@@ -66,13 +77,13 @@
 	iLearner.Login = Login;
 
 	function Logout(){
-		$.post(API_ROOT + "process_logout.php");
+		$.post(iL.Conf.API_ROOT + "process_logout.php");
 	}
 	iLearner.Logout = Logout;
 
 	function getInitData(){
 		loading = Promise.resolve(
-			$.post(API_ROOT + "process_getinitdata.php",
+			$.post(iL.Conf.API_ROOT + "process_getinitdata.php",
 				null,
 				null,
 				"json")
@@ -193,7 +204,7 @@
 
 	 /**
 	  * Get a room by ID
-	  * 
+	  *
 	  * @method get
 	  * @param id {int} ID of the Room to get
 	  * @return {object} Object with details of the room
@@ -294,6 +305,8 @@
 	 * @param person {object} Object with a `name` property
 	 */
 	function parseName(person){
+		person.name = $.trim(person.name);
+
 		var names = person.name.match(/\w+/g);
 
 		if(!names){
