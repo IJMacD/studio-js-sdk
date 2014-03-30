@@ -108,11 +108,8 @@
 		hash = JSON.stringify(post_data);
 
 		if(!_lessons[hash]){
-			_lessons[hash] = Promise.resolve(
-				$.post(iL.API_ROOT + 'process_getCalendarData.php',
-					post_data,
-					null,
-					"json")
+			_lessons[hash] = iL.query('process_getCalendarData.php',
+					post_data
 				).then(function(data){
 					var events = [];
 
@@ -239,20 +236,15 @@
 				sun:0,
 				coursetypechanged:0,
 				orignal_coursetype:0
-			},
-			deferred = $.Deferred();
-		$.post(iL.API_ROOT + 'process_updateCourseSchedule.php',
-			post_data,
-			function(data){
-				if(data.statuscode == 1){
-					deferred.resolve();
-				}
-				else {
-					deferred.reject();
-				}
-			},
-			"json").fail(deferred.reject);
-		return deferred.promise();
+			};
+
+		return iL.query('process_updateCourseSchedule.php',
+			post_data)
+		.then(function(data){
+			if(data.statuscode != 1){
+				return Promise.reject();
+			}
+		});
 	}
 	Lesson.save = save;
 
@@ -264,8 +256,7 @@
 		}
 
 		if(!_promises[id][method]){
-			_promises[id][method] = Course
-				.lessons(lesson.course)
+			_promises[id][method] = findLessons({course:lesson.course})
 				.then(function(lessons){
 					var index = lessons.indexOf(lesson);
 					if(method == "previous"){
@@ -335,7 +326,7 @@
 			return attendances.map(function(item){return item.student});
 		});
 	}
-	Lesson.students = lessonStudents;
+	//Lesson.students = lessonStudents;
 
 	/**
 	 * Class to deal with courses. Courses generally run for a number of weeks
@@ -387,12 +378,8 @@
 			hash = JSON.stringify(post_data);
 
 		if(!_courses[hash]){
-			_courses[hash] = Promise.resolve(
-				$.post(iL.API_ROOT + 'process_getCourseList.php',
-					post_data,
-					null,
-					"json")
-				).then(function(data){
+			_courses[hash] = iL.query('process_getCourseList.php', post_data)
+				.then(function(data){
 					var out = [];
 
 					$.each(data.courselist, function(i,item){
@@ -477,13 +464,10 @@
 	 */
 	function courseLessons(course){
 		if(!course._lessons){
-			course._lessons = Promise.resolve(
-				$.post(iL.API_ROOT + "process_getCourseDetail.php",
+			course._lessons = iL.query("process_getCourseDetail.php",
 					{
 						courseID: course.id
-					},
-					null,
-					"json")
+					}
 				)
 				.then(function(data){
 					if(!course.lessons){
@@ -529,7 +513,7 @@
 		}
 		return course._lessons;
 	}
-	Course.lessons = courseLessons;
+	//Course.lessons = courseLessons;
 
 	/**
 	 * Attendance class for dealing with attendances
@@ -541,6 +525,9 @@
 	 * Function to get an attendance record
 	 */
 	function getAttendance(lesson, student){
+		if(typeof lesson == "string"){
+			return attendances[lesson];
+		}
 		return attendances[attendanceKey(lesson, student)];
 	}
 	Attendance.get = getAttendance;
@@ -619,7 +606,7 @@
 			.catch(function(err){console.error(err.stack);});
 			return;
 		}
-		$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
+		iL.query("process_updateStudentAttendance.php", {
 			mcid: attendance.memberCourseID,
 			absent: attendance.absent ? 0 : 1,
 			coursescheduleID: attendance.lesson.id,

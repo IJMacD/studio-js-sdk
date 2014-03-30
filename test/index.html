@@ -164,8 +164,9 @@ asyncTest("Lesson", function(){
 	});
 });
 asyncTest("Course", function(){expect(0);start();});
-asyncTest("Report", function(){expect(0);start();});
+asyncTest("Attendance", function(){expect(0);start();});
 asyncTest("Student", function(){expect(0);start();});
+asyncTest("Report", function(){expect(0);start();});
 asyncTest("Big Chain", function(){
 	function testChain(a,b,c){
 		iL.Tutor.all().then(function(tutors){
@@ -174,14 +175,14 @@ asyncTest("Big Chain", function(){
 		})
 		.then(function(reports){
 			console.log(reports[b].course.title);
-			return iL.Course.lessons(reports[b].course);
+			return iL.Lesson.find({course: reports[b].course});
 		})
 		.then(function(lessons){
 			console.log("on " + lessons[c].start.getDate() + "/" + (lessons[c].start.getMonth() + 1));
-			return iL.Lesson.students(lessons[c]);
+			return iL.Attendance.find({lesson: lessons[c]});
 		})
-		.then(function(students){
-			students.map(function(s){console.log("- " + s.englishName)});
+		.then(function(attendees){
+			attendees.map(function(a){console.log("- " + a.student.englishName)});
 			ok(true, "Completed the chain");
 			start();
 		})

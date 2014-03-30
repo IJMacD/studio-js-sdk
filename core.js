@@ -77,17 +77,12 @@
 	iLearner.Login = Login;
 
 	function Logout(){
-		$.post(iL.Conf.API_ROOT + "process_logout.php");
+		query("process_logout.php");
 	}
 	iLearner.Logout = Logout;
 
 	function getInitData(){
-		loading = Promise.resolve(
-			$.post(iL.Conf.API_ROOT + "process_getinitdata.php",
-				null,
-				null,
-				"json")
-			)
+		loading = query("process_getinitdata.php")
 			.then(function(data){
 				adminStaff = data.AdminStaff;
 				classrooms = $.map(data.classroom, function(i){
@@ -100,6 +95,13 @@
 				});
 			});
 	}
+
+	function query(url, data){
+		return Promise.resolve(
+			$.post(iL.Conf.API_ROOT + url, data, null, "json")
+		);
+	}
+	iLearner.query = query;
 
 	/**
 	 * Used for interacting with tutors

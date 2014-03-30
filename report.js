@@ -236,6 +236,8 @@
 		}
 		return comments.promise();
 	}
+	Report.Comments = getComments;
+	/* deprecated - clearer that it is static method */
 	Report.getComments = getComments;
 
 	/**
