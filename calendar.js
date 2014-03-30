@@ -126,15 +126,7 @@
 							lessonID = item.CourseScheduleID,
 
 							course = courses[courseID] || {
-								id: courseID,
-								code: item.CourseName,
-								title: courseTitle,
-								level: null,
-								day: start.getDay(),
-								startTime: item.Starttime,
-								endTime: item.endtime,
-								tutor: tutor,
-								lessons: []
+								id: courseID
 							},
 							lesson = lessons[lessonID] || {
 								id: lessonID,
@@ -144,6 +136,15 @@
 								tutor: tutor,
 								attendees: []
 							};
+
+						course.code = item.CourseName;
+						course.title = courseTitle;
+						course.level = null;
+						course.day = start.getDay();
+						course.startTime = item.Starttime;
+						course.endTime = item.endtime;
+						course.tutor = tutor;
+						course.lessons = [];
 
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
@@ -161,7 +162,6 @@
 
 						courses[course.id] = course;
 
-						// TODO: This is wasteful, find elegant way to merge
 						lesson.attendees.length = 0;
 
 						lessons[lesson.id] = lesson;
@@ -171,29 +171,23 @@
 							course.lessons.push(lesson);
 						}
 
-						// lesson is about to get loaded with its known attendees
-						// so it is safe to set and immediatly resolve the deferred
-						// (no one has access to this object yet)
-						//  - OK not strictly true if it already existed
-						_attendees[lesson.id] = Promise.resolve(lesson.attendees);
-
 						events.push(lesson);
 					});
 
 					$.each(data.CalendarStudent, function(i,item){
-						var student = {
+						var student = iL.Student.get(item.MemberID) || {
 								id: item.MemberID,
 								name: item.nickname,
 								photo: item.Accountname
 							},
 							lesson = lessons[item.CourseScheduleID],
-							attendance = {
+							attendance = getAttendance(lesson, student) || {
 								memberCourseID: null,
 								lesson: lesson,
-								student: student,
-								absent: item.Attendance == "0"
+								student: student
 							},
 							key = lesson && attendanceKey(lesson, student);
+						attendance.absent = item.Attendance == "0";
 						iL.Util.parseName(student);
 						lesson && lesson.attendees.push(attendance);
 						attendances[key] = attendance;
@@ -572,18 +566,19 @@
 							}
 							lesson.attendees.length = 0;
 							$.each(data.coursestudent, function(i,item){
-								var student = {
+								var student = iL.Student.get(item.MemberID) || {
 										id: item.MemberID,
 										name: item.Lastname,
 										photo: item.Accountname
 									},
-									attendance = {
-										memberCourseID: item.MemberCourseID,
+									attendance = getAttendance(lesson, student) || {
 										lesson: lesson,
-										student: student,
-										absent: item.absent == "1"
+										student: student
 									};
 								iL.Util.parseName(student);
+
+								attendance.memberCourseID = item.MemberCourseID;
+								attendance.absent = item.absent == "1";
 
 								iL.Student.add(student);
 								lesson.attendees.push(attendance);
@@ -601,9 +596,27 @@
 	Attendance.find = findAttendance;
 
 	/**
+	 * Get complete attendance record,
+	 * i.e. attendance may likely be missing memberCourseID
+	 * @return returns the attendance you passed in
+	 */
+	function fetchAttendance(attendance){
+		var key = attendanceKey(attendance);
+		return findAttendance({lesson: attendance.lesson}).then(function(){
+			return attendances[key];
+		});
+	}
+	Attendance.fetch = fetchAttendance;
+
+	/**
 	 * Function to save attendance to the server
 	 */
 	function saveAttendance(attendance){
+		if(!attendance.memberCourseID){
+			fetchAttendance(attendance).then(saveAttendance)
+			.catch(function(err){console.error(err.stack);});
+			return;
+		}
 		$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
 			mcid: attendance.memberCourseID,
 			absent: attendance.absent ? 0 : 1,
@@ -613,7 +626,13 @@
 	}
 	Attendance.save = saveAttendance;
 
+	/**
+	 * Takes either an attendance or a lesson/student pair
+	 */
 	function attendanceKey(lesson, student){
+		if(arguments.length == 1){
+			return arguments[0].lesson.id + ":" + arguments[0].student.id;
+		}
 		return lesson.id + ":" + student.id;
 	}
 
