@@ -8,16 +8,19 @@
 	var iLearner = window.iLearner || {},
 		Student = {},
 		Invoice = {},
+		Subscription = {},
 
 		/* Constants */
 
 		/* data */
 		students = {},
+		subscriptions = {},
 		_students = {},
 		_searches = {};
 
 	window.iL = iLearner;
 	iLearner.Student = Student;
+	iLearner.Subscription = Subscription;
 	iLearner.Invoice = Invoice;
 
 	/**
@@ -114,7 +117,7 @@
 
 
 	/**
-	 * Get details of the students registered for a lessonS
+	 * Get details of the students registered for a lesson
 	 */
 	function lessonStudents(lesson){
 		var id = lesson.id;
@@ -162,9 +165,9 @@
 			_students[student.id] = Promise.resolve(
 					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
 				).then(function(data){
-					var courses = {},
-						guardians = [],
-						guardian;
+					var guardians = [],
+						guardian,
+						subs = {};
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
 							var name = (item.lastname && item.Nickname) ?
@@ -222,13 +225,19 @@
 					}
 					if(data.memberCourseBalance){
 						$.each(data.memberCourseBalance, function(i,item){
-							var id = item.CourseID,
+							var courseID = item.CourseID,
 								lessonCount = parseInt(item.Nooflesson),
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
 								dateIndex,
-								course = iL.Course.get(id) || {
-									id: id
+								course = iL.Course.get(courseID) || {
+									id: courseID
+								},
+								subscription = iL.Subscription.get(course, student) || {
+									id: null,	// should be memberCourseID but we don't have it here
+									course: course,
+									student: student,
+									invoices: []
 								},
 
 								/*
@@ -253,42 +262,45 @@
 									memberCourseID: item.membercourseID
 								};
 
-								course.title = item.Coursename;
-								course.unpaid = 0;
-								course.code = item.CourseCode;
-								course.withdrawn = item.withdrawal == "1";
-								/* This is the potential discount for existing students,
-								   on this course.
-								   The student is *not* necessarily entitled to this */
-								course.existingDiscount = parseInt(item.DiscountForOldStudent);
-								course.pricePerLesson = pricePerLesson;
-								course.existingStudent = false;
-								course.lastPaymentIndex = 0;
+							course.title = item.Coursename;
+							course.code = item.CourseCode;
+							/* This is the potential discount for existing students,
+							   on this subscription.
+							   The student is *not* necessarily entitled to this */
+							course.existingDiscount = parseInt(item.DiscountForOldStudent);
+							course.pricePerLesson = pricePerLesson;
 
-								iL.Course.add(course);
+							subscription.unpaid = 0;
+							subscription.withdrawn = item.withdrawal == "1";
+							subscription.existingStudent = false;
+							subscription.lastPaymentIndex = 0;
+
+							iL.Course.add(course);
+							iL.Subscription.add(subscription);
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
-							if(invoice.paid && dateIndex > course.lastPaymentIndex
-								&& course.existingDiscount){
-								course.existingStudent =
-									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
-								course.lastPaymentIndex = dateIndex;
+							if(invoice.paid && dateIndex > subscription.lastPaymentIndex
+								&& subscription.existingDiscount){
+								subscription.existingStudent =
+									(invoice.discount / invoice.lessonCount >= subscription.existingDiscount);
+								subscription.lastPaymentIndex = dateIndex;
 							}
 
-							if(!course.invoices){
-								course.invoices = [];
+							if(!subscription.invoices){
+								subscription.invoices = [];
 							}
 
-							course.invoices.push(invoice);
+							subscription.invoices.push(invoice);
 
 							if(!invoice.paid){
-								course.unpaid += 1;
+								subscription.unpaid += 1;
 							}
 
-							courses[id] = course;
+							subs[subscriptionKey(subscription)] = subscription;
 						});
-						student.courses = courses;
+
+						student.subscriptions = subs;
 					}
 					return student;
 				});
@@ -386,5 +398,25 @@
 		});
 	}
 	Invoice.voidInvoice = voidInvoice;
+
+	function getSubscription(id){
+		var key = subscriptionKey.apply(null, arguments);
+		return subscriptions[key];
+	}
+	Subscription.get = getSubscription;
+
+	function addSubscription(subscription){
+		var key = subscriptionKey(subscription);
+		subscriptions[key] = subscription;
+	}
+	Subscription.add = addSubscription;
+
+	function subscriptionKey(course, student){
+		var args = arguments;
+		if(args.length == 2){
+			return course.id + ":" + student.id;
+		}
+		return args[0].course.id + ":" + args[0].student.id;
+	}
 
 }(window));
