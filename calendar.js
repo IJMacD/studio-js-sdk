@@ -19,12 +19,14 @@
 			{regex: /DSE/, level: "S"},
 			{regex: /Starters|Movers|Flyers/, level: "K"}
 		],
+		grades = "K1 K2 K3 P1 P2 P3 P4 P5 P6 F1 F2 F3 F4 F5 F6".split(" "),
 
 		/* data */
 		courses = {},
 		lessons = {},
 		attendances = {},
 		_courses = {},
+		_courseDetails = {},
 		_lessons = {},
 		_promises = {},
 		_attendees = {};
@@ -372,6 +374,7 @@
 	 *
 	 * @method find
 	 * @param options {object}
+	 * @param [options.title] {int}
 	 * @param [options.year] {int}
 	 * @param [options.month] {int}
 	 * @param [options.tutor] {object}
@@ -379,14 +382,31 @@
 	 */
 	function findCourses(options){
 		var now = new Date(),
-			post_data = {
-				searchCourseCourseYear: options.year || now.getFullYear(),
-				searchCourseCourseMonth: options.month || (now.getMonth() + 1),
-				searchTutor: options.tutor.id
-			},
+			post_data = options.code ?
+				{
+					searchCouseCode: options.code // [sic]
+				}
+			:
+				{
+					searchCourseTitle: options.title,
+					searchCourseCourseYear: options.year || now.getFullYear(),
+					searchCourseCourseMonth: options.month || (now.getMonth() + 1),
+					searchTutor: options.tutor && options.tutor.id
+				},
 			hash = JSON.stringify(post_data);
 
 		if(!_courses[hash]){
+			if(options.code){
+				$.each(courses, function(i,course){
+					if(course.code == options.code){
+						_courses[hash] = Promise.resolve([course]);
+						return false;
+					}
+				});
+				if(_courses[hash]){
+					return _courses[hash];
+				}
+			}
 			_courses[hash] = Promise.resolve(
 				$.post(iL.API_ROOT + 'process_getCourseList.php',
 					post_data,
@@ -401,9 +421,6 @@
 							courseTitle = item.CourseName.replace(levelRegex, ""),
 							course = courses[id] || {
 								id: id,
-								title: courseTitle,
-								code: item.coursecode,
-								level: level,
 								lessons: []
 							};
 
@@ -416,7 +433,10 @@
 								}
 							});
 						}
+						course.title = courseTitle;
+						course.code = item.coursecode;
 						course.level = level;
+						course.subject = item.subject;
 
 						courses[id] = course;
 						out.push(course);
@@ -468,16 +488,9 @@
 	}
 	Course.find = findCourses;
 
-	/**
-	 * Get all lessons for this course
-	 *
-	 * @method lessons
-	 * @param course {object}
-	 * @return {Promise} Promise of an array
-	 */
-	function courseLessons(course){
-		if(!course._lessons){
-			course._lessons = Promise.resolve(
+	function courseFetch(course){
+		if(!_courseDetails[course.id]){
+			_courseDetails[course.id] = Promise.resolve(
 				$.post(iL.API_ROOT + "process_getCourseDetail.php",
 					{
 						courseID: course.id
@@ -486,6 +499,20 @@
 					"json")
 				)
 				.then(function(data){
+					var details = data.coursedetail[0];
+
+					course.code = details.CourseCode;
+					course.title = details.CourseName;
+					course.room = iL.Room.get(details.DefaultClassroomID);
+					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "monthly";
+					course.existingDiscount = details.DiscountForOldStudent;
+					course.pricePerLesson = details.LessonFee;
+					course.pricePerMonth = details.MonthlyFee;
+					course.notes = details.Remark == "null" ? "" : details.Remark;
+					course.subject = null; // details.SubjectID
+					course.tutor = iL.Tutor.get(details.TutorMemberID);
+					course.grade = stringifyGrade(details);
+
 					if(!course.lessons){
 						course.lessons = [];
 					}
@@ -524,10 +551,26 @@
 						return a.start.getTime() < b.start.getTime() ? -1 : 1;
 					});
 
-					return course.lessons;
+					return course;
 				});
 		}
-		return course._lessons;
+		return _courseDetails[course.id];
+	}
+	Course.fetch = courseFetch;
+
+	/**
+	 * Get all lessons for this course
+	 * [Sugar] for Lesson.find({course: this})
+	 *
+	 * @method lessons
+	 * @param course {object}
+	 * @return {Promise} Promise of an array
+	 */
+	function courseLessons(course){
+		return courseFetch(course)
+			.then(function(){
+				return course.lessons;
+			});
 	}
 	Course.lessons = courseLessons;
 
@@ -643,6 +686,16 @@
 	function _setTime(date, time){
 		date.setHours(time.substr(0,2));
 		date.setMinutes(time.substr(2,2));
+	}
+
+	function stringifyGrade(object){
+		var outGrades = [];
+		grades.forEach(function(grade){
+			if(object[grade] == "1"){
+				outGrades.push(grade);
+			}
+		});
+		return outGrades.join("-");
 	}
 
 }(window));
