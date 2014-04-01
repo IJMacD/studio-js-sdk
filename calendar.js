@@ -128,7 +128,8 @@
 							lessonID = item.CourseScheduleID,
 
 							course = courses[courseID] || {
-								id: courseID
+								id: courseID,
+								lessons: []
 							},
 							lesson = lessons[lessonID] || {
 								id: lessonID,
@@ -146,7 +147,6 @@
 						course.startTime = item.Starttime;
 						course.endTime = item.endtime;
 						course.tutor = tutor;
-						course.lessons = [];
 
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
