@@ -506,7 +506,7 @@
 					var details = data.coursedetail[0];
 
 					course.code = details.CourseCode;
-					course.title = details.CourseName;
+					course.title = details.CourseName.replace(levelRegex, "");
 					course.room = iL.Room.get(details.DefaultClassroomID);
 					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "monthly";
 					course.existingDiscount = details.DiscountForOldStudent;
@@ -515,7 +515,11 @@
 					course.notes = details.Remark == "null" ? "" : details.Remark;
 					course.subject = null; // details.SubjectID
 					course.tutor = iL.Tutor.get(details.TutorMemberID);
-					course.grade = stringifyGrade(details);
+					course.level = stringifyGrade(details);
+
+					if(!course.level){
+						course.level = details.CourseName.match(levelRegex);
+					}
 
 					if(!course.lessons){
 						course.lessons = [];
