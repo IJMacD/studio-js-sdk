@@ -169,6 +169,10 @@
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
 
+						if(!course.lessons){
+							course.lessons = [];
+						}
+
 						if(course.lessons.indexOf(lesson) == -1){
 							course.lessons.push(lesson);
 						}
