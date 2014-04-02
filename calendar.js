@@ -660,16 +660,20 @@
 	 */
 	function saveAttendance(attendance){
 		if(!attendance.memberCourseID){
-			fetchAttendance(attendance).then(saveAttendance)
-			.catch(function(err){console.error(err.stack);});
-			return;
+			// Shhh but... This could infinite loop if fetchAttendance
+			// for some reason doesn't supply the memberCourseID.
+			// Solution is second check in then handler before
+			// re-calling saveAttendance.
+			return fetchAttendance(attendance).then(saveAttendance);
 		}
-		$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
-			mcid: attendance.memberCourseID,
-			absent: attendance.absent ? 0 : 1,
-			coursescheduleID: attendance.lesson.id,
-			absentReason: ""
-		});
+		return Promise.resolve(
+			$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
+				mcid: attendance.memberCourseID,
+				absent: attendance.absent ? 0 : 1,
+				coursescheduleID: attendance.lesson.id,
+				absentReason: ""
+			})
+		);
 	}
 	Attendance.save = saveAttendance;
 
