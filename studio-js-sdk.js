@@ -605,20 +605,14 @@
 				sun:0,
 				coursetypechanged:0,
 				orignal_coursetype:0
-			},
-			deferred = $.Deferred();
-		$.post(iL.API_ROOT + 'process_updateCourseSchedule.php',
-			post_data,
-			function(data){
-				if(data.statuscode == 1){
-					deferred.resolve();
-				}
-				else {
-					deferred.reject();
-				}
-			},
-			"json").fail(deferred.reject);
-		return deferred.promise();
+			};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + 'process_updateCourseSchedule.php', post_data)
+		).then(function(data){
+			if(data.statuscode != 1){
+				return Promise.reject();
+			}
+		});
 	}
 	Lesson.save = save;
 
@@ -1026,16 +1020,20 @@
 	 */
 	function saveAttendance(attendance){
 		if(!attendance.memberCourseID){
-			fetchAttendance(attendance).then(saveAttendance)
-			.catch(function(err){console.error(err.stack);});
-			return;
+			// Shhh but... This could infinite loop if fetchAttendance
+			// for some reason doesn't supply the memberCourseID.
+			// Solution is second check in then handler before
+			// re-calling saveAttendance.
+			return fetchAttendance(attendance).then(saveAttendance);
 		}
-		$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
-			mcid: attendance.memberCourseID,
-			absent: attendance.absent ? 0 : 1,
-			coursescheduleID: attendance.lesson.id,
-			absentReason: ""
-		});
+		return Promise.resolve(
+			$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
+				mcid: attendance.memberCourseID,
+				absent: attendance.absent ? 0 : 1,
+				coursescheduleID: attendance.lesson.id,
+				absentReason: ""
+			})
+		);
 	}
 	Attendance.save = saveAttendance;
 
@@ -1183,50 +1181,6 @@
 		return _searches[hash];
 	}
 	Student.find = findStudents;
-
-
-	/**
-	 * Get details of the students registered for a lesson
-	 */
-	function lessonStudents(lesson){
-		var id = lesson.id;
-		if(!_students[id]){
-			_students[id] = new Promise(function(resolve, reject){
-				$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
-					{
-						scheduleID: lesson.id
-					},
-					function(data){
-						if(!lesson.students){
-							lesson.students = [];
-						}
-						lesson.students.length = 0;
-						$.each(data.coursestudent, function(i,item){
-							var student = {
-									id: item.MemberID,
-									name: item.Lastname,
-									photo: item.Accountname
-								},
-								attendance = {
-									memberCourseID: item.MemberCourseID,
-									lesson: lesson,
-									student: student,
-									absent: item.absent == "1"
-								};
-							iL.Util.parseName(student);
-
-							students[student.id] = student;
-							lesson.students.push(attendance);
-							attendances[attendanceKey(lesson, student)] = attendance;
-						});
-						resolve(lesson.students);
-					},
-					"json")
-				.fail(reject);
-			});
-		}
-		return _students[id];
-	}
 
 	function fetchStudent(student){
 		student = students[student.id] || student;
