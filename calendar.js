@@ -245,20 +245,14 @@
 				sun:0,
 				coursetypechanged:0,
 				orignal_coursetype:0
-			},
-			deferred = $.Deferred();
-		$.post(iL.API_ROOT + 'process_updateCourseSchedule.php',
-			post_data,
-			function(data){
-				if(data.statuscode == 1){
-					deferred.resolve();
-				}
-				else {
-					deferred.reject();
-				}
-			},
-			"json").fail(deferred.reject);
-		return deferred.promise();
+			};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + 'process_updateCourseSchedule.php', post_data)
+		).then(function(data){
+			if(data.statuscode != 1){
+				return Promise.reject();
+			}
+		});
 	}
 	Lesson.save = save;
 
