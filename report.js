@@ -85,20 +85,40 @@
 					if(data.MemberReportCardList){
 						resultSet = data.MemberReportCardList;
 						$.each(resultSet, function(i,item){
-							item.id = item.membercourseid;
-							item.studentId = item.memberID;
-							item.name = item.nickname;
-							item.course = {
-								id: item.courseID,
-								title: item.coursename,
-								startTime: item.starttime,
-								endTime: item.endtime
-							};
-							item.memberCourseId = item.membercourseid;
-							item.complete = (item.completed == "1");
-							item.tutor = options.tutor;
+							var studentID = item.memberID,
+								courseID = item.courseID,
+								subscriptionID = item.membercourseid,
+								student = iL.Student.get(studentID) || {
+									id: studentID
+								},
+								course = iL.Course.get(courseID) || {
+									id: courseID
+								},
+								subscription = iL.Subscription.get(course, student) || {
+									id: subscriptionID,
+									student: student,
+									course: course
+								}
+								report = {
+									id: subscriptionID,
+									student: student,
+									course: course,
+									subscription: subscription,
+									complete: (item.completed == "1")
+								};
 
-							iL.parseName(item);
+							student.name = item.nickname;
+							course.title = item.coursename;
+							course.startTime = item.starttime;
+							course.endTime = item.endtime;
+
+							course.tutor = options.tutor;
+
+							iL.parseName(student);
+
+							iL.Student.add(student);
+							iL.Course.add(course);
+							iL.subscription.add(subscription);
 
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
@@ -125,7 +145,7 @@
 
 		$.when(
 			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.id },  null, "json"),
-			getCourseLearningFocus(item.courseName)
+			getCourseLearningFocus(item.course.title)
 		)
 		.done(function(a1, focus){
 			var detail = a1[0].MemberReportCardDetail[0],

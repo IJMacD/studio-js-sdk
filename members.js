@@ -190,7 +190,7 @@
 									id: courseID
 								},
 								subscription = iL.Subscription.get(course, student) || {
-									id: null,	// should be memberCourseID but we don't have it here
+									id: item.membercourseID,
 									course: course,
 									student: student,
 									invoices: []
@@ -200,7 +200,6 @@
 									- Discount, Amount, AmountAfterDiscount are for *PAID* invoices
 									- shouldpaid is full price for future lesson
 								*/
-
 								discount = parseInt(item.Discount) || 0,
 								originalAmount = parseInt(item.Amount) || fullPrice,
 								finalAmount = parseInt(item.AmountAfterDiscount) || originalAmount - discount,
@@ -355,6 +354,17 @@
 	}
 	Invoice.voidInvoice = voidInvoice;
 
+	/**
+	 * Class to handle Student-Course Links
+	 *
+	 * @class Subscription
+	 */
+
+	/**
+	 * Get Subscription by courseId and studentID
+	 *
+	 * @method get
+	 */
 	function getSubscription(id){
 		var key = subscriptionKey.apply(null, arguments);
 		return subscriptions[key];
