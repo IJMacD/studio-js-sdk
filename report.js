@@ -15,7 +15,7 @@
 		comments,
 
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
-		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount".split(" ");
+		saveFields = "ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount".split(" ");
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -81,13 +81,13 @@
 					"json")
 				)
 				.then(function(data){
-					var resultSet;
+					var resultSet = [];
 					if(data.MemberReportCardList){
-						resultSet = data.MemberReportCardList;
-						$.each(resultSet, function(i,item){
+						$.each(data.MemberReportCardList, function(i,item){
 							var studentID = item.memberID,
 								courseID = item.courseID,
 								subscriptionID = item.membercourseid,
+								reportID = item.idmembercoursereportcard,
 								student = iL.Student.get(studentID) || {
 									id: studentID
 								},
@@ -100,11 +100,13 @@
 									course: course
 								}
 								report = {
-									id: subscriptionID,
+									id: reportID,
 									student: student,
 									course: course,
 									subscription: subscription,
-									complete: (item.completed == "1")
+									complete: (item.completed == "1"),
+									attendance: item.Attend_amendment,
+									lessoncount: item.lessoncount
 								};
 
 							student.name = item.nickname;
@@ -118,10 +120,12 @@
 
 							iL.Student.add(student);
 							iL.Course.add(course);
-							iL.subscription.add(subscription);
+							iL.Subscription.add(subscription);
 
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
+
+							resultSet.push(report);
 						});
 					}
 					return resultSet;
@@ -144,7 +148,7 @@
 			promise = deferred.promise();
 
 		$.when(
-			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.id },  null, "json"),
+			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id },  null, "json"),
 			getCourseLearningFocus(item.course.title)
 		)
 		.done(function(a1, focus){
@@ -193,6 +197,7 @@
 	function save(item){
 		var post_data = {},
 			i, k;
+		post_data.idmembercoursereportcard = item.id;
 		item.complete = true;
 		for(i in saveFields){
 			k = saveFields[i];
