@@ -265,9 +265,12 @@
 	Student.fetch = fetchStudent;
 
 	function saveStudent(student){
+		if(!student.guardians || !student.guardians.length){
+			student.guardians = [{}];
+		}
 		var guardian = student.guardians[0],
 			post_data = {
-				Action:"update",
+				Action: student.id ? "update" : "insert",
 				MemberID: student.id,
 				MemberDetailNameinEnglish: student.englishName,
 				MemberDetailRemark: student.notes,
@@ -301,7 +304,19 @@
 			};
 		return Promise.resolve(
 			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
-		);
+		).then(function(data){
+			if(!data || data.statuscode != "1"){
+				return Promise.reject(Error("Server Rejected Student"));
+			}
+			if(!student.id){
+				student.id = data.MemberID;
+				student.accountID = data.SAccount;
+				student.guardians[0].accountID = data.GAccount;
+				iL.Util.parseName(student);
+				addStudent(student);
+			}
+			return student;
+		});
 	}
 	Student.save = saveStudent;
 
