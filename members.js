@@ -193,6 +193,9 @@
 									id: item.membercourseID,
 									course: course,
 									student: student,
+									existingStudent: false,
+									unpaid: 0,
+									lastPaymentIndex: 0,
 									invoices: []
 								},
 
@@ -225,10 +228,7 @@
 							course.existingDiscount = parseInt(item.DiscountForOldStudent);
 							course.pricePerLesson = pricePerLesson;
 
-							subscription.unpaid = 0;
 							subscription.withdrawn = item.withdrawal == "1";
-							subscription.existingStudent = false;
-							subscription.lastPaymentIndex = 0;
 
 							iL.Course.add(course);
 							iL.Subscription.add(subscription);
@@ -236,9 +236,9 @@
 							dateIndex = invoice.year * 100 + invoice.month;
 
 							if(invoice.paid && dateIndex > subscription.lastPaymentIndex
-								&& subscription.existingDiscount){
+								&& course.existingDiscount){
 								subscription.existingStudent =
-									(invoice.discount / invoice.lessonCount >= subscription.existingDiscount);
+									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
 								subscription.lastPaymentIndex = dateIndex;
 							}
 
