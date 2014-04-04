@@ -312,6 +312,7 @@
 				student.id = data.MemberID;
 				student.accountID = data.SAccount;
 				student.guardians[0].accountID = data.GAccount;
+				student.registeredDate = new Date();
 				iL.Util.parseName(student);
 				addStudent(student);
 			}
@@ -399,5 +400,33 @@
 		}
 		return args[0].course.id + ":" + args[0].student.id;
 	}
+
+	function saveSubscription(subscription){
+		var post_data = {
+			Action: subscription.id ? "update" : "insert",
+			MemberID: subscription.student.id,
+			CoruseScheduleID: subscription.firstLesson.id, // [sic]
+			StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
+			StudentCoursePaymentcycle: 2 // [sic] per lesson
+		};
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
+		).then(function(data){
+			if(!subscription.id){
+				subscription.id = data.MemberCourseID;
+				addSubscription(subscription);
+
+				var attendance = {
+						student: subscription.student,
+						lesson: subscription.firstLesson,
+						absent: false,
+						memberCourseID: subscription.id // should this actually just be 'subscription:'' ?
+					};
+				iL.Attendance.add(attendance);
+			}
+			return subscription;
+		});
+	}
+	Subscription.save = saveSubscription;
 
 }(window));

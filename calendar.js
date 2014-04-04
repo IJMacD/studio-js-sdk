@@ -591,6 +591,15 @@
 	Attendance.get = getAttendance;
 
 	/**
+	 * Function to track an attendance record
+	 */
+	function addAttendance(attendance){
+		attendances[attendanceKey(attendance)] = attendance;
+		attendance.lesson.attendees.push(attendance);
+	}
+	Attendance.add = addAttendance;
+
+	/**
 	 * Function to find attendances
 	 *
 	 * @param options {object} Options
