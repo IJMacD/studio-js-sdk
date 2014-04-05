@@ -188,14 +188,29 @@
 							},
 							lesson = lessons[item.CourseScheduleID],
 							attendance = getAttendance(lesson, student) || {
-								memberCourseID: null,
 								lesson: lesson,
 								student: student
 							},
 							key = lesson && attendanceKey(lesson, student);
+
 						attendance.absent = item.Attendance == "0";
+
 						iL.Util.parseName(student);
+
+						iL.Subscription.find({course: lesson.course, student: student})
+							.then(function(subscriptions){
+								if(subscriptions.length)
+								{
+									attendance.subscription = subscriptions[0];
+								}
+							});
+
+						/**
+						 * @deprecated
+						 * Use Attendance.find instead
+						 */
 						lesson && lesson.attendees.push(attendance);
+
 						attendances[key] = attendance;
 						iL.Student.add(student);
 					});
@@ -474,6 +489,10 @@
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
 
+						if(!course.lessons){
+							course.lessons = [];
+						}
+
 						if(course.lessons.indexOf(lesson) == -1){
 							course.lessons.push(lesson);
 						}
@@ -612,6 +631,10 @@
 	 */
 	function addAttendance(attendance){
 		attendances[attendanceKey(attendance)] = attendance;
+		/**
+		 * @deprecated
+		 * Use Attendance.find instead
+		 */
 		attendance.lesson.attendees.push(attendance);
 	}
 	Attendance.add = addAttendance;
@@ -627,7 +650,20 @@
 	function findAttendances(options){
 		if(options.lesson){
 			var lesson = options.lesson,
-				id = lesson.id;
+				id = lesson.id,
+				attendance;
+
+			if(options.student){
+				attendance = getAttendance(lesson, options.student);
+				if (attendance) {
+					return Promise.resolve([attendance]);
+				};
+			}
+
+			if(options.clearCache){
+				_attendees[id] = undefined;
+			}
+
 			if(!_attendees[id]){
 				_attendees[id] = new Promise(function(resolve, reject){
 					$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
@@ -653,17 +689,20 @@
 									}
 									attendance = getAttendance(lesson, student) || {
 										lesson: lesson,
-										student: student,
-										subscription: subscription
+										student: student
 									};
 								iL.Util.parseName(student);
 
-								attendance.memberCourseID = subscription.id;
+								attendance.subscription = subscription;
 								attendance.absent = item.absent == "1";
 
 								iL.Student.add(student);
 								iL.Subscription.add(subscription);
 
+								/**
+								 * @deprecated
+								 * Use Attendance.find instead
+								 */
 								lesson.attendees.push(attendance);
 
 								attendances[attendanceKey(lesson, student)] = attendance;
@@ -672,6 +711,12 @@
 						},
 						"json")
 					.fail(reject);
+				});
+			}
+
+			if(options.student){
+				return _attendees[id].then(function(attendees){
+					return [getAttendance(lesson, options.student)];
 				});
 			}
 			return _attendees[id];
@@ -686,9 +731,26 @@
 	 *
 	 * @method fetch
 	 * @param attendance {object}
-	 * @return {object} returns the attendance you passed in
+	 * @return {Promise} returns a promise of the attendance you passed in
+	 */
+
+	/**
+	 * Get complete attendance records
+	 *
+	 * i.e. attendances may likely be missing memberCourseID
+	 *
+	 * @method fetch
+	 * @param attendances {array}
+	 * @return {array} returns an array of the attendances you passed in
 	 */
 	function fetchAttendance(attendance){
+		if($.isArray(attendance)){
+			return attendance.map(fetchAttendance);
+		}
+
+		if(attendance.subscription){
+			return Promise.resolve(attendance);
+		}
 		var key = attendanceKey(attendance);
 		return findAttendances({lesson: attendance.lesson}).then(function(){
 			return attendances[key];

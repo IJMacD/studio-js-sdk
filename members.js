@@ -425,10 +425,17 @@
 	 * @param options {object}
 	 * @param options.course {object}
 	 * @param options.student {object}
-	 * @return {object}
+	 * @return {Promise(Subscription[])}
 	 */
 	function findSubscription(options){
-		throw Error("Not Implemented");
+		var out = [];
+		$.each(subscriptions, function(i, subscription){
+			if(subscription.course == options.course &&
+				subscription.student == options.student){
+				out.push(subscription);
+			}
+		});
+		return Promise.resolve(out);
 	}
 	Subscription.find = findSubscription;
 
@@ -446,7 +453,7 @@
 	/**
 	 * Save a subscription to the server
 	 *
-	 * Subscribe a student to a course
+	 * Subscribe/Unsubscribe a student to/from a course
 	 *
 	 * @method save
 	 * @param subscription {object}
@@ -463,6 +470,13 @@
 				$.post(iL.API_ROOT + "process_MemberCourseWithDrawal.php", post_data, "json")
 			).then(function(){
 				// invalidate attendances
+				iL.Lesson
+					.future(subscription.lastLesson)
+					.then(function(lessons){
+						lessons.forEach(function(lesson){
+							iL.Attendance.find({lesson: lesson, clearCache: true});
+						});
+					});
 			});
 		}
 		else {
@@ -480,14 +494,14 @@
 					subscription.id = data.MemberCourseID;
 					addSubscription(subscription);
 
-					var attendance = {
-							student: subscription.student,
-							lesson: subscription.firstLesson,
-							subscription: subscription,
-							absent: false,
-							memberCourseID: subscription.id /* deprecated */
-						};
-					iL.Attendance.add(attendance);
+					// invalidate attendances
+					iL.Lesson
+						.future(subscription.firstLesson)
+						.then(function(lessons){
+							lessons.forEach(function(lesson){
+								iL.Attendance.find({lesson: lesson, clearCache: true});
+							});
+						});
 				}
 				return subscription;
 			});
@@ -506,7 +520,7 @@
 		return Promise.resolve(
 			$.post(iL.API_ROOT + "process_cancelMemberCourse.php", {MemberCourseID: subscription.id}, null, "json")
 		).then(function(){
-			// invalidate attendances
+			// invalidate attendancess
 		});
 	}
 	Subscription.remove = removeSubscription;
