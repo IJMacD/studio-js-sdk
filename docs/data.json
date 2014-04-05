@@ -6,6 +6,20 @@
         "url": "http://127.0.0.1/c/Dashboard"
     },
     "files": {
+        "test\\qunit-1.14.0.js": {
+            "name": "test\\qunit-1.14.0.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "test\\spark-md5.js": {
+            "name": "test\\spark-md5.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
         "calendar.js": {
             "name": "calendar.js",
             "modules": {
@@ -13,7 +27,8 @@
             },
             "classes": {
                 "Lesson": 1,
-                "Course": 1
+                "Course": 1,
+                "Attendance": 1
             },
             "fors": {},
             "namespaces": {}
@@ -27,6 +42,19 @@
                 "Tutor": 1,
                 "Room": 1,
                 "Util": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "members.js": {
+            "name": "members.js",
+            "modules": {
+                "Members": 1
+            },
+            "classes": {
+                "Student": 1,
+                "Invoice": 1,
+                "Subscription": 1
             },
             "fors": {},
             "namespaces": {}
@@ -49,13 +77,14 @@
             "submodules": {},
             "classes": {
                 "Lesson": 1,
-                "Course": 1
+                "Course": 1,
+                "Attendance": 1
             },
             "fors": {},
             "namespaces": {},
             "tag": "module",
             "file": "calendar.js",
-            "line": 356,
+            "line": 589,
             "description": "Calendar module. Contains Lesson and Course classes."
         },
         "Core": {
@@ -70,8 +99,23 @@
             "namespaces": {},
             "tag": "module",
             "file": "core.js",
-            "line": 266,
+            "line": 274,
             "description": "Core module. Contains Tutor, Room classes as well as Utility submodule"
+        },
+        "Members": {
+            "name": "Members",
+            "submodules": {},
+            "classes": {
+                "Student": 1,
+                "Invoice": 1,
+                "Subscription": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "members.js",
+            "line": 400,
+            "description": "Members module. Contains Student class."
         },
         "Report": {
             "name": "Report",
@@ -99,7 +143,7 @@
             "module": "Calendar",
             "namespace": "",
             "file": "calendar.js",
-            "line": 34,
+            "line": 39,
             "description": "Lesson class for dealing with lesson instances happening\nat a specific time on a specific date"
         },
         "Course": {
@@ -113,8 +157,22 @@
             "module": "Calendar",
             "namespace": "",
             "file": "calendar.js",
-            "line": 356,
+            "line": 340,
             "description": "Class to deal with courses. Courses generally run for a number of weeks\nand contain lesson instances"
+        },
+        "Attendance": {
+            "name": "Attendance",
+            "shortname": "Attendance",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Calendar",
+            "namespace": "",
+            "file": "calendar.js",
+            "line": 589,
+            "description": "Attendance class for dealing with attendances"
         },
         "Tutor": {
             "name": "Tutor",
@@ -127,7 +185,7 @@
             "module": "Core",
             "namespace": "",
             "file": "core.js",
-            "line": 94,
+            "line": 104,
             "description": "Used for interacting with tutors"
         },
         "Room": {
@@ -141,7 +199,7 @@
             "module": "Core",
             "namespace": "",
             "file": "core.js",
-            "line": 189,
+            "line": 199,
             "description": "Class for using rooms"
         },
         "Util": {
@@ -155,8 +213,50 @@
             "module": "Core",
             "namespace": "",
             "file": "core.js",
-            "line": 266,
+            "line": 274,
             "description": "Utility Class"
+        },
+        "Student": {
+            "name": "Student",
+            "shortname": "Student",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Members",
+            "namespace": "",
+            "file": "members.js",
+            "line": 26,
+            "description": "Student class for dealing with students"
+        },
+        "Invoice": {
+            "name": "Invoice",
+            "shortname": "Invoice",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Members",
+            "namespace": "",
+            "file": "members.js",
+            "line": 339,
+            "description": "Invoice class for dealing with invoices"
+        },
+        "Subscription": {
+            "name": "Subscription",
+            "shortname": "Subscription",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Members",
+            "namespace": "",
+            "file": "members.js",
+            "line": 400,
+            "description": "Class to handle Student-Course Links"
         },
         "Report": {
             "name": "Report",
@@ -175,8 +275,455 @@
     },
     "classitems": [
         {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 40,
+            "description": "Provides a normalized error string, correcting an issue\nwith IE 7 (and prior) where Error.prototype.toString is\nnot properly implemented\n\nBased on http://es5.github.com/#x15.11.4.4",
+            "params": [
+                {
+                    "name": "error",
+                    "description": "",
+                    "type": "String|Error"
+                }
+            ],
+            "return": {
+                "description": "error message",
+                "type": "String"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 69,
+            "description": "Makes a clone of an object using only Array or Object as base,\nand copies over the own enumerable properties.",
+            "params": [
+                {
+                    "name": "obj",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "New object with only the own properties (recursively).",
+                "type": "Object"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 219,
+            "description": "Config object: Maintain internal state\nLater exposed as QUnit.config\n`config` initialized at top of scope",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 538,
+            "deprecated": true,
+            "deprecationMessage": ": Created for backwards compatibility with test runner that set the hook function\ninto QUnit.{hook}, instead of invoking it and passing the hook function.\nQUnit.constructor is set to the empty F() above so that we can add to it's prototype here.\nDoing this allows us to tell if the following methods have been overwritten on the actual\nQUnit object.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 884,
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 974,
+            "description": "Escape text for attribute or text content.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1096,
+            "params": [
+                {
+                    "name": "elem",
+                    "description": "",
+                    "type": "HTMLElement"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "fn",
+                    "description": "",
+                    "type": "Function"
+                }
+            ],
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1117,
+            "params": [
+                {
+                    "name": "elems",
+                    "description": "",
+                    "type": "Array|NodeList"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "fn",
+                    "description": "",
+                    "type": "Function"
+                }
+            ],
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1259,
+            "description": "Expose the current test environment.",
+            "deprecated": true,
+            "deprecationMessage": "since 1.12.0: Use QUnit.config.current.testEnvironment instead.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1492,
+            "description": "Asserts rough true-ish result.",
+            "name": "",
+            "itemtype": "method",
+            "example": [
+                " ok( \"asdfasdf\".length > 5, \"There must be at least 5 chars\" );"
+            ],
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1531,
+            "description": "Assert that the first two arguments are equal, with an optional message.\nPrints out both actual and expected values.",
+            "name": "",
+            "itemtype": "method",
+            "example": [
+                " equal( format( \"Received {0} bytes.\", 2), \"Received 2 bytes.\", \"format() replaces {0} with next argument\" );"
+            ],
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1543,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1552,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1562,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1572,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1580,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1588,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1596,
+            "name": "",
+            "itemtype": "method",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1661,
+            "deprecated": true,
+            "deprecationMessage": "since 1.8.0\nKept assertion helpers in root for backwards compatibility.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1667,
+            "deprecated": true,
+            "deprecationMessage": "since 1.9.0\nKept to avoid TypeErrors for undefined methods.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1675,
+            "deprecated": true,
+            "deprecationMessage": "since 1.0.0, replaced with error pushes since 1.3.0\nKept to avoid TypeErrors for undefined methods.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\qunit-1.14.0.js",
+            "line": 1894,
+            "description": "jsDump Copyright (c) 2008 Ariel Flesler - aflesler(at)gmail(dot)com |\nhttp://flesler.blogspot.com Licensed under BSD\n(http://www.opensource.org/licenses/bsd-license.php) Date: 5/15/2008",
+            "projectdescription": "Advanced and extensible data dumping for Javascript.",
+            "version": "1.0.0",
+            "author": "Ariel Flesler",
+            "link": "{http://flesler.blogspot.com/2008/05/jsdump-pretty-dump-of-any-javascript.html}",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 296,
+            "description": "SparkMD5 OOP implementation.\n\nUse this class to perform an incremental md5, otherwise use the\nstatic methods instead.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 318,
+            "description": "Appends a string.\nA conversion will be applied if an utf8 string is detected.",
+            "params": [
+                {
+                    "name": "str",
+                    "description": "The string to be appended",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The instance itself",
+                "type": "SparkMD5"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 338,
+            "description": "Appends a binary string.",
+            "params": [
+                {
+                    "name": "contents",
+                    "description": "The binary string to be appended",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The instance itself",
+                "type": "SparkMD5"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 361,
+            "description": "Finishes the incremental computation, reseting the internal state and\nreturning the result.\nUse the raw parameter to obtain the raw result instead of the hex one.",
+            "params": [
+                {
+                    "name": "raw",
+                    "description": "True to get the raw result, false to get the hex result",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The result",
+                "type": "String|Array"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 389,
+            "description": "Finish the final calculation based on the tail.",
+            "params": [
+                {
+                    "name": "tail",
+                    "description": "The tail (will be modified)",
+                    "type": "Array"
+                },
+                {
+                    "name": "length",
+                    "description": "The length of the remaining buffer",
+                    "type": "Number"
+                }
+            ],
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 421,
+            "description": "Resets the internal state of the computation.",
+            "return": {
+                "description": "The instance itself",
+                "type": "SparkMD5"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 434,
+            "description": "Releases memory used by the incremental buffer and other aditional\nresources. If you plan to use the instance again, use reset instead.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 445,
+            "description": "Performs the md5 hash on a string.\nA conversion will be applied if utf8 string is detected.",
+            "params": [
+                {
+                    "name": "str",
+                    "description": "The string",
+                    "type": "String"
+                },
+                {
+                    "name": "raw",
+                    "description": "True to get the raw result, false to get the hex result",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The result",
+                "type": "String|Array"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 465,
+            "description": "Performs the md5 hash on a binary string.",
+            "params": [
+                {
+                    "name": "content",
+                    "description": "The binary string",
+                    "type": "String"
+                },
+                {
+                    "name": "raw",
+                    "description": "True to get the raw result, false to get the hex result",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The result",
+                "type": "String|Array"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 479,
+            "description": "SparkMD5 OOP implementation for array buffers.\n\nUse this class to perform an incremental md5 ONLY for array buffers.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 491,
+            "description": "Appends an array buffer.",
+            "params": [
+                {
+                    "name": "arr",
+                    "description": "The array to be appended",
+                    "type": "ArrayBuffer"
+                }
+            ],
+            "return": {
+                "description": "The instance itself",
+                "type": "SparkMD5.ArrayBuffer"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 517,
+            "description": "Finishes the incremental computation, reseting the internal state and\nreturning the result.\nUse the raw parameter to obtain the raw result instead of the hex one.",
+            "params": [
+                {
+                    "name": "raw",
+                    "description": "True to get the raw result, false to get the hex result",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The result",
+                "type": "String|Array"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 547,
+            "description": "Resets the internal state of the computation.",
+            "return": {
+                "description": "The instance itself",
+                "type": "SparkMD5.ArrayBuffer"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 560,
+            "description": "Releases memory used by the incremental buffer and other aditional\nresources. If you plan to use the instance again, use reset instead.",
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 566,
+            "description": "Concats two array buffers, returning a new one.",
+            "params": [
+                {
+                    "name": "first",
+                    "description": "The first array buffer",
+                    "type": "ArrayBuffer"
+                },
+                {
+                    "name": "second",
+                    "description": "The second array buffer",
+                    "type": "ArrayBuffer"
+                }
+            ],
+            "return": {
+                "description": "The new array buffer",
+                "type": "ArrayBuffer"
+            },
+            "class": "Lesson"
+        },
+        {
+            "file": "test\\spark-md5.js",
+            "line": 584,
+            "description": "Performs the md5 hash on an array buffer.",
+            "params": [
+                {
+                    "name": "arr",
+                    "description": "The array buffer",
+                    "type": "ArrayBuffer"
+                },
+                {
+                    "name": "raw",
+                    "description": "True to get the raw result, false to get the hex result",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The result",
+                "type": "String|Array"
+            },
+            "class": "Lesson"
+        },
+        {
             "file": "calendar.js",
-            "line": 41,
+            "line": 46,
             "description": "Get a lesson specified by its ID",
             "itemtype": "method",
             "name": "get",
@@ -196,7 +743,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 53,
+            "line": 58,
             "description": "Find a lesson with specific conditions",
             "itemtype": "method",
             "name": "find",
@@ -214,7 +761,13 @@
                         },
                         {
                             "name": "tutor",
-                            "description": "Restrict lessons to only those taught by the\nspecified tutor",
+                            "description": "Restrict lessons to only those taught by the",
+                            "type": "Object",
+                            "optional": true
+                        },
+                        {
+                            "name": "course",
+                            "description": "Lessons from the specified course\nspecified tutor",
                             "type": "Object",
                             "optional": true
                         }
@@ -230,7 +783,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 64,
+            "line": 70,
             "description": "Find lessons relative to a specified lesson",
             "itemtype": "method",
             "name": "find",
@@ -255,7 +808,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 195,
+            "line": 211,
             "description": "Save lesson changes back to the server",
             "itemtype": "method",
             "name": "save",
@@ -275,7 +828,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 280,
+            "line": 290,
             "description": "Get previous lesson in series of course",
             "itemtype": "method",
             "name": "prev",
@@ -295,7 +848,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 292,
+            "line": 302,
             "description": "Get next lesson in series of course",
             "itemtype": "method",
             "name": "next",
@@ -315,7 +868,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 304,
+            "line": 314,
             "description": "Get a collection of all future lessons of the same course",
             "itemtype": "method",
             "name": "future",
@@ -335,10 +888,10 @@
         },
         {
             "file": "calendar.js",
-            "line": 316,
-            "description": "Get details of the students registered for a lesson",
+            "line": 326,
+            "description": "Get details of the attendees registered for a lesson",
             "itemtype": "method",
-            "name": "students",
+            "name": "attendees",
             "params": [
                 {
                     "name": "lesson",
@@ -347,7 +900,7 @@
                 }
             ],
             "return": {
-                "description": "An array of students",
+                "description": "An array of attendees",
                 "type": "Promise"
             },
             "class": "Lesson",
@@ -355,7 +908,7 @@
         },
         {
             "file": "calendar.js",
-            "line": 363,
+            "line": 347,
             "description": "Get a specific course",
             "itemtype": "method",
             "name": "get",
@@ -375,7 +928,23 @@
         },
         {
             "file": "calendar.js",
-            "line": 375,
+            "line": 359,
+            "description": "Add a course to be tracked by the sdk",
+            "itemtype": "method",
+            "name": "add",
+            "params": [
+                {
+                    "name": "course",
+                    "description": "course to add",
+                    "type": "Object"
+                }
+            ],
+            "class": "Course",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 370,
             "description": "Find courses matching given search parameters",
             "itemtype": "method",
             "name": "find",
@@ -385,6 +954,18 @@
                     "description": "",
                     "type": "Object",
                     "props": [
+                        {
+                            "name": "code",
+                            "description": "",
+                            "type": "String",
+                            "optional": true
+                        },
+                        {
+                            "name": "title",
+                            "description": "",
+                            "type": "String",
+                            "optional": true
+                        },
                         {
                             "name": "year",
                             "description": "",
@@ -415,8 +996,28 @@
         },
         {
             "file": "calendar.js",
-            "line": 476,
-            "description": "Get all lessons for this course",
+            "line": 490,
+            "description": "Fetch details of a course\n\nDetails  gained by fetching include payment information and fees",
+            "itemtype": "method",
+            "name": "fetch",
+            "params": [
+                {
+                    "name": "course",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "Returns the same course object",
+                "type": "Object"
+            },
+            "class": "Course",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 573,
+            "description": "Get all lessons for this course\n[Sugar] for Lesson.find({course: this})",
             "itemtype": "method",
             "name": "lessons",
             "params": [
@@ -434,8 +1035,118 @@
             "module": "Calendar"
         },
         {
+            "file": "calendar.js",
+            "line": 595,
+            "description": "Function to get an attendance record",
+            "itemtype": "method",
+            "name": "get",
+            "params": [
+                {
+                    "name": "attendance|lesson",
+                    "description": "Either an attendance object or a lesson",
+                    "type": "Object"
+                },
+                {
+                    "name": "student",
+                    "description": "If a lesson has been provided as the first parameter this must be a student",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 607,
+            "description": "Function to track an attendance record",
+            "itemtype": "method",
+            "name": "add",
+            "params": [
+                {
+                    "name": "attendance",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 619,
+            "description": "Function to find attendances",
+            "params": [
+                {
+                    "name": "options",
+                    "description": "Options",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "lesson",
+                            "description": "Lesson to fetch attendances for",
+                            "type": "Object"
+                        }
+                    ]
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 671,
+            "description": "Get complete attendance record\n\ni.e. attendance may likely be missing memberCourseID",
+            "itemtype": "method",
+            "name": "fetch",
+            "params": [
+                {
+                    "name": "attendance",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "returns the attendance you passed in",
+                "type": "Object"
+            },
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 688,
+            "description": "Function to save attendance to the server",
+            "itemtype": "method",
+            "name": "save",
+            "params": [
+                {
+                    "name": "attendance",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
+            "file": "calendar.js",
+            "line": 714,
+            "description": "Takes either an attendance or a lesson/student pair",
+            "class": "Attendance",
+            "module": "Calendar"
+        },
+        {
             "file": "core.js",
-            "line": 100,
+            "line": 110,
             "description": "Get all tutors",
             "itemtype": "method",
             "name": "all",
@@ -448,7 +1159,7 @@
         },
         {
             "file": "core.js",
-            "line": 113,
+            "line": 123,
             "description": "Get a single tutor specified by his ID",
             "itemtype": "method",
             "name": "get",
@@ -468,7 +1179,7 @@
         },
         {
             "file": "core.js",
-            "line": 138,
+            "line": 148,
             "description": "Find a single tutor specified by his name",
             "itemtype": "method",
             "name": "find",
@@ -494,7 +1205,7 @@
         },
         {
             "file": "core.js",
-            "line": 174,
+            "line": 184,
             "description": "Get a colour associated with this tutor",
             "itemtype": "method",
             "name": "colour",
@@ -514,7 +1225,7 @@
         },
         {
             "file": "core.js",
-            "line": 195,
+            "line": 205,
             "description": "Get a room by ID",
             "itemtype": "method",
             "name": "get",
@@ -534,7 +1245,7 @@
         },
         {
             "file": "core.js",
-            "line": 207,
+            "line": 217,
             "description": "Get all rooms",
             "itemtype": "method",
             "name": "all",
@@ -547,7 +1258,7 @@
         },
         {
             "file": "core.js",
-            "line": 238,
+            "line": 246,
             "description": "Find a room by name",
             "itemtype": "method",
             "name": "find",
@@ -567,7 +1278,7 @@
         },
         {
             "file": "core.js",
-            "line": 272,
+            "line": 280,
             "description": "Format date in server specific format",
             "itemtype": "method",
             "name": "formatDate",
@@ -588,7 +1299,7 @@
         },
         {
             "file": "core.js",
-            "line": 286,
+            "line": 294,
             "description": "Useful function to set the name on any object with a `name` property.\n\nParses names to extract forename and surname as well as combinations\nfor English and Chinese names. It recognises common Chinese surnames\nto avoid confusion with English name first vs. English name last.\n\nThis method modifies the original object by adding the properties:\n`forename`, `surname`, `englishName` and `chineseName`.",
             "itemtype": "method",
             "name": "parseName",
@@ -601,6 +1312,207 @@
             ],
             "class": "Util",
             "module": "Core"
+        },
+        {
+            "file": "members.js",
+            "line": 32,
+            "description": "Get a student specified by his ID",
+            "itemtype": "method",
+            "name": "get",
+            "params": [
+                {
+                    "name": "id",
+                    "description": "Student ID",
+                    "type": "Int"
+                }
+            ],
+            "return": {
+                "description": "Object representing the student",
+                "type": "Object"
+            },
+            "class": "Student",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 44,
+            "description": "Add a student here for tracking which may have been generated elsewhere\n(single homogenous module solves this)",
+            "itemtype": "method",
+            "name": "add",
+            "params": [
+                {
+                    "name": "student",
+                    "description": "Student object",
+                    "type": "Object"
+                }
+            ],
+            "class": "Student",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 56,
+            "description": "Find students with specific conditions",
+            "itemtype": "method",
+            "name": "find",
+            "params": [
+                {
+                    "name": "options",
+                    "description": "A map of options",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "name",
+                            "description": "Only return students whose name *contains* this value",
+                            "type": "String",
+                            "optional": true
+                        }
+                    ]
+                }
+            ],
+            "return": {
+                "description": "Promise of an array of student objects",
+                "type": "Promise"
+            },
+            "class": "Student",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 118,
+            "description": "Fetch details about a student",
+            "itemtype": "method",
+            "name": "fetch",
+            "params": [
+                {
+                    "name": "student",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "The same student object passed in",
+                "type": "Object"
+            },
+            "class": "Student",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 274,
+            "description": "Save student back to the server",
+            "itemtype": "method",
+            "name": "save",
+            "params": [
+                {
+                    "name": "student",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "Prmoise resolves when server confirms student has been saved succesfully",
+                "type": "Promise(Student)"
+            },
+            "class": "Student",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 345,
+            "description": "Function to commit invoices to the server",
+            "itemtype": "method",
+            "name": "save",
+            "params": [
+                {
+                    "name": "invoice",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "class": "Invoice",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 375,
+            "description": "Void an Invoice\n\n[Sugar] for...",
+            "itemtype": "method",
+            "name": "void",
+            "params": [
+                {
+                    "name": "invoice",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "reason",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Promise reflects success of operation",
+                "type": "Promise"
+            },
+            "class": "Invoice",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 406,
+            "description": "Get Subscription by courseId and studentID",
+            "itemtype": "method",
+            "name": "get",
+            "params": [
+                {
+                    "name": "id",
+                    "description": "",
+                    "type": "Int"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Object"
+            },
+            "class": "Subscription",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 419,
+            "description": "Start tracking a subscription",
+            "itemtype": "method",
+            "name": "add",
+            "params": [
+                {
+                    "name": "subscription",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "class": "Subscription",
+            "module": "Members"
+        },
+        {
+            "file": "members.js",
+            "line": 439,
+            "description": "Save a subscription to the server\n\nSubscribe a student to a course",
+            "itemtype": "method",
+            "name": "save",
+            "params": [
+                {
+                    "name": "subscription",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise(Subscription)"
+            },
+            "class": "Subscription",
+            "module": "Members"
         },
         {
             "file": "report.js",
@@ -670,7 +1582,7 @@
         },
         {
             "file": "report.js",
-            "line": 115,
+            "line": 139,
             "description": "Given a report stub this method provides the full report card details",
             "itemtype": "method",
             "name": "fetch",
@@ -690,7 +1602,7 @@
         },
         {
             "file": "report.js",
-            "line": 165,
+            "line": 189,
             "description": "When provided with a full report object this method will save the report\nback to the server.",
             "itemtype": "method",
             "name": "save",
@@ -710,7 +1622,7 @@
         },
         {
             "file": "report.js",
-            "line": 185,
+            "line": 210,
             "description": "Static method to get comment templates",
             "itemtype": "method",
             "name": "getComments",
@@ -724,7 +1636,7 @@
         },
         {
             "file": "report.js",
-            "line": 241,
+            "line": 266,
             "description": "Get Learning focuses for courses",
             "itemtype": "method",
             "name": "getCourseLearningFocus",
@@ -745,7 +1657,7 @@
         },
         {
             "file": "report.js",
-            "line": 271,
+            "line": 296,
             "description": "Set course learning objective for a course\n\nDOES NOT save back to server, only for current session",
             "itemtype": "method",
             "name": "setCourseLearningFocus",
@@ -771,5 +1683,214 @@
             "module": "Report"
         }
     ],
-    "warnings": []
+    "warnings": [
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1492"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1492"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1531"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1531"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1543"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1543"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1552"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1552"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1562"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1562"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1572"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1572"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1580"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1580"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1588"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1588"
+        },
+        {
+            "message": "unknown tag: name",
+            "line": " test\\qunit-1.14.0.js:1596"
+        },
+        {
+            "message": "replacing incorrect tag: function with method",
+            "line": " test\\qunit-1.14.0.js:1596"
+        },
+        {
+            "message": "unknown tag: projectdescription",
+            "line": " test\\qunit-1.14.0.js:1894"
+        },
+        {
+            "message": "unknown tag: version",
+            "line": " test\\qunit-1.14.0.js:1894"
+        },
+        {
+            "message": "unknown tag: link",
+            "line": " test\\qunit-1.14.0.js:1894"
+        },
+        {
+            "message": "Missing item type\nProvides a normalized error string, correcting an issue\nwith IE 7 (and prior) where Error.prototype.toString is\nnot properly implemented\n\nBased on http://es5.github.com/#x15.11.4.4",
+            "line": " test\\qunit-1.14.0.js:40"
+        },
+        {
+            "message": "Missing item type\nMakes a clone of an object using only Array or Object as base,\nand copies over the own enumerable properties.",
+            "line": " test\\qunit-1.14.0.js:69"
+        },
+        {
+            "message": "Missing item type\nConfig object: Maintain internal state\nLater exposed as QUnit.config\n`config` initialized at top of scope",
+            "line": " test\\qunit-1.14.0.js:219"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:538"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:884"
+        },
+        {
+            "message": "Missing item type\nEscape text for attribute or text content.",
+            "line": " test\\qunit-1.14.0.js:974"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:1096"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:1117"
+        },
+        {
+            "message": "Missing item type\nExpose the current test environment.",
+            "line": " test\\qunit-1.14.0.js:1259"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:1661"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:1667"
+        },
+        {
+            "message": "Missing item type",
+            "line": " test\\qunit-1.14.0.js:1675"
+        },
+        {
+            "message": "Missing item type\njsDump Copyright (c) 2008 Ariel Flesler - aflesler(at)gmail(dot)com |\nhttp://flesler.blogspot.com Licensed under BSD\n(http://www.opensource.org/licenses/bsd-license.php) Date: 5/15/2008",
+            "line": " test\\qunit-1.14.0.js:1894"
+        },
+        {
+            "message": "Missing item type\nSparkMD5 OOP implementation.\n\nUse this class to perform an incremental md5, otherwise use the\nstatic methods instead.",
+            "line": " test\\spark-md5.js:296"
+        },
+        {
+            "message": "Missing item type\nAppends a string.\nA conversion will be applied if an utf8 string is detected.",
+            "line": " test\\spark-md5.js:318"
+        },
+        {
+            "message": "Missing item type\nAppends a binary string.",
+            "line": " test\\spark-md5.js:338"
+        },
+        {
+            "message": "Missing item type\nFinishes the incremental computation, reseting the internal state and\nreturning the result.\nUse the raw parameter to obtain the raw result instead of the hex one.",
+            "line": " test\\spark-md5.js:361"
+        },
+        {
+            "message": "Missing item type\nFinish the final calculation based on the tail.",
+            "line": " test\\spark-md5.js:389"
+        },
+        {
+            "message": "Missing item type\nResets the internal state of the computation.",
+            "line": " test\\spark-md5.js:421"
+        },
+        {
+            "message": "Missing item type\nReleases memory used by the incremental buffer and other aditional\nresources. If you plan to use the instance again, use reset instead.",
+            "line": " test\\spark-md5.js:434"
+        },
+        {
+            "message": "Missing item type\nPerforms the md5 hash on a string.\nA conversion will be applied if utf8 string is detected.",
+            "line": " test\\spark-md5.js:445"
+        },
+        {
+            "message": "Missing item type\nPerforms the md5 hash on a binary string.",
+            "line": " test\\spark-md5.js:465"
+        },
+        {
+            "message": "Missing item type\nSparkMD5 OOP implementation for array buffers.\n\nUse this class to perform an incremental md5 ONLY for array buffers.",
+            "line": " test\\spark-md5.js:479"
+        },
+        {
+            "message": "Missing item type\nAppends an array buffer.",
+            "line": " test\\spark-md5.js:491"
+        },
+        {
+            "message": "Missing item type\nFinishes the incremental computation, reseting the internal state and\nreturning the result.\nUse the raw parameter to obtain the raw result instead of the hex one.",
+            "line": " test\\spark-md5.js:517"
+        },
+        {
+            "message": "Missing item type\nResets the internal state of the computation.",
+            "line": " test\\spark-md5.js:547"
+        },
+        {
+            "message": "Missing item type\nReleases memory used by the incremental buffer and other aditional\nresources. If you plan to use the instance again, use reset instead.",
+            "line": " test\\spark-md5.js:560"
+        },
+        {
+            "message": "Missing item type\nConcats two array buffers, returning a new one.",
+            "line": " test\\spark-md5.js:566"
+        },
+        {
+            "message": "Missing item type\nPerforms the md5 hash on an array buffer.",
+            "line": " test\\spark-md5.js:584"
+        },
+        {
+            "message": "Missing item type\nFunction to find attendances",
+            "line": " calendar.js:619"
+        },
+        {
+            "message": "Missing item type\nTakes either an attendance or a lesson/student pair",
+            "line": " calendar.js:714"
+        }
+    ]
 }

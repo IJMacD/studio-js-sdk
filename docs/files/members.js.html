@@ -1,3 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>members.js - i-Learner Studio Admin API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="i-Learner Studio Admin API"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 1.0.0</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/Attendance.html">Attendance</a></li>
+            
+                <li><a href="../classes/Course.html">Course</a></li>
+            
+                <li><a href="../classes/Invoice.html">Invoice</a></li>
+            
+                <li><a href="../classes/Lesson.html">Lesson</a></li>
+            
+                <li><a href="../classes/Report.html">Report</a></li>
+            
+                <li><a href="../classes/Room.html">Room</a></li>
+            
+                <li><a href="../classes/Student.html">Student</a></li>
+            
+                <li><a href="../classes/Subscription.html">Subscription</a></li>
+            
+                <li><a href="../classes/Tutor.html">Tutor</a></li>
+            
+                <li><a href="../classes/Util.html">Util</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Calendar.html">Calendar</a></li>
+            
+                <li><a href="../modules/Core.html">Core</a></li>
+            
+                <li><a href="../modules/Members.html">Members</a></li>
+            
+                <li><a href="../modules/Report.html">Report</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: members.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
 (function(window){
 
 	/**
@@ -65,7 +179,7 @@
 		var now = new Date(),
 			post_data = {
 				// Case-insensitive searching
-				searchStudentName: options.name && options.name.toLowerCase(),
+				searchStudentName: options.name &amp;&amp; options.name.toLowerCase(),
 				searchStudentMobile: options.phone,
 				searchStudentSchool: options.school,
 				searchStudentCourseYear: options.year === undefined ? now.getFullYear() : options.year,
@@ -79,7 +193,7 @@
 
 		if(!_searches[hash]){
 			_searches[hash] = Promise.resolve(
-					$.post(iL.API_ROOT + "process_getMemberList.php", post_data, null, "json")
+					$.post(iL.API_ROOT + &quot;process_getMemberList.php&quot;, post_data, null, &quot;json&quot;)
 				)
 				.then(function(data){
 					var out = [];
@@ -88,16 +202,16 @@
 							student = students[id] || {
 								id: id
 							},
-							name = (item.Lastname && item.nickname) ?
-								(item.Lastname.length > item.nickname.length ? item.Lastname : item.nickname) :
+							name = (item.Lastname &amp;&amp; item.nickname) ?
+								(item.Lastname.length &gt; item.nickname.length ? item.Lastname : item.nickname) :
 								(item.Lastname || item.nickname);
 
 						name = $.trim(name);
 						student.name = name;
-						student.gender = item.Gender == "1" ? "male" : "female";
+						student.gender = item.Gender == &quot;1&quot; ? &quot;male&quot; : &quot;female&quot;;
 						student.grade = item.Grade;
 						student.account = item.AccountName;
-						student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
+						student.photo = iL.Conf.PHOTO_URL + item.AccountName + &quot;.jpg&quot;;
 						student.school = item.School;
 						student.phone = item.mobile;
 						student.registeredDate = new Date(item.RegDate);
@@ -126,23 +240,23 @@
 		student = students[student.id] || student;
 		if(!_students[student.id]){
 			_students[student.id] = Promise.resolve(
-					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
+					$.post(iL.API_ROOT + &quot;process_getMemberDetail.php&quot;, {memberID: student.id}, null, &quot;json&quot;)
 				).then(function(data){
 					var guardians = [],
 						guardian,
 						subs = {};
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
-							var name = (item.lastname && item.Nickname) ?
-								(item.lastname.length > item.Nickname.length ? item.lastname : item.Nickname) :
+							var name = (item.lastname &amp;&amp; item.Nickname) ?
+								(item.lastname.length &gt; item.Nickname.length ? item.lastname : item.Nickname) :
 								(item.lastname || item.Nickname);
 							name = $.trim(name);
-							if(item.isStudent == "1"){
+							if(item.isStudent == &quot;1&quot;){
 								student.name = name;
-								student.gender = item.Gender == "1" ? "male" : "female";
+								student.gender = item.Gender == &quot;1&quot; ? &quot;male&quot; : &quot;female&quot;;
 								student.grade = item.Grade;
 								student.account = item.AccountName;
-								student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
+								student.photo = iL.Conf.PHOTO_URL + item.AccountName + &quot;.jpg&quot;;
 								student.school = item.School;
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
@@ -155,7 +269,7 @@
 								student.nameChinese = item.Chiname;
 								student.schoolStart = item.schooltimefrom;
 								student.schoolEnd = item.schooltimeto;
-								student.soco = item.isSOCO == "1";
+								student.soco = item.isSOCO == &quot;1&quot;;
 								student.entryChannel1 = item.whyjoinusextendtext1;
 								student.entryChannel2 = item.whyjoinusextendtext2;
 
@@ -168,7 +282,7 @@
 								// break loop
 								return false;
 							}
-							else if(item.isGuardian == "1"){
+							else if(item.isGuardian == &quot;1&quot;){
 								guardian = {
 									accountID: item.AccountName,
 									relationship: item.Relationship,
@@ -218,7 +332,7 @@
 									year: parseInt(item.invoiceyear),
 									month: parseInt(item.invoicemonth),
 									lessonCount: lessonCount,
-									paid: item.Paid == "1",
+									paid: item.Paid == &quot;1&quot;,
 									amount: finalAmount,
 									originalAmount: originalAmount,
 									discount: originalAmount - finalAmount,
@@ -235,17 +349,17 @@
 							course.existingDiscount = parseInt(item.DiscountForOldStudent);
 							course.pricePerLesson = pricePerLesson;
 
-							subscription.withdrawn = item.withdrawal == "1";
+							subscription.withdrawn = item.withdrawal == &quot;1&quot;;
 
 							iL.Course.add(course);
 							iL.Subscription.add(subscription);
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
-							if(invoice.paid && dateIndex > subscription.lastPaymentIndex
-								&& course.existingDiscount){
+							if(invoice.paid &amp;&amp; dateIndex &gt; subscription.lastPaymentIndex
+								&amp;&amp; course.existingDiscount){
 								subscription.existingStudent =
-									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
+									(invoice.discount / invoice.lessonCount &gt;= course.existingDiscount);
 								subscription.lastPaymentIndex = dateIndex;
 							}
 
@@ -284,7 +398,7 @@
 		}
 		var guardian = student.guardians[0],
 			post_data = {
-				Action: student.id ? "update" : "insert",
+				Action: student.id ? &quot;update&quot; : &quot;insert&quot;,
 				MemberID: student.id,
 				MemberDetailNameinEnglish: student.englishName,
 				MemberDetailRemark: student.notes,
@@ -292,7 +406,7 @@
 				MemberDetailNameinChinese: student.nameChinese,
 				MemberDetailNickname: student.name,
 				MemberDetailBirthDay: iL.Util.formatDate(student.birthDate),
-				MemberDetailGender: student.gender == "male" ? "1" : "0",
+				MemberDetailGender: student.gender == &quot;male&quot; ? &quot;1&quot; : &quot;0&quot;,
 				MemberDetailGrade: student.grade,
 				MemberDetailSchool: student.school,
 				MemberDetailSchooltimefrom: student.schoolStart,
@@ -310,17 +424,17 @@
 				GuardianDetailMobileNo: student.phone,	/* Be careful! At the moment this is echoed back for both the
 														   student and guardian but it is only saved under the guardian. We
 														   keep track of it as part of the student for simplicity, which is
-														   why we're using that value here - just incase it has been modified
+														   why we&#x27;re using that value here - just incase it has been modified
 														   on the student */
 				GuardianDetailOfficeNo: guardian.phoneOffice,
 				whyjoinusextendtext1: student.entryChannel1,
 				whyjoinusextendtext2: student.entryChannel2
 			};
 		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
+			$.post(iL.API_ROOT + &quot;process_updateMemberInformation.php&quot;, post_data, null, &quot;json&quot;)
 		).then(function(data){
-			if(!data || data.statuscode != "1"){
-				return Promise.reject(Error("Server Rejected Student"));
+			if(!data || data.statuscode != &quot;1&quot;){
+				return Promise.reject(Error(&quot;Server Rejected Student&quot;));
 			}
 			if(!student.id){
 				student.id = data.MemberID;
@@ -355,15 +469,15 @@
 				InvoiceMonth: invoice.month,
 				shouldpay: invoice.originalAmount,
 				AmountAfterDiscount: invoice.amount,
-				paymentmethod: invoice.paymentMethod == "cash" ? 1 : 2,
+				paymentmethod: invoice.paymentMethod == &quot;cash&quot; ? 1 : 2,
 				ChequeNo: invoice.chequeNumber,
-				CouponCode: invoice.coupons.join(","),
+				CouponCode: invoice.coupons.join(&quot;,&quot;),
 				issuedate: invoice.date,
 				htmlselect_Discountvalue_val: invoice.originalAmount - invoice.amount,
 				htmlselect_Discounttype_val: 1	// dollars
 			};
 		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberInvoice.php", post_data, null, "json")
+			$.post(iL.API_ROOT + &quot;process_updateMemberInvoice.php&quot;, post_data, null, &quot;json&quot;)
 		).then(function(data){
 			invoice.id = data.iID;
 			invoice.handledBy = data.handle;
@@ -388,7 +502,7 @@
 				reason: reason
 			};
 		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_removeMemberInvoice.php", post_data, null, "json")
+			$.post(iL.API_ROOT + &quot;process_removeMemberInvoice.php&quot;, post_data, null, &quot;json&quot;)
 		).then(function(data){
 			invoice.id = 0;
 			invoice.handledBy = undefined;
@@ -431,9 +545,9 @@
 	function subscriptionKey(course, student){
 		var args = arguments;
 		if(args.length == 2){
-			return course.id + ":" + student.id;
+			return course.id + &quot;:&quot; + student.id;
 		}
-		return args[0].course.id + ":" + args[0].student.id;
+		return args[0].course.id + &quot;:&quot; + args[0].student.id;
 	}
 
 	/**
@@ -447,14 +561,14 @@
 	 */
 	function saveSubscription(subscription){
 		var post_data = {
-			Action: subscription.id ? "update" : "insert",
+			Action: subscription.id ? &quot;update&quot; : &quot;insert&quot;,
 			MemberID: subscription.student.id,
 			CoruseScheduleID: subscription.firstLesson.id, // [sic]
 			StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
 			StudentCoursePaymentcycle: 2 // [sic] per lesson
 		};
 		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
+			$.post(iL.API_ROOT + &quot;process_updateMemberCourse.php&quot;, post_data, null, &quot;json&quot;)
 		).then(function(data){
 			if(!subscription.id){
 				subscription.id = data.MemberCourseID;
@@ -464,7 +578,7 @@
 						student: subscription.student,
 						lesson: subscription.firstLesson,
 						absent: false,
-						memberCourseID: subscription.id // should this actually just be 'subscription:'' ?
+						memberCourseID: subscription.id // should this actually just be &#x27;subscription:&#x27;&#x27; ?
 					};
 				iL.Attendance.add(attendance);
 			}
@@ -474,3 +588,23 @@
 	Subscription.save = saveSubscription;
 
 }(window));
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

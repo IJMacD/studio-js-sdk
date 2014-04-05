@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Course - i-Learner Studio Admin API</title>
+    <title>Subscription - i-Learner Studio Admin API</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -108,7 +108,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>Course Class</h1>
+                        <h1>Subscription Class</h1>
 <div class="box meta">
     
 
@@ -116,13 +116,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/calendar.js.html#l340"><code>calendar.js:340</code></a>
+            Defined in: <a href="../files/members.js.html#l400"><code>members.js:400</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Calendar.html">Calendar</a>
+            Module: <a href="../modules/Members.html">Members</a>
         
     
 
@@ -132,8 +132,7 @@
 
 
 <div class="box intro">
-    <p>Class to deal with courses. Courses generally run for a number of weeks
-and contain lesson instances</p>
+    <p>Class to handle Student-Course Links</p>
 
 </div>
 
@@ -169,20 +168,6 @@ and contain lesson instances</p>
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fetch">fetch</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_find">find</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
                                 <a href="#method_get">get</a>
 
                                 
@@ -190,7 +175,7 @@ and contain lesson instances</p>
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_lessons">lessons</a>
+                                <a href="#method_save">save</a>
 
                                 
                                 
@@ -221,7 +206,7 @@ and contain lesson instances</p>
             
                 <li class="arg">
                     
-                        <code>course</code>
+                        <code>subscription</code>
                     
                 </li>
             
@@ -254,7 +239,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l359"><code>calendar.js:359</code></a>
+        <a href="../files/members.js.html#l419"><code>members.js:419</code></a>
         
         </p>
 
@@ -265,7 +250,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Add a course to be tracked by the sdk</p>
+        <p>Start tracking a subscription</p>
 
     </div>
 
@@ -277,101 +262,7 @@ and contain lesson instances</p>
             
                 <li class="param">
                     
-                        <code class="param-name">course</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>course to add</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fetch" class="method item">
-    <h3 class="name"><code>fetch</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>course</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Object</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/calendar.js.html#l490"><code>calendar.js:490</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Fetch details of a course</p>
-<p>Details  gained by fetching include payment information and fees</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">course</code>
+                        <code class="param-name">subscription</code>
                         <span class="type">Object</span>
                     
 
@@ -388,200 +279,6 @@ and contain lesson instances</p>
         </div>
     
 
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type">Object</span>:
-                    
-                    <p>Returns the same course object</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_find" class="method item">
-    <h3 class="name"><code>find</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>options</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Promise</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/calendar.js.html#l370"><code>calendar.js:370</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Find courses matching given search parameters</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">options</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                        <ul class="params-list">
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[code]</code>
-                                    <span class="type">String</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[title]</code>
-                                    <span class="type">String</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[year]</code>
-                                    <span class="type">Int</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[month]</code>
-                                    <span class="type">Int</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[tutor]</code>
-                                    <span class="type">Object</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                        </ul>
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type">Promise</span>:
-                    
-                    <p>Promise of an array</p>
-
-                
-            </div>
-        </div>
     
 
     
@@ -634,7 +331,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l347"><code>calendar.js:347</code></a>
+        <a href="../files/members.js.html#l406"><code>members.js:406</code></a>
         
         </p>
 
@@ -645,7 +342,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Get a specific course</p>
+        <p>Get Subscription by courseId and studentID</p>
 
     </div>
 
@@ -664,8 +361,7 @@ and contain lesson instances</p>
                     
 
                     <div class="param-description">
-                        <p>ID of course to get</p>
-
+                         
                     </div>
 
                     
@@ -684,8 +380,6 @@ and contain lesson instances</p>
                     
                         <span class="type">Object</span>:
                     
-                    <p>Course object</p>
-
                 
             </div>
         </div>
@@ -695,8 +389,8 @@ and contain lesson instances</p>
 </div>
 
                 
-                    <div id="method_lessons" class="method item">
-    <h3 class="name"><code>lessons</code></h3>
+                    <div id="method_save" class="method item">
+    <h3 class="name"><code>save</code></h3>
 
     
         <div class="args">
@@ -704,7 +398,7 @@ and contain lesson instances</p>
             
                 <li class="arg">
                     
-                        <code>course</code>
+                        <code>subscription</code>
                     
                 </li>
             
@@ -714,7 +408,7 @@ and contain lesson instances</p>
 
     
         <span class="returns-inline">
-            <span class="type">Promise</span>
+            <span class="type">Promise(Subscription)</span>
         </span>
     
 
@@ -741,7 +435,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l573"><code>calendar.js:573</code></a>
+        <a href="../files/members.js.html#l439"><code>members.js:439</code></a>
         
         </p>
 
@@ -752,8 +446,8 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Get all lessons for this course
-[Sugar] for Lesson.find({course: this})</p>
+        <p>Save a subscription to the server</p>
+<p>Subscribe a student to a course</p>
 
     </div>
 
@@ -765,7 +459,7 @@ and contain lesson instances</p>
             
                 <li class="param">
                     
-                        <code class="param-name">course</code>
+                        <code class="param-name">subscription</code>
                         <span class="type">Object</span>
                     
 
@@ -789,10 +483,8 @@ and contain lesson instances</p>
             <div class="returns-description">
                 
                     
-                        <span class="type">Promise</span>:
+                        <span class="type">Promise(Subscription)</span>:
                     
-                    <p>Promise of an array</p>
-
                 
             </div>
         </div>
