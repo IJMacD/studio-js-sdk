@@ -4,6 +4,8 @@
     "version": "1.0.0",
     "url": "http://127.0.0.1/c/Dashboard",
     "options": {
+    	"paths": ".",
+    	"exclude": "studio-js-sdk.js",
         "outdir": "./docs"
     }
 }

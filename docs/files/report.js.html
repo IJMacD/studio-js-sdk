@@ -41,13 +41,21 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="../classes/Attendance.html">Attendance</a></li>
+            
                 <li><a href="../classes/Course.html">Course</a></li>
+            
+                <li><a href="../classes/Invoice.html">Invoice</a></li>
             
                 <li><a href="../classes/Lesson.html">Lesson</a></li>
             
                 <li><a href="../classes/Report.html">Report</a></li>
             
                 <li><a href="../classes/Room.html">Room</a></li>
+            
+                <li><a href="../classes/Student.html">Student</a></li>
+            
+                <li><a href="../classes/Subscription.html">Subscription</a></li>
             
                 <li><a href="../classes/Tutor.html">Tutor</a></li>
             
@@ -60,6 +68,8 @@
                 <li><a href="../modules/Calendar.html">Calendar</a></li>
             
                 <li><a href="../modules/Core.html">Core</a></li>
+            
+                <li><a href="../modules/Members.html">Members</a></li>
             
                 <li><a href="../modules/Report.html">Report</a></li>
             
@@ -119,7 +129,7 @@
 		comments,
 
 		learningDefaults = {wh1label: &quot;Politeness&quot;, wh2label: &quot;Attentiveness&quot;, wh3label: &quot;Participation&quot;, wh4label: &quot;Effort&quot;},
-		saveFields = &quot;idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus lessoncount&quot;.split(&quot; &quot;);
+		saveFields = &quot;ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount&quot;.split(&quot; &quot;);
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -185,27 +195,51 @@
 					&quot;json&quot;)
 				)
 				.then(function(data){
-					var resultSet;
+					var resultSet = [];
 					if(data.MemberReportCardList){
-						resultSet = data.MemberReportCardList;
-						$.each(resultSet, function(i,item){
-							item.id = item.membercourseid;
-							item.studentId = item.memberID;
-							item.name = item.nickname;
-							item.course = {
-								id: item.courseID,
-								title: item.coursename,
-								startTime: item.starttime,
-								endTime: item.endtime
-							};
-							item.memberCourseId = item.membercourseid;
-							item.complete = (item.completed == &quot;1&quot;);
-							item.tutor = options.tutor;
+						$.each(data.MemberReportCardList, function(i,item){
+							var studentID = item.memberID,
+								courseID = item.courseID,
+								subscriptionID = item.membercourseid,
+								reportID = item.idmembercoursereportcard,
+								student = iL.Student.get(studentID) || {
+									id: studentID
+								},
+								course = iL.Course.get(courseID) || {
+									id: courseID
+								},
+								subscription = iL.Subscription.get(course, student) || {
+									id: subscriptionID,
+									student: student,
+									course: course
+								}
+								report = {
+									id: reportID,
+									student: student,
+									course: course,
+									subscription: subscription,
+									complete: (item.completed == &quot;1&quot;),
+									attendance: item.Attend_amendment,
+									lessoncount: item.lessoncount
+								};
 
-							iL.parseName(item);
+							student.name = item.nickname;
+							course.title = item.coursename;
+							course.startTime = item.starttime;
+							course.endTime = item.endtime;
+
+							course.tutor = options.tutor;
+
+							iL.parseName(student);
+
+							iL.Student.add(student);
+							iL.Course.add(course);
+							iL.Subscription.add(subscription);
 
 							// TODO: check if report already exists and don&#x27;t replace it
 							reports[item.id] = item;
+
+							resultSet.push(report);
 						});
 					}
 					return resultSet;
@@ -228,8 +262,8 @@
 			promise = deferred.promise();
 
 		$.when(
-			$.post(iL.API_ROOT + &quot;process_getMemberReportCardDetail.php&quot;, { membercourseID: item.id },  null, &quot;json&quot;),
-			getCourseLearningFocus(item.courseName)
+			$.post(iL.API_ROOT + &quot;process_getMemberReportCardDetail.php&quot;, { membercourseID: item.subscription.id },  null, &quot;json&quot;),
+			getCourseLearningFocus(item.course.title)
 		)
 		.done(function(a1, focus){
 			var detail = a1[0].MemberReportCardDetail[0],
@@ -277,6 +311,7 @@
 	function save(item){
 		var post_data = {},
 			i, k;
+		post_data.idmembercoursereportcard = item.id;
 		item.complete = true;
 		for(i in saveFields){
 			k = saveFields[i];

@@ -41,13 +41,21 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="../classes/Attendance.html">Attendance</a></li>
+            
                 <li><a href="../classes/Course.html">Course</a></li>
+            
+                <li><a href="../classes/Invoice.html">Invoice</a></li>
             
                 <li><a href="../classes/Lesson.html">Lesson</a></li>
             
                 <li><a href="../classes/Report.html">Report</a></li>
             
                 <li><a href="../classes/Room.html">Room</a></li>
+            
+                <li><a href="../classes/Student.html">Student</a></li>
+            
+                <li><a href="../classes/Subscription.html">Subscription</a></li>
             
                 <li><a href="../classes/Tutor.html">Tutor</a></li>
             
@@ -60,6 +68,8 @@
                 <li><a href="../modules/Calendar.html">Calendar</a></li>
             
                 <li><a href="../modules/Core.html">Core</a></li>
+            
+                <li><a href="../modules/Members.html">Members</a></li>
             
                 <li><a href="../modules/Report.html">Report</a></li>
             
@@ -113,12 +123,20 @@
 		iL = iLearner,
 		$ = window.jQuery,
 
+		defaults = {
+			API_ROOT: &quot;/&quot;,
+			PHOTO_URL: &quot;/photos&quot;
+		},
+
 		Tutor = iLearner.Tutor || {},
 		Room = iLearner.Room || {},
 		Util = iLearner.Util || {},
 
-		API_ROOT = (iL.Conf &amp;&amp; iL.Conf.API_ROOT) || &quot;/c/studio/&quot;,
-		topNames = &quot;Chan Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen&quot;.split(&quot; &quot;),
+		topNames = &quot;Chan Chang Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung&quot;
+			+ &quot; Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay&quot;
+			+ &quot; Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Man Mang Mo Mok Ng Ngai Pak Pang Poon Sek Shek Sheung&quot;
+			+ &quot; Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui&quot;
+			+ &quot; Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen&quot;.split(&quot; &quot;),
 
 		memberID,
 		accountName,
@@ -131,53 +149,55 @@
 	window.iL = iLearner;
 	window.iLearner = iLearner;
 
+	iL.Conf = $.extend({}, defaults, iL.Conf);
+
 	iLearner.Tutor = Tutor;
 	iLearner.Room = Room;
 	iLearner.Util = Util;
 
-	iL.API_ROOT = API_ROOT;
+	/* legacy */
+	iL.API_ROOT = iL.Conf.API_ROOT;
 
 	getInitData();
 
-	function Login(user, pass, success, error){
-		$.post(API_ROOT + &quot;process_login.php&quot;,
-			{
-				login: user,
-				password: pass
-			},
-			function(data){
+	function Login(user, pass){
+		return Promise.resolve(
+				$.post(
+					iL.Conf.API_ROOT + &quot;process_login.php&quot;,
+					{
+						login: user,
+						password: pass
+					},
+					null,
+					&quot;json&quot;
+				)
+			)
+			.then(function(data){
 				if(data.result &amp;&amp; data.result[0]){
 					memberID = parseInt(data.result[0].mid);
 					accountName = data.result[0].acc;
 
 					if(!memberID){
-						if(typeof error == &quot;function&quot;){
-							error();
-						}
-						return;
+						return Promise.reject(Error(&quot;No member ID&quot;));
 					}
 
-					if(typeof success == &quot;function&quot;){
-						success(data.result[0]);
-					}
+					return data.result[0];
 				}
-				else if(typeof error == &quot;function&quot;){
-					error();
+				else{
+					return Promise.reject(Error(&quot;Invalid data from the server&quot;));
 				}
-			},
-			&quot;json&quot;)
-		.fail(error);
+			});
 	}
 	iLearner.Login = Login;
 
 	function Logout(){
-		$.post(API_ROOT + &quot;process_logout.php&quot;);
+		$.post(iL.Conf.API_ROOT + &quot;process_logout.php&quot;);
 	}
 	iLearner.Logout = Logout;
 
 	function getInitData(){
 		loading = Promise.resolve(
-			$.post(API_ROOT + &quot;process_getinitdata.php&quot;,
+			$.post(iL.Conf.API_ROOT + &quot;process_getinitdata.php&quot;,
 				null,
 				null,
 				&quot;json&quot;)
@@ -298,7 +318,7 @@
 
 	 /**
 	  * Get a room by ID
-	  * 
+	  *
 	  * @method get
 	  * @param id {int} ID of the Room to get
 	  * @return {object} Object with details of the room
@@ -315,6 +335,7 @@
 	 * @return {Promise} Promise of an array rooms
 	 */
 	function getRooms(id){
+		var classroom;
 
 		if(classrooms &amp;&amp; id){
 			$.each(classrooms, function(i,c){
@@ -327,12 +348,9 @@
 			return classroom;
 		}
 
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
-		loading.then(function(){
-			deferred.resolve(classrooms);
-		});
-		return promise;
+		return Promise.resolve(
+			loading.then(function(){return classrooms;})
+		);
 	}
 	Room.all = getRooms;
 	/* @deprecated */
@@ -347,7 +365,7 @@
 	 * @return {object} Object describing room
 	 */
 	function findRoom(name){
-		var room;
+		var classroom;
 
 		if(!name){
 			return { id: 0, name: &quot;&quot; };
@@ -401,6 +419,8 @@
 	 * @param person {object} Object with a &#x60;name&#x60; property
 	 */
 	function parseName(person){
+		person.name = $.trim(person.name);
+
 		var names = person.name.match(/\w+/g);
 
 		if(!names){

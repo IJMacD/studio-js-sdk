@@ -331,7 +331,7 @@
 	 * @return {Promise} An array of attendees
 	 */
 	function lessonStudents(lesson){
-		return findAttendance({lesson: lesson}).then(function(attendances){
+		return findAttendances({lesson: lesson}).then(function(attendances){
 			return attendances.map(function(item){return item.student});
 		});
 	}
@@ -357,7 +357,7 @@
 	Course.get = getCourse;
 
 	/**
-	 * Add a course
+	 * Add a course to be tracked by the sdk
 	 *
 	 * @method add
 	 * @param course {object} course to add
@@ -372,7 +372,8 @@
 	 *
 	 * @method find
 	 * @param options {object}
-	 * @param [options.title] {int}
+	 * @param [options.code] {string}
+	 * @param [options.title] {string}
 	 * @param [options.year] {int}
 	 * @param [options.month] {int}
 	 * @param [options.tutor] {object}
@@ -486,6 +487,15 @@
 	}
 	Course.find = findCourses;
 
+	/**
+	 * Fetch details of a course
+	 *
+	 * Details  gained by fetching include payment information and fees
+	 *
+	 * @method fetch
+	 * @param course {object}
+	 * @return {object} Returns the same course object
+	 */
 	function courseFetch(course){
 		if(!_courseDetails[course.id]){
 			_courseDetails[course.id] = Promise.resolve(
@@ -579,11 +589,15 @@
 	/**
 	 * Attendance class for dealing with attendances
 	 *
-	 * @class Student
+	 * @class Attendance
 	 */
 
 	/**
 	 * Function to get an attendance record
+	 *
+	 * @method get
+	 * @param attendance|lesson {object} Either an attendance object or a lesson
+	 * @param [student] {object} If a lesson has been provided as the first parameter this must be a student
 	 */
 	function getAttendance(lesson, student){
 		return attendances[attendanceKey(lesson, student)];
@@ -592,6 +606,9 @@
 
 	/**
 	 * Function to track an attendance record
+	 *
+	 * @method add
+	 * @param attendance {object}
 	 */
 	function addAttendance(attendance){
 		attendances[attendanceKey(attendance)] = attendance;
@@ -606,7 +623,7 @@
 	 * @param options.lesson {object} Lesson to fetch attendances for
 	 * @return {Promise}
 	 */
-	function findAttendance(options){
+	function findAttendances(options){
 		if(options.lesson){
 			var lesson = options.lesson,
 				id = lesson.id;
@@ -649,16 +666,20 @@
 			return _attendees[id];
 		}
 	}
-	Attendance.find = findAttendance;
+	Attendance.find = findAttendances;
 
 	/**
-	 * Get complete attendance record,
+	 * Get complete attendance record
+	 *
 	 * i.e. attendance may likely be missing memberCourseID
-	 * @return returns the attendance you passed in
+	 *
+	 * @method fetch
+	 * @param attendance {object}
+	 * @return {object} returns the attendance you passed in
 	 */
 	function fetchAttendance(attendance){
 		var key = attendanceKey(attendance);
-		return findAttendance({lesson: attendance.lesson}).then(function(){
+		return findAttendances({lesson: attendance.lesson}).then(function(){
 			return attendances[key];
 		});
 	}
@@ -666,6 +687,10 @@
 
 	/**
 	 * Function to save attendance to the server
+	 *
+	 * @method save
+	 * @param attendance {object}
+	 * @return {Promise}
 	 */
 	function saveAttendance(attendance){
 		if(!attendance.memberCourseID){
