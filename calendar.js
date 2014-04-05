@@ -378,6 +378,13 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
+		// Assume its come from outside, so apply our niceties
+		var match = course.title.match(levelRegex);
+		if(match){
+			course.title.replace(levelRegex, "");
+			course.level = match;
+		}
+
 		courses[course.id] = course;
 	}
 	Course.add = addCourse;
@@ -463,10 +470,7 @@
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
 
-							course = courses[courseID] || {
-								id: courseID,
-								lessons: []
-							},
+							course = courses[courseID],
 							lesson = lessons[lessonID] || {
 								id: lessonID,
 								start: start,
@@ -483,8 +487,6 @@
 
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
-
-						courses[course.id] = course;
 
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
@@ -528,7 +530,8 @@
 				.then(function(data){
 					var details = data.coursedetail[0];
 
-					course.code = details.CourseCode;
+					// This sometimes comes without suffix - can screw up links
+					//course.code = details.CourseCode;
 					course.title = details.CourseName.replace(levelRegex, "");
 					course.room = iL.Room.get(details.DefaultClassroomID);
 					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "monthly";
@@ -766,16 +769,23 @@
 	 * @return {Promise}
 	 */
 	function saveAttendance(attendance){
-		if(!attendance.memberCourseID){
+		if(!attendance.subscription){
 			// Shhh but... This could infinite loop if fetchAttendance
 			// for some reason doesn't supply the memberCourseID.
 			// Solution is second check in then handler before
 			// re-calling saveAttendance.
-			return fetchAttendance(attendance).then(saveAttendance);
+			if(!attendance.busy){
+				attendance.busy = true;
+				return fetchAttendance(attendance).then(saveAttendance);
+			}
+			else {
+				return Promise.reject(Error("Couldn't save, couldn't get memberCourseID"));
+			}
 		}
+		attendance.busy = false;
 		return Promise.resolve(
 			$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
-				mcid: attendance.memberCourseID,
+				mcid: attendance.subscription.id,
 				absent: attendance.absent ? 0 : 1,
 				coursescheduleID: attendance.lesson.id,
 				absentReason: ""
