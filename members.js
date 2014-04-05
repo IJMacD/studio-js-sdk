@@ -130,7 +130,7 @@
 				).then(function(data){
 					var guardians = [],
 						guardian,
-						subs = {};
+						subs = [];
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
 							var name = (item.lastname && item.Nickname) ?
@@ -189,6 +189,7 @@
 					if(data.memberCourseBalance){
 						$.each(data.memberCourseBalance, function(i,item){
 							var courseID = item.CourseID,
+								subscriptionID = item.membercourseID,
 								lessonCount = parseInt(item.Nooflesson),
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
@@ -196,8 +197,8 @@
 								course = iL.Course.get(courseID) || {
 									id: courseID
 								},
-								subscription = iL.Subscription.get(course, student) || {
-									id: item.membercourseID,
+								subscription = iL.Subscription.get(subscriptionID) || {
+									id: subscriptionID,
 									course: course,
 									student: student,
 									existingStudent: false,
@@ -259,7 +260,9 @@
 								subscription.unpaid += 1;
 							}
 
-							subs[subscriptionKey(subscription)] = subscription;
+							if(subs.indexOf(subscription) == -1){
+								subs.push(subscription);
+							}
 						});
 
 						student.subscriptions = subs;
@@ -404,17 +407,30 @@
 	 */
 
 	/**
-	 * Get Subscription by courseId and studentID
+	 * Get Subscription by id (memberCourseID)
 	 *
 	 * @method get
 	 * @param id {int}
 	 * @return {object}
 	 */
 	function getSubscription(id){
-		var key = subscriptionKey.apply(null, arguments);
-		return subscriptions[key];
+		return subscriptions[id];
 	}
 	Subscription.get = getSubscription;
+
+	/**
+	 * Find Subscription by course and student
+	 *
+	 * @method get
+	 * @param options {object}
+	 * @param options.course {object}
+	 * @param options.student {object}
+	 * @return {object}
+	 */
+	function findSubscription(options){
+		throw Error("Not Implemented");
+	}
+	Subscription.find = findSubscription;
 
 	/**
 	 * Start tracking a subscription
@@ -423,18 +439,9 @@
 	 * @param subscription {object}
 	 */
 	function addSubscription(subscription){
-		var key = subscriptionKey(subscription);
-		subscriptions[key] = subscription;
+		subscriptions[subscription.id] = subscription;
 	}
 	Subscription.add = addSubscription;
-
-	function subscriptionKey(course, student){
-		var args = arguments;
-		if(args.length == 2){
-			return course.id + ":" + student.id;
-		}
-		return args[0].course.id + ":" + args[0].student.id;
-	}
 
 	/**
 	 * Save a subscription to the server
@@ -446,31 +453,62 @@
 	 * @return {Promise(Subscription)}
 	 */
 	function saveSubscription(subscription){
-		var post_data = {
-			Action: subscription.id ? "update" : "insert",
-			MemberID: subscription.student.id,
-			CoruseScheduleID: subscription.firstLesson.id, // [sic]
-			StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
-			StudentCoursePaymentcycle: 2 // [sic] per lesson
-		};
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
-		).then(function(data){
-			if(!subscription.id){
-				subscription.id = data.MemberCourseID;
-				addSubscription(subscription);
+		var post_data;
+		if(subscription.lastLesson){
+			post_data = {
+				membercourseID: subscription.id,
+				courseScheduleID: subscription.lastLesson.id
+			};
+			return Promise.resolve(
+				$.post(iL.API_ROOT + "process_MemberCourseWithDrawal.php", post_data, "json")
+			).then(function(){
+				// invalidate attendances
+			});
+		}
+		else {
+			post_data = {
+				Action: subscription.id ? "update" : "insert",
+				MemberID: subscription.student.id,
+				CoruseScheduleID: subscription.firstLesson.id, // [sic]
+				StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
+				StudentCoursePaymentcycle: 2 // [sic] per lesson
+			};
+			return Promise.resolve(
+				$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
+			).then(function(data){
+				if(!subscription.id){
+					subscription.id = data.MemberCourseID;
+					addSubscription(subscription);
 
-				var attendance = {
-						student: subscription.student,
-						lesson: subscription.firstLesson,
-						absent: false,
-						memberCourseID: subscription.id // should this actually just be 'subscription:'' ?
-					};
-				iL.Attendance.add(attendance);
-			}
-			return subscription;
-		});
+					var attendance = {
+							student: subscription.student,
+							lesson: subscription.firstLesson,
+							subscription: subscription,
+							absent: false,
+							memberCourseID: subscription.id /* deprecated */
+						};
+					iL.Attendance.add(attendance);
+				}
+				return subscription;
+			});
+		}
 	}
 	Subscription.save = saveSubscription;
+
+	/**
+	 * Cancel a student subscription to a course
+	 *
+	 * @method remove
+	 * @param subscription {object}
+	 * @return {Promise}
+	 */
+	function removeSubscription(subscription){
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_cancelMemberCourse.php", {MemberCourseID: subscription.id}, null, "json")
+		).then(function(){
+			// invalidate attendances
+		});
+	}
+	Subscription.remove = removeSubscription;
 
 }(window));

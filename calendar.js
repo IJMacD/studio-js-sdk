@@ -619,6 +619,7 @@
 	/**
 	 * Function to find attendances
 	 *
+	 * @method find
 	 * @param options {object} Options
 	 * @param options.lesson {object} Lesson to fetch attendances for
 	 * @return {Promise}
@@ -644,17 +645,27 @@
 										name: item.Lastname,
 										photo: item.Accountname
 									},
+									subscriptionID = item.MemberCourseID,
+									subscription = iL.Subscription.get(subscriptionID) || {
+										id: subscriptionID,
+										course: lesson.course,
+										student: student
+									}
 									attendance = getAttendance(lesson, student) || {
 										lesson: lesson,
-										student: student
+										student: student,
+										subscription: subscription
 									};
 								iL.Util.parseName(student);
 
-								attendance.memberCourseID = item.MemberCourseID;
+								attendance.memberCourseID = subscription.id;
 								attendance.absent = item.absent == "1";
 
 								iL.Student.add(student);
+								iL.Subscription.add(subscription);
+
 								lesson.attendees.push(attendance);
+
 								attendances[attendanceKey(lesson, student)] = attendance;
 							});
 							resolve(lesson.attendees);
