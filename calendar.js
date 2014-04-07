@@ -142,7 +142,6 @@
 
 						course.code = item.CourseName;
 						course.title = courseTitle;
-						course.level = null;
 						course.day = start.getDay();
 						course.startTime = item.Starttime;
 						course.endTime = item.endtime;
@@ -230,7 +229,7 @@
 	 * @param lesson {object} lesson object
 	 * @return {Promise} Promise of completion
 	 */
-	function save(lesson){
+	function saveLesson(lesson){
 		var startHour = lesson.start.getHours(),
 			endHour = lesson.end.getHours(),
 			startAP = startHour < 12 ? "AM" : "PM",
@@ -269,7 +268,7 @@
 			}
 		});
 	}
-	Lesson.save = save;
+	Lesson.save = saveLesson;
 
 	function _relativeLessons(lesson, method){
 		var id = lesson.id;
@@ -381,8 +380,8 @@
 		// Assume its come from outside, so apply our niceties
 		var match = course.title.match(levelRegex);
 		if(match){
-			course.title.replace(levelRegex, "");
-			course.level = match;
+			course.title = course.title.replace(levelRegex, "");
+			course.level = match[0].replace(" ", "");
 		}
 
 		courses[course.id] = course;
@@ -509,6 +508,38 @@
 	Course.find = findCourses;
 
 	/**
+	 * Save course details to the server
+	 *
+	 * @method save
+	 * @param course {object}
+	 * @return {Promise}
+	 */
+	function saveCourse(course){
+		var post_data = {
+				Action: "update",
+				courseid: course.id,
+				subject: course.subject,
+				tid: course.tutor.id,
+				ccode: course.code,
+				subcode: null,
+				vacancy: 6,
+				discount: course.existingDiscount,
+				cname: course.title + " " + course.level,
+				status: 1, // Enabled?
+				cssid: 2, // UNKNOWN
+				payment: course.paymentCycle == "lesson" ? "2" : "1",
+				mfee: course.pricePerMonth,
+				lfee: course.pricePerLesson,
+				remark: course.notes
+			};
+		$.extend(post_data, objectifyGrade(course.level));
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_updateCourse.php", post_data, null, "json")
+		);
+	}
+	Course.save = saveCourse;
+
+	/**
 	 * Fetch details of a course
 	 *
 	 * Details  gained by fetching include payment information and fees
@@ -528,7 +559,13 @@
 					"json")
 				)
 				.then(function(data){
-					var details = data.coursedetail[0];
+					var details = data.coursedetail[0],
+						tutor = iL.Tutor.get(details.TutorMemberID);
+
+					if(!tutor && course.tutor){
+						tutor = course.tutor;
+						tutor.id = details.TutorMemberID;
+					}
 
 					// This sometimes comes without suffix - can screw up links
 					//course.code = details.CourseCode;
@@ -539,9 +576,11 @@
 					course.pricePerLesson = details.LessonFee;
 					course.pricePerMonth = details.MonthlyFee;
 					course.notes = details.Remark == "null" ? "" : details.Remark;
-					course.subject = null; // details.SubjectID
-					course.tutor = iL.Tutor.get(details.TutorMemberID);
+					course.tutor = tutor;
 					course.level = stringifyGrade(details);
+
+					// unused
+					course.subject = details.SubjectID;
 
 					if(!course.level){
 						course.level = details.CourseName.match(levelRegex);
@@ -782,7 +821,7 @@
 				return Promise.reject(Error("Couldn't save, couldn't get memberCourseID"));
 			}
 		}
-		attendance.busy = false;
+		attendance.busy = undefined;
 		return Promise.resolve(
 			$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
 				mcid: attendance.subscription.id,
@@ -819,6 +858,14 @@
 			}
 		});
 		return outGrades.join("-");
+	}
+
+	function objectifyGrade(string){
+		var outGrades = {};
+		grades.forEach(function(grade){
+			outGrades[grade] = string.match(grade) ? 1 : 0;
+		});
+		return outGrades;
 	}
 
 }(window));
