@@ -11,6 +11,12 @@
 		Subscription = {},
 
 		/* Constants */
+		existingRegex = /\b\n?(Existing|New) Student\b/gi,
+		existingOldRegex = /\b(old|existing)\b/gi,
+		existingNewRegex = /\b(new)\b/gi,
+
+		/* Parameters */
+		existingCutoff = moment([2014]),
 
 		/* data */
 		students = {},
@@ -102,6 +108,8 @@
 						student.phone = item.mobile;
 						student.registeredDate = new Date(item.RegDate);
 
+						student.existing = student.registeredDate < existingCutoff;
+
 						iL.Util.parseName(student);
 
 						students[id] = student;
@@ -147,6 +155,16 @@
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
 								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
+
+								if(student.notes.match(existingOldRegex)){
+									student.existing = true;
+								}
+								else if(student.notes.match(existingNewRegex)){
+									student.existing = false;
+								}
+								else {
+									student.existing = !!student.existing;
+								}
 
 								/* Not currently used but need to
 								   look after them in order to
@@ -201,7 +219,6 @@
 									id: subscriptionID,
 									course: course,
 									student: student,
-									existingStudent: false,
 									unpaid: 0,
 									lastPaymentIndex: 0,
 									invoices: []
@@ -243,13 +260,6 @@
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
-							if(invoice.paid && dateIndex > subscription.lastPaymentIndex
-								&& course.existingDiscount){
-								subscription.existingStudent =
-									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
-								subscription.lastPaymentIndex = dateIndex;
-							}
-
 							if(!subscription.invoices){
 								subscription.invoices = [];
 							}
@@ -285,6 +295,19 @@
 		if(!student.guardians || !student.guardians.length){
 			student.guardians = [{}];
 		}
+
+		student.notes = student.notes.replace(existingRegex, "");
+
+		if(student.existing){
+			student.notes = $.trim(student.notes.replace(existingNewRegex, ""));
+			student.notes += student.notes.length ? "\n" : "";
+			student.notes += "Existing Student";
+		}else{
+			student.notes = $.trim(student.notes.replace(existingOldRegex, ""));
+			student.notes += student.notes.length ? "\n" : "";
+			student.notes += "New Student";
+		}
+
 		var guardian = student.guardians[0],
 			post_data = {
 				Action: student.id ? "update" : "insert",
@@ -319,6 +342,7 @@
 				whyjoinusextendtext1: student.entryChannel1,
 				whyjoinusextendtext2: student.entryChannel2
 			};
+
 		return Promise.resolve(
 			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
 		).then(function(data){
