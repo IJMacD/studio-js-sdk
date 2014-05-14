@@ -133,10 +133,12 @@
 	function fetchStudent(student){
 		student = students[student.id] || student;
 		if(!_students[student.id]){
-			_students[student.id] = Promise.resolve(
-					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
-				).then(function(data){
-					var guardians = [],
+			_students[student.id] = Promise.all([
+					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json"),
+					findStudents({name: student.name})
+				]).then(function(array){
+					var data = array[0],
+						guardians = [],
 						guardian,
 						subs = [];
 					if(data.memberdetail){
