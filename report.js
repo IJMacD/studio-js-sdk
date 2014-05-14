@@ -15,7 +15,7 @@
 		comments,
 
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
-		saveFields = "ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount".split(" ");
+		saveFields = "idmembercoursereportcard searchTerm ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount".split(" ");
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -60,12 +60,14 @@
 		}
 
 		if(options.from){
-			post_data.searchDateFrom = formatDate(options.from);
+			post_data.searchDateFrom = iL.Util.formatDate(options.from);
 		}
 
 		if(options.to){
-			post_data.searchDateTo = formatDate(options.to);
+			post_data.searchDateTo = iL.Util.formatDate(options.to);
 		}
+
+		post_data.searchTerm = 3;
 
 		hash = JSON.stringify(post_data);
 
@@ -87,7 +89,7 @@
 							var studentID = item.memberID,
 								courseID = item.courseID,
 								subscriptionID = item.membercourseid,
-								reportID = item.idmembercoursereportcard,
+								reportID = item.membercourseid,
 								student = iL.Student.get(studentID) || {
 									id: studentID
 								},
@@ -105,8 +107,9 @@
 									course: course,
 									subscription: subscription,
 									complete: (item.completed == "1"),
-									attendance: item.Attend_amendment,
-									lessoncount: item.lessoncount
+									attendance: item.lessoncount - item.leavecount,
+									lessoncount: item.lessoncount,
+									searchTerm: 3
 								};
 
 							student.name = item.nickname;
@@ -148,13 +151,30 @@
 			promise = deferred.promise();
 
 		$.when(
-			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id },  null, "json"),
-			getCourseLearningFocus(item.course.title)
+			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id, searchTerm: 3 },  null, "json"),
+			getCourseLearningFocus(item.course)
 		)
 		.done(function(a1, focus){
 			var detail = a1[0].MemberReportCardDetail[0],
-				labels = "ap1label ap2label ap3label ap4label wh1label wh2label wh3label wh4label".split(" "),
-				o = {},
+				labels = "ap1label ap2label ap3label ap4label wh1label wh2label wh3label wh4label ap1progress ap2progress ap3progress ap4progress ap1value ap2value ap3value ap4value wh1value wh2value wh3value wh4value wh1progress wh2progress wh3progress wh4progress".split(" "),
+				o = {
+					ap1progress: "0",
+					ap2progress: "0",
+					ap3progress: "0",
+					ap4progress: "0",
+					wh1progress: "0",
+					wh2progress: "0",
+					wh3progress: "0",
+					wh4progress: "0",
+					ap1value: "A+",
+					ap2value: "A+",
+					ap3value: "A+",
+					ap4value: "A+",
+					wh1value: "A+",
+					wh2value: "A+",
+					wh3value: "A+",
+					wh4value: "A+"
+				},
 				i;
 
 			// wh labels from code are lowest priority
@@ -182,7 +202,7 @@
 		})
 		.fail(deferred.reject);
 
-		return promise;
+		return Promise.resolve(promise);
 	}
 	Report.fetch = fetchReport;
 
@@ -197,7 +217,6 @@
 	function save(item){
 		var post_data = {},
 			i, k;
-		post_data.idmembercoursereportcard = item.id;
 		item.complete = true;
 		for(i in saveFields){
 			k = saveFields[i];
@@ -237,7 +256,7 @@
 							item.regex.lastIndex = 0;
 							item.push(
 								item.regex.exec(comment)[1]
-									.replace("XXX",			"{ forename }")
+									.replace("XXX",			"{ student.forename }")
 									.replace(/\bshe\b/g,	"{ pronounSubject }")
 									.replace(/\bShe\b/g,	"{ pronounSubjectCapitalize }")
 									.replace(/\bherself\b/g,"{ pronounReflexive }")
@@ -271,12 +290,12 @@
 	 * @param courseName {string}
 	 * @return {Promise} Promise of an array
 	 */
-	function getCourseLearningFocus(courseName){
+	function getCourseLearningFocus(course){
 		var deferred,
 			post;
-		if(!learningObjectives[courseName]){
+		if(!learningObjectives[course.id]){
 			deferred = $.Deferred();
-			post = $.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: courseName }, null, "json");
+			post = $.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: course.title + " " + course.level }, null, "json");
 			post.done(function(data){
 				var focus = data.CourseFocusObject[0],
 					o = {};
@@ -288,9 +307,9 @@
 				}
 				deferred.resolve(o);
 			});
-			learningObjectives[courseName] = deferred.promise();
+			learningObjectives[course.id] = deferred.promise();
 		}
-		return learningObjectives[courseName];
+		return learningObjectives[course.id];
 	}
 
 	/**
@@ -304,8 +323,8 @@
 	 * @param focus {string} Which of the four fields to set
 	 * @param objective {string} Actual text of the objective
 	 */
-	function setCourseLearningFocus(courseName, focus, objective){
-		getCourseLearningFocus(courseName)
+	function setCourseLearningFocus(course, focus, objective){
+		getCourseLearningFocus(course)
 			.done(function(focii){
 				focii[focus] = objective;
 			});
