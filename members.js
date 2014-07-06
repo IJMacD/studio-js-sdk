@@ -11,6 +11,12 @@
 		Subscription = {},
 
 		/* Constants */
+		existingRegex = /\b\n?(Existing|New) Student\b/gi,
+		existingOldRegex = /\b(old|existing)\b/gi,
+		existingNewRegex = /\b(new)\b/gi,
+
+		/* Parameters */
+		existingCutoff = moment([2014]),
 
 		/* data */
 		students = {},
@@ -102,6 +108,8 @@
 						student.phone = item.mobile;
 						student.registeredDate = new Date(item.RegDate);
 
+						student.existing = student.registeredDate < existingCutoff;
+
 						iL.Util.parseName(student);
 
 						students[id] = student;
@@ -125,12 +133,14 @@
 	function fetchStudent(student){
 		student = students[student.id] || student;
 		if(!_students[student.id]){
-			_students[student.id] = Promise.resolve(
-					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json")
-				).then(function(data){
-					var guardians = [],
+			_students[student.id] = Promise.all([
+					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json"),
+					findStudents({name: student.name})
+				]).then(function(array){
+					var data = array[0],
+						guardians = [],
 						guardian,
-						subs = {};
+						subs = [];
 					if(data.memberdetail){
 						$.each(data.memberdetail, function(i,item){
 							var name = (item.lastname && item.Nickname) ?
@@ -147,6 +157,16 @@
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
 								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
+
+								if(student.notes.match(existingOldRegex)){
+									student.existing = true;
+								}
+								else if(student.notes.match(existingNewRegex)){
+									student.existing = false;
+								}
+								else {
+									student.existing = !!student.existing;
+								}
 
 								/* Not currently used but need to
 								   look after them in order to
@@ -189,6 +209,7 @@
 					if(data.memberCourseBalance){
 						$.each(data.memberCourseBalance, function(i,item){
 							var courseID = item.CourseID,
+								subscriptionID = item.membercourseID,
 								lessonCount = parseInt(item.Nooflesson),
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
@@ -196,11 +217,10 @@
 								course = iL.Course.get(courseID) || {
 									id: courseID
 								},
-								subscription = iL.Subscription.get(course, student) || {
-									id: item.membercourseID,
+								subscription = iL.Subscription.get(subscriptionID) || {
+									id: subscriptionID,
 									course: course,
 									student: student,
-									existingStudent: false,
 									unpaid: 0,
 									lastPaymentIndex: 0,
 									invoices: []
@@ -242,13 +262,6 @@
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
-							if(invoice.paid && dateIndex > subscription.lastPaymentIndex
-								&& course.existingDiscount){
-								subscription.existingStudent =
-									(invoice.discount / invoice.lessonCount >= course.existingDiscount);
-								subscription.lastPaymentIndex = dateIndex;
-							}
-
 							if(!subscription.invoices){
 								subscription.invoices = [];
 							}
@@ -259,7 +272,9 @@
 								subscription.unpaid += 1;
 							}
 
-							subs[subscriptionKey(subscription)] = subscription;
+							if(subs.indexOf(subscription) == -1){
+								subs.push(subscription);
+							}
 						});
 
 						student.subscriptions = subs;
@@ -282,6 +297,19 @@
 		if(!student.guardians || !student.guardians.length){
 			student.guardians = [{}];
 		}
+
+		student.notes = student.notes.replace(existingRegex, "");
+
+		if(student.existing){
+			student.notes = $.trim(student.notes.replace(existingNewRegex, ""));
+			student.notes += student.notes.length ? "\n" : "";
+			student.notes += "Existing Student";
+		}else{
+			student.notes = $.trim(student.notes.replace(existingOldRegex, ""));
+			student.notes += student.notes.length ? "\n" : "";
+			student.notes += "New Student";
+		}
+
 		var guardian = student.guardians[0],
 			post_data = {
 				Action: student.id ? "update" : "insert",
@@ -316,6 +344,7 @@
 				whyjoinusextendtext1: student.entryChannel1,
 				whyjoinusextendtext2: student.entryChannel2
 			};
+
 		return Promise.resolve(
 			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
 		).then(function(data){
@@ -404,17 +433,37 @@
 	 */
 
 	/**
-	 * Get Subscription by courseId and studentID
+	 * Get Subscription by id (memberCourseID)
 	 *
 	 * @method get
 	 * @param id {int}
 	 * @return {object}
 	 */
 	function getSubscription(id){
-		var key = subscriptionKey.apply(null, arguments);
-		return subscriptions[key];
+		return subscriptions[id];
 	}
 	Subscription.get = getSubscription;
+
+	/**
+	 * Find Subscription by course and student
+	 *
+	 * @method get
+	 * @param options {object}
+	 * @param options.course {object}
+	 * @param options.student {object}
+	 * @return {Promise(Subscription[])}
+	 */
+	function findSubscription(options){
+		var out = [];
+		$.each(subscriptions, function(i, subscription){
+			if(subscription.course == options.course &&
+				subscription.student == options.student){
+				out.push(subscription);
+			}
+		});
+		return Promise.resolve(out);
+	}
+	Subscription.find = findSubscription;
 
 	/**
 	 * Start tracking a subscription
@@ -423,54 +472,83 @@
 	 * @param subscription {object}
 	 */
 	function addSubscription(subscription){
-		var key = subscriptionKey(subscription);
-		subscriptions[key] = subscription;
+		subscriptions[subscription.id] = subscription;
 	}
 	Subscription.add = addSubscription;
-
-	function subscriptionKey(course, student){
-		var args = arguments;
-		if(args.length == 2){
-			return course.id + ":" + student.id;
-		}
-		return args[0].course.id + ":" + args[0].student.id;
-	}
 
 	/**
 	 * Save a subscription to the server
 	 *
-	 * Subscribe a student to a course
+	 * Subscribe/Unsubscribe a student to/from a course
 	 *
 	 * @method save
 	 * @param subscription {object}
 	 * @return {Promise(Subscription)}
 	 */
 	function saveSubscription(subscription){
-		var post_data = {
-			Action: subscription.id ? "update" : "insert",
-			MemberID: subscription.student.id,
-			CoruseScheduleID: subscription.firstLesson.id, // [sic]
-			StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
-			StudentCoursePaymentcycle: 2 // [sic] per lesson
-		};
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
-		).then(function(data){
-			if(!subscription.id){
-				subscription.id = data.MemberCourseID;
-				addSubscription(subscription);
+		var post_data;
+		if(subscription.lastLesson){
+			post_data = {
+				membercourseID: subscription.id,
+				courseScheduleID: subscription.lastLesson.id
+			};
+			return Promise.resolve(
+				$.post(iL.API_ROOT + "process_MemberCourseWithDrawal.php", post_data, "json")
+			).then(function(){
+				// invalidate attendances
+				iL.Lesson
+					.future(subscription.lastLesson)
+					.then(function(lessons){
+						lessons.forEach(function(lesson){
+							iL.Attendance.find({lesson: lesson, clearCache: true});
+						});
+					});
+			});
+		}
+		else {
+			post_data = {
+				Action: subscription.id ? "update" : "insert",
+				MemberID: subscription.student.id,
+				CoruseScheduleID: subscription.firstLesson.id, // [sic]
+				StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
+				StudentCoursePaymentcycle: 2 // [sic] per lesson
+			};
+			return Promise.resolve(
+				$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
+			).then(function(data){
+				if(!subscription.id){
+					subscription.id = data.MemberCourseID;
+					addSubscription(subscription);
 
-				var attendance = {
-						student: subscription.student,
-						lesson: subscription.firstLesson,
-						absent: false,
-						memberCourseID: subscription.id // should this actually just be 'subscription:'' ?
-					};
-				iL.Attendance.add(attendance);
-			}
-			return subscription;
-		});
+					// invalidate attendances
+					iL.Lesson
+						.future(subscription.firstLesson)
+						.then(function(lessons){
+							lessons.forEach(function(lesson){
+								iL.Attendance.find({lesson: lesson, clearCache: true});
+							});
+						});
+				}
+				return subscription;
+			});
+		}
 	}
 	Subscription.save = saveSubscription;
+
+	/**
+	 * Cancel a student subscription to a course
+	 *
+	 * @method remove
+	 * @param subscription {object}
+	 * @return {Promise}
+	 */
+	function removeSubscription(subscription){
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_cancelMemberCourse.php", {MemberCourseID: subscription.id}, null, "json")
+		).then(function(){
+			// invalidate attendancess
+		});
+	}
+	Subscription.remove = removeSubscription;
 
 }(window));

@@ -61,9 +61,8 @@
 	 * @method find
 	 * @param options {object} A map of options
 	 * @param [options.start] {Date} Only return lessons which start after this date
-	 * @param [options.tutor] {object} Restrict lessons to only those taught by the
+	 * @param [options.tutor] {object} Restrict lessons to only those taught by the specified tutor
 	 * @param [options.course] {object} Lessons from the specified course
-	 * specified tutor
 	 * @return {Promise} Promise of an array of lesson objects
 	 */
 
@@ -142,7 +141,6 @@
 
 						course.code = item.CourseName;
 						course.title = courseTitle;
-						course.level = null;
 						course.day = start.getDay();
 						course.startTime = item.Starttime;
 						course.endTime = item.endtime;
@@ -166,6 +164,10 @@
 
 						lesson.attendees.length = 0;
 
+						// We have the attendees array now so we can
+						// pre-emptively resolve a promise for each of the lessons.
+						_attendees[lesson.id] = Promise.resolve(lesson.attendees);
+
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
 
@@ -188,15 +190,28 @@
 							},
 							lesson = lessons[item.CourseScheduleID],
 							attendance = getAttendance(lesson, student) || {
-								memberCourseID: null,
 								lesson: lesson,
 								student: student
 							},
 							key = lesson && attendanceKey(lesson, student);
+
+						if(!lesson){
+							return;
+						}
+
 						attendance.absent = item.Attendance == "0";
+
 						iL.Util.parseName(student);
-						lesson && lesson.attendees.push(attendance);
-						attendances[key] = attendance;
+
+						iL.Subscription.find({course: lesson.course, student: student})
+							.then(function(subscriptions){
+								if(subscriptions.length)
+								{
+									attendance.subscription = subscriptions[0];
+								}
+							});
+
+						iL.Attendance.add(attendance);
 						iL.Student.add(student);
 					});
 
@@ -215,7 +230,7 @@
 	 * @param lesson {object} lesson object
 	 * @return {Promise} Promise of completion
 	 */
-	function save(lesson){
+	function saveLesson(lesson){
 		var startHour = lesson.start.getHours(),
 			endHour = lesson.end.getHours(),
 			startAP = startHour < 12 ? "AM" : "PM",
@@ -254,7 +269,7 @@
 			}
 		});
 	}
-	Lesson.save = save;
+	Lesson.save = saveLesson;
 
 	function _relativeLessons(lesson, method){
 		var id = lesson.id;
@@ -363,6 +378,13 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
+		// Assume its come from outside, so apply our niceties
+		var match = course.title.match(levelRegex);
+		if(match){
+			course.title = course.title.replace(levelRegex, "");
+			course.level = match[0].replace(" ", "");
+		}
+
 		courses[course.id] = course;
 	}
 	Course.add = addCourse;
@@ -448,10 +470,7 @@
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
 
-							course = courses[courseID] || {
-								id: courseID,
-								lessons: []
-							},
+							course = courses[courseID],
 							lesson = lessons[lessonID] || {
 								id: lessonID,
 								start: start,
@@ -469,10 +488,12 @@
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
 
-						courses[course.id] = course;
-
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
+
+						if(!course.lessons){
+							course.lessons = [];
+						}
 
 						if(course.lessons.indexOf(lesson) == -1){
 							course.lessons.push(lesson);
@@ -486,6 +507,38 @@
 		return _courses[hash];
 	}
 	Course.find = findCourses;
+
+	/**
+	 * Save course details to the server
+	 *
+	 * @method save
+	 * @param course {object}
+	 * @return {Promise}
+	 */
+	function saveCourse(course){
+		var post_data = {
+				Action: "update",
+				courseid: course.id,
+				subject: course.subject,
+				tid: course.tutor.id,
+				ccode: course.code,
+				subcode: null,
+				vacancy: 6,
+				discount: course.existingDiscount,
+				cname: course.title + " " + course.level,
+				status: 1, // Enabled?
+				cssid: 2, // UNKNOWN
+				payment: course.paymentCycle == "lesson" ? "2" : "1",
+				mfee: course.pricePerMonth,
+				lfee: course.pricePerLesson,
+				remark: course.notes
+			};
+		$.extend(post_data, objectifyGrade(course.level));
+		return Promise.resolve(
+			$.post(iL.API_ROOT + "process_updateCourse.php", post_data, null, "json")
+		);
+	}
+	Course.save = saveCourse;
 
 	/**
 	 * Fetch details of a course
@@ -507,9 +560,16 @@
 					"json")
 				)
 				.then(function(data){
-					var details = data.coursedetail[0];
+					var details = data.coursedetail[0],
+						tutor = iL.Tutor.get(details.TutorMemberID);
 
-					course.code = details.CourseCode;
+					if(!tutor && course.tutor){
+						tutor = course.tutor;
+						tutor.id = details.TutorMemberID;
+					}
+
+					// This sometimes comes without suffix - can screw up links
+					//course.code = details.CourseCode;
 					course.title = details.CourseName.replace(levelRegex, "");
 					course.room = iL.Room.get(details.DefaultClassroomID);
 					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "monthly";
@@ -517,9 +577,11 @@
 					course.pricePerLesson = details.LessonFee;
 					course.pricePerMonth = details.MonthlyFee;
 					course.notes = details.Remark == "null" ? "" : details.Remark;
-					course.subject = null; // details.SubjectID
-					course.tutor = iL.Tutor.get(details.TutorMemberID);
+					course.tutor = tutor;
 					course.level = stringifyGrade(details);
+
+					// unused
+					course.subject = details.SubjectID;
 
 					if(!course.level){
 						course.level = details.CourseName.match(levelRegex);
@@ -612,6 +674,10 @@
 	 */
 	function addAttendance(attendance){
 		attendances[attendanceKey(attendance)] = attendance;
+		/**
+		 * @deprecated
+		 * Use Attendance.find instead
+		 */
 		attendance.lesson.attendees.push(attendance);
 	}
 	Attendance.add = addAttendance;
@@ -619,6 +685,7 @@
 	/**
 	 * Function to find attendances
 	 *
+	 * @method find
 	 * @param options {object} Options
 	 * @param options.lesson {object} Lesson to fetch attendances for
 	 * @return {Promise}
@@ -626,7 +693,20 @@
 	function findAttendances(options){
 		if(options.lesson){
 			var lesson = options.lesson,
-				id = lesson.id;
+				id = lesson.id,
+				attendance;
+
+			if(options.student){
+				attendance = getAttendance(lesson, options.student);
+				if (attendance) {
+					return Promise.resolve([attendance]);
+				};
+			}
+
+			if(options.clearCache){
+				_attendees[id] = undefined;
+			}
+
 			if(!_attendees[id]){
 				_attendees[id] = new Promise(function(resolve, reject){
 					$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
@@ -644,23 +724,35 @@
 										name: item.Lastname,
 										photo: item.Accountname
 									},
+									subscriptionID = item.MemberCourseID,
+									subscription = iL.Subscription.get(subscriptionID) || {
+										id: subscriptionID,
+										course: lesson.course,
+										student: student
+									}
 									attendance = getAttendance(lesson, student) || {
 										lesson: lesson,
 										student: student
 									};
 								iL.Util.parseName(student);
 
-								attendance.memberCourseID = item.MemberCourseID;
+								attendance.subscription = subscription;
 								attendance.absent = item.absent == "1";
 
 								iL.Student.add(student);
-								lesson.attendees.push(attendance);
-								attendances[attendanceKey(lesson, student)] = attendance;
+								iL.Subscription.add(subscription);
+								iL.Attendance.add(attendance);
 							});
 							resolve(lesson.attendees);
 						},
 						"json")
 					.fail(reject);
+				});
+			}
+
+			if(options.student){
+				return _attendees[id].then(function(attendees){
+					return [getAttendance(lesson, options.student)];
 				});
 			}
 			return _attendees[id];
@@ -675,9 +767,26 @@
 	 *
 	 * @method fetch
 	 * @param attendance {object}
-	 * @return {object} returns the attendance you passed in
+	 * @return {Promise} returns a promise of the attendance you passed in
+	 */
+
+	/**
+	 * Get complete attendance records
+	 *
+	 * i.e. attendances may likely be missing memberCourseID
+	 *
+	 * @method fetch
+	 * @param attendances {array}
+	 * @return {array} returns an array of the attendances you passed in
 	 */
 	function fetchAttendance(attendance){
+		if($.isArray(attendance)){
+			return attendance.map(fetchAttendance);
+		}
+
+		if(attendance.subscription){
+			return Promise.resolve(attendance);
+		}
 		var key = attendanceKey(attendance);
 		return findAttendances({lesson: attendance.lesson}).then(function(){
 			return attendances[key];
@@ -693,16 +802,23 @@
 	 * @return {Promise}
 	 */
 	function saveAttendance(attendance){
-		if(!attendance.memberCourseID){
+		if(!attendance.subscription){
 			// Shhh but... This could infinite loop if fetchAttendance
 			// for some reason doesn't supply the memberCourseID.
 			// Solution is second check in then handler before
 			// re-calling saveAttendance.
-			return fetchAttendance(attendance).then(saveAttendance);
+			if(!attendance.busy){
+				attendance.busy = true;
+				return fetchAttendance(attendance).then(saveAttendance);
+			}
+			else {
+				return Promise.reject(Error("Couldn't save, couldn't get memberCourseID"));
+			}
 		}
+		attendance.busy = undefined;
 		return Promise.resolve(
 			$.post(iL.Conf.API_ROOT + "process_updateStudentAttendance.php", {
-				mcid: attendance.memberCourseID,
+				mcid: attendance.subscription.id,
 				absent: attendance.absent ? 0 : 1,
 				coursescheduleID: attendance.lesson.id,
 				absentReason: ""
@@ -717,6 +833,9 @@
 	function attendanceKey(lesson, student){
 		if(arguments.length == 1){
 			return arguments[0].lesson.id + ":" + arguments[0].student.id;
+		}
+		if(!lesson || !student){
+			return
 		}
 		return lesson.id + ":" + student.id;
 	}
@@ -736,6 +855,14 @@
 			}
 		});
 		return outGrades.join("-");
+	}
+
+	function objectifyGrade(string){
+		var outGrades = {};
+		grades.forEach(function(grade){
+			outGrades[grade] = string.match(grade) ? 1 : 0;
+		});
+		return outGrades;
 	}
 
 }(window));
