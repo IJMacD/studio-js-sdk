@@ -138,9 +138,6 @@
 			});
 			return tutor;
 		}
-		return Promise.resolve(
-			loading.then(function(){return tutors;})
-		);
 	}
 	Tutor.get = getTutors;
 	iLearner.getTutors = getTutors;

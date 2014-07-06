@@ -61,9 +61,8 @@
 	 * @method find
 	 * @param options {object} A map of options
 	 * @param [options.start] {Date} Only return lessons which start after this date
-	 * @param [options.tutor] {object} Restrict lessons to only those taught by the
+	 * @param [options.tutor] {object} Restrict lessons to only those taught by the specified tutor
 	 * @param [options.course] {object} Lessons from the specified course
-	 * specified tutor
 	 * @return {Promise} Promise of an array of lesson objects
 	 */
 
@@ -165,6 +164,10 @@
 
 						lesson.attendees.length = 0;
 
+						// We have the attendees array now so we can
+						// pre-emptively resolve a promise for each of the lessons.
+						_attendees[lesson.id] = Promise.resolve(lesson.attendees);
+
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
 
@@ -192,6 +195,10 @@
 							},
 							key = lesson && attendanceKey(lesson, student);
 
+						if(!lesson){
+							return;
+						}
+
 						attendance.absent = item.Attendance == "0";
 
 						iL.Util.parseName(student);
@@ -204,13 +211,7 @@
 								}
 							});
 
-						/**
-						 * @deprecated
-						 * Use Attendance.find instead
-						 */
-						lesson && lesson.attendees.push(attendance);
-
-						attendances[key] = attendance;
+						iL.Attendance.add(attendance);
 						iL.Student.add(student);
 					});
 
@@ -740,14 +741,7 @@
 
 								iL.Student.add(student);
 								iL.Subscription.add(subscription);
-
-								/**
-								 * @deprecated
-								 * Use Attendance.find instead
-								 */
-								lesson.attendees.push(attendance);
-
-								attendances[attendanceKey(lesson, student)] = attendance;
+								iL.Attendance.add(attendance);
 							});
 							resolve(lesson.attendees);
 						},
@@ -839,6 +833,9 @@
 	function attendanceKey(lesson, student){
 		if(arguments.length == 1){
 			return arguments[0].lesson.id + ":" + arguments[0].student.id;
+		}
+		if(!lesson || !student){
+			return
 		}
 		return lesson.id + ":" + student.id;
 	}
