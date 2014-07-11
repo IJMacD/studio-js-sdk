@@ -166,6 +166,8 @@
 
 						// We have the attendees array now so we can
 						// pre-emptively resolve a promise for each of the lessons.
+						// // Warning these attendances don't contain `subscription` or `memberCourseID`
+						// // To get hold of these you must call `Attendance.fetch()`
 						_attendees[lesson.id] = Promise.resolve(lesson.attendees);
 
 						lessons[lesson.id] = lesson;
@@ -707,6 +709,13 @@
 				_attendees[id] = undefined;
 			}
 
+			// If we've been called from a fetch we might have all the data
+			// or we might not. Check for `subscription` and if its not there
+			// get it from the server.
+			if(options.fetch && _attendees[id] && !_attendees[id].subscription){
+				_attendees[id] = undefined;
+			}
+
 			if(!_attendees[id]){
 				_attendees[id] = new Promise(function(resolve, reject){
 					$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
@@ -788,7 +797,7 @@
 			return Promise.resolve(attendance);
 		}
 		var key = attendanceKey(attendance);
-		return findAttendances({lesson: attendance.lesson}).then(function(){
+		return findAttendances({lesson: attendance.lesson,fetch:true}).then(function(){
 			return attendances[key];
 		});
 	}

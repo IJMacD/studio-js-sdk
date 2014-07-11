@@ -170,7 +170,7 @@
 		if(!tutor && fallback){
 			tutor = { name: name };
 			tutor.colour = getTutorColour(tutor);
-			tutors.push(tutor);
+			tutors && tutors.push(tutor);
 		}
 
 		return tutor;
