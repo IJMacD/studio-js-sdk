@@ -194,8 +194,7 @@
 							attendance = getAttendance(lesson, student) || {
 								lesson: lesson,
 								student: student
-							},
-							key = lesson && attendanceKey(lesson, student);
+							};
 
 						if(!lesson){
 							return;
