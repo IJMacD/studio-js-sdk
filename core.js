@@ -94,7 +94,7 @@
 					return { id: i.crid, name: i.place }
 				});
 				tutors = $.map(data.tutor, function(t){
-					var tutor = { name: t.n, id: t.mid };
+					var tutor = { name: $.trim(t.n), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
 					return tutor;
 				});
@@ -157,6 +157,8 @@
 		if(!name){
 			return { name: "", colour: "#999999" };
 		}
+
+		name = $.trim(name);
 
 		if(tutors){
 			$.each(tutors, function(i,t){
