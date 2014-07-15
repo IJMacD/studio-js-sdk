@@ -530,7 +530,7 @@
 		var post_data = {
 				Action: "update",
 				courseid: course.id,
-				subject: course.subject,
+				subject: subjectToNumber(course.subject),
 				tid: (course.tutor && course.tutor.id) || 0,
 				ccode: course.code,
 				subcode: null,
@@ -540,8 +540,8 @@
 				status: 1, // Enabled?
 				cssid: 2, // UNKNOWN
 				payment: course.paymentCycle == "lesson" ? "2" : "1",
-				mfee: course.pricePerMonth,
-				lfee: course.pricePerLesson,
+				mfee: course.pricePerMonth || 0,
+				lfee: course.pricePerLesson || 0,
 				remark: course.notes
 			};
 		$.extend(post_data, objectifyGrade(course.level));
@@ -875,6 +875,18 @@
 			course.subject = "chinese";
 		} else {
 			course.subject = "english";
+		}
+	}
+
+	function subjectToNumber(subject){
+		if(subject == "english"){
+			return 1;
+		} else if(subject == "chinese"){
+			return 3;
+		} else if(subject == "maths"){
+			return 2;
+		} else {
+			return 4;
 		}
 	}
 
