@@ -21,6 +21,9 @@
 		],
 		grades = "K1 K2 K3 P1 P2 P3 P4 P5 P6 F1 F2 F3 F4 F5 F6".split(" "),
 
+		chineseRegex = /[\u4E00-\u9FFF]/,
+		mathsRegex = /(math|數)/i,
+
 		/* data */
 		courses = {},
 		lessons = {},
@@ -145,6 +148,8 @@
 						course.startTime = item.Starttime;
 						course.endTime = item.endtime;
 						course.tutor = tutor;
+
+						_setSubject(course);
 
 						_setTime(start, item.Starttime);
 						_setTime(end, item.endtime);
@@ -458,7 +463,8 @@
 						course.title = courseTitle;
 						course.code = item.coursecode;
 						course.level = level;
-						course.subject = item.subject;
+
+						_setSubject(course);
 
 						courses[id] = course;
 						out.push(course);
@@ -521,7 +527,7 @@
 				Action: "update",
 				courseid: course.id,
 				subject: course.subject,
-				tid: course.tutor.id,
+				tid: (course.tutor && course.tutor.id) || 0,
 				ccode: course.code,
 				subcode: null,
 				vacancy: 6,
@@ -581,11 +587,12 @@
 					course.tutor = tutor;
 					course.level = stringifyGrade(details);
 
-					// unused
-					course.subject = details.SubjectID;
-
 					if(!course.level){
 						course.level = details.CourseName.match(levelRegex);
+					}
+
+					if(!course.subject){
+						_setSubject(course);
 					}
 
 					if(!course.lessons){
@@ -853,6 +860,16 @@
 	function _setTime(date, time){
 		date.setHours(time.substr(0,2));
 		date.setMinutes(time.substr(2,2));
+	}
+
+	function _setSubject(course){
+		if(course.title.match(mathsRegex)){
+			course.subject = "maths";
+		} else if(course.title.match(chineseRegex)){
+			course.subject = "chinese";
+		} else {
+			course.subject = "english";
+		}
 	}
 
 	function stringifyGrade(object){
