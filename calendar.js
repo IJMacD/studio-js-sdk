@@ -112,13 +112,15 @@
 		hash = JSON.stringify(post_data);
 
 		if(!_lessons[hash]){
-			_lessons[hash] = Promise.resolve(
-				$.post(iL.API_ROOT + 'process_getCalendarData.php',
-					post_data,
-					null,
-					"json")
-				).then(function(data){
-					var events = [];
+			_lessons[hash] = Promise.all([
+					$.post(iL.API_ROOT + 'process_getCalendarData.php',
+						post_data,
+						null,
+						"json"),
+					iL.Room.all()
+				]).then(function(results){
+					var data = results[0],
+						events = [];
 
 					$.each(data.CalendarCourse, function(i,item){
 						var start = new Date(item.ScheduleDate),
@@ -434,13 +436,15 @@
 					return _courses[hash];
 				}
 			}
-			_courses[hash] = Promise.resolve(
-				$.post(iL.API_ROOT + 'process_getCourseList.php',
-					post_data,
-					null,
-					"json")
-				).then(function(data){
-					var out = [];
+			_courses[hash] = Promise.all([
+					$.post(iL.API_ROOT + 'process_getCourseList.php',
+						post_data,
+						null,
+						"json"),
+					iL.Room.all()
+				]).then(function(results){
+					var data = results[0],
+						out = [];
 
 					$.each(data.courselist, function(i,item){
 						var id = item.CourseID,
@@ -558,16 +562,18 @@
 	 */
 	function courseFetch(course){
 		if(!_courseDetails[course.id]){
-			_courseDetails[course.id] = Promise.resolve(
-				$.post(iL.API_ROOT + "process_getCourseDetail.php",
-					{
-						courseID: course.id
-					},
-					null,
-					"json")
-				)
-				.then(function(data){
-					var details = data.coursedetail[0],
+			_courseDetails[course.id] = Promise.all([
+					$.post(iL.API_ROOT + "process_getCourseDetail.php",
+						{
+							courseID: course.id
+						},
+						null,
+						"json"),
+					iL.Room.all()
+				])
+				.then(function(results){
+					var data = results[0],
+						details = data.coursedetail[0],
 						tutor = iL.Tutor.get(details.TutorMemberID);
 
 					if(!tutor && course.tutor){
