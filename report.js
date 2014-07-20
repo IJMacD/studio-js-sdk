@@ -100,7 +100,7 @@
 									id: subscriptionID,
 									student: student,
 									course: course
-								}
+								},
 								report = {
 									id: reportID,
 									student: student,
