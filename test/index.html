@@ -75,6 +75,10 @@ asyncTest("Room", function(){
 		start();
 
 		ok(iL.Room.find("Room 1"), 'Room.find("Room 1")');
+	})
+	.catch(function(){
+		ok(false, "Room error");
+		start();
 	});
 });
 asyncTest("Lesson", function(){

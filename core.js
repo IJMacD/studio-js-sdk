@@ -44,20 +44,12 @@
 	/* legacy */
 	iL.API_ROOT = iL.Conf.API_ROOT;
 
+	iL.query = query;
+
 	getInitData();
 
 	function Login(user, pass){
-		return Promise.resolve(
-				$.post(
-					iL.Conf.API_ROOT + "process_login.php",
-					{
-						login: user,
-						password: pass
-					},
-					null,
-					"json"
-				)
-			)
+		return query("process_login.php", { login: user, password: pass })
 			.then(function(data){
 				if(data.result && data.result[0]){
 					memberID = parseInt(data.result[0].mid);
@@ -77,12 +69,12 @@
 	iLearner.Login = Login;
 
 	function Logout(){
-		query("process_logout.php");
+		iL.query("process_logout.php");
 	}
 	iLearner.Logout = Logout;
 
 	function getInitData(){
-		loading = query("process_getinitdata.php")
+		loading = iL.query("process_getinitdata.php")
 			.then(function(data){
 				adminStaff = data.AdminStaff;
 				classrooms = $.map(data.classroom, function(i){
@@ -101,7 +93,6 @@
 			$.post(iL.Conf.API_ROOT + url, data, null, "json")
 		);
 	}
-	iLearner.query = query;
 
 	/**
 	 * Used for interacting with tutors
@@ -116,7 +107,7 @@
 	 * @return {Promise} Promise of an array containing the details of the tutors
 	 */
 	function allTutors(){
-		return Promise.resolve(loading).then(function(){
+		return loading.then(function(){
 				return tutors;
 			});
 	}
@@ -142,7 +133,6 @@
 		}
 	}
 	Tutor.get = getTutors;
-	iLearner.getTutors = getTutors;
 
 	/**
 	 * Find a single tutor specified by his name
@@ -180,7 +170,6 @@
 		return tutor;
 	}
 	Tutor.find = findTutor;
-	iLearner.findTutor = findTutor;
 
 	/**
 	 * Get a colour associated with this tutor
@@ -213,7 +202,7 @@
 	function getRoom(id){
 		return getRooms(id);
 	}
-	iLearner.getRoom = getRoom;
+	Room.get = getRoom;
 
 	/**
 	 * Get all rooms
@@ -235,14 +224,9 @@
 			return classroom;
 		}
 
-		return Promise.resolve(
-			loading.then(function(){return classrooms;})
-		);
+		return loading.then(function(){return classrooms;});
 	}
 	Room.all = getRooms;
-	/* @deprecated */
-	Room.get = getRooms;
-	iLearner.getRooms = getRooms;
 
 	/**
 	 * Find a room by name
@@ -270,7 +254,6 @@
 		return classroom;
 	}
 	Room.find = findRoom;
-	iLearner.findRoom = findRoom;
 
 	/**
 	 * Utility Class
@@ -290,7 +273,6 @@
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
 	Util.formatDate = formatDate;
-	iLearner.formatDate = formatDate;
 
 	/**
 	 * Useful function to set the name on any object with a `name` property.
@@ -355,7 +337,6 @@
 		}
 	}
 	Util.parseName = parseName;
-	iLearner.parseName = parseName;
 
 	window.iLearner = iLearner;
 }(window));

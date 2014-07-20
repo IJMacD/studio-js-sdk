@@ -102,7 +102,7 @@
 		}
 
 		post_data = {
-			sDate: iL.formatDate(options.start)
+			sDate: iL.Util.formatDate(options.start)
 		};
 
 		if(options.tutor){

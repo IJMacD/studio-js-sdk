@@ -119,7 +119,7 @@
 
 							course.tutor = options.tutor;
 
-							iL.parseName(student);
+							iL.Util.parseName(student);
 
 							iL.Student.add(student);
 							iL.Course.add(course);
