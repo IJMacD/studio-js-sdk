@@ -566,7 +566,8 @@
 				.then(function(results){
 					var data = results[0],
 						details = data.coursedetail[0],
-						tutor = iL.Tutor.get(details.TutorMemberID);
+						tutor = iL.Tutor.get(details.TutorMemberID),
+						level;
 
 					if(!tutor && course.tutor){
 						tutor = course.tutor;
@@ -586,7 +587,8 @@
 					course.level = stringifyGrade(details);
 
 					if(!course.level){
-						course.level = details.CourseName.match(levelRegex);
+						level = details.CourseName.match(levelRegex);
+						course.level = level && level[0];
 					}
 
 					if(!course.subject){
