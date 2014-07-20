@@ -344,6 +344,7 @@
 	/**
 	 * Get details of the attendees registered for a lesson
 	 *
+	 * @deprecated
 	 * @method attendees
 	 * @param lesson {object}
 	 * @return {Promise} An array of attendees
@@ -353,7 +354,6 @@
 			return attendances.map(function(item){return item.student});
 		});
 	}
-	//Lesson.students = lessonStudents;
 
 	/**
 	 * Class to deal with courses. Courses generally run for a number of weeks
@@ -537,9 +537,7 @@
 				remark: course.notes
 			};
 		$.extend(post_data, objectifyGrade(course.level));
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateCourse.php", post_data, null, "json")
-		);
+		return iL.query("process_updateCourse.php", post_data);
 	}
 	Course.save = saveCourse;
 
@@ -555,12 +553,7 @@
 	function courseFetch(course){
 		if(!_courseDetails[course.id]){
 			_courseDetails[course.id] = Promise.all([
-					$.post(iL.API_ROOT + "process_getCourseDetail.php",
-						{
-							courseID: course.id
-						},
-						null,
-						"json"),
+					iL.query("process_getCourseDetail.php", { courseID: course.id }),
 					iL.Room.all()
 				])
 				.then(function(results){
@@ -644,6 +637,7 @@
 	 * Get all lessons for this course
 	 * [Sugar] for Lesson.find({course: this})
 	 *
+	 * @deprecated
 	 * @method lessons
 	 * @param course {object}
 	 * @return {Promise} Promise of an array
@@ -654,7 +648,6 @@
 				return course.lessons;
 			});
 	}
-	//Course.lessons = courseLessons;
 
 	/**
 	 * Attendance class for dealing with attendances
@@ -726,46 +719,43 @@
 			}
 
 			if(!_attendees[id]){
-				_attendees[id] = new Promise(function(resolve, reject){
-					$.post(iL.API_ROOT + "process_getCourseScheduleStudents.php",
-						{
-							scheduleID: lesson.id
-						},
-						function(data){
-							if(!lesson.attendees){
-								lesson.attendees = [];
-							}
-							lesson.attendees.length = 0;
-							$.each(data.coursestudent, function(i,item){
-								var student = iL.Student.get(item.MemberID) || {
-										id: item.MemberID,
-										name: item.Lastname,
-										photo: item.Accountname
-									},
-									subscriptionID = item.MemberCourseID,
-									subscription = iL.Subscription.get(subscriptionID) || {
-										id: subscriptionID,
-										course: lesson.course,
-										student: student
-									}
-									attendance = getAttendance(lesson, student) || {
-										lesson: lesson,
-										student: student
-									};
-								iL.Util.parseName(student);
+				_attendees[id] = iL.query("process_getCourseScheduleStudents.php", { scheduleID: lesson.id })
+					.then(function(data){
 
-								attendance.subscription = subscription;
-								attendance.absent = item.absent == "1";
+						if(!lesson.attendees){
+							lesson.attendees = [];
+						}
+						lesson.attendees.length = 0;
 
-								iL.Student.add(student);
-								iL.Subscription.add(subscription);
-								iL.Attendance.add(attendance);
-							});
-							resolve(lesson.attendees);
-						},
-						"json")
-					.fail(reject);
-				});
+						$.each(data.coursestudent, function(i,item){
+							var student = iL.Student.get(item.MemberID) || {
+									id: item.MemberID,
+									name: item.Lastname,
+									photo: item.Accountname
+								},
+								subscriptionID = item.MemberCourseID,
+								subscription = iL.Subscription.get(subscriptionID) || {
+									id: subscriptionID,
+									course: lesson.course,
+									student: student
+								}
+								attendance = getAttendance(lesson, student) || {
+									lesson: lesson,
+									student: student
+								};
+
+							iL.Util.parseName(student);
+
+							attendance.subscription = subscription;
+							attendance.absent = item.absent == "1";
+
+							iL.Student.add(student);
+							iL.Subscription.add(subscription);
+							iL.Attendance.add(attendance);
+						});
+
+						return lesson.attendees;
+					});
 			}
 
 			if(options.student){
@@ -773,6 +763,7 @@
 					return [getAttendance(lesson, options.student)];
 				});
 			}
+
 			return _attendees[id];
 		}
 	}
