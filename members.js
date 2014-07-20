@@ -16,7 +16,7 @@
 		existingNewRegex = /\b(new)\b/gi,
 
 		/* Parameters */
-		existingCutoff = moment([2014]),
+		existingCutoff = new Date(2014, 0, 1),
 
 		/* data */
 		students = {},
