@@ -89,7 +89,7 @@
 					return { id: i.crid, name: i.place }
 				});
 				tutors = $.map(data.tutor, function(t){
-					var tutor = { name: t.n, id: t.mid };
+					var tutor = { name: $.trim(t.n), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
 					return tutor;
 				});
@@ -140,9 +140,6 @@
 			});
 			return tutor;
 		}
-		return Promise.resolve(
-			loading.then(function(){return tutors;})
-		);
 	}
 	Tutor.get = getTutors;
 	iLearner.getTutors = getTutors;
@@ -163,6 +160,8 @@
 			return { name: "", colour: "#999999" };
 		}
 
+		name = $.trim(name);
+
 		if(tutors){
 			$.each(tutors, function(i,t){
 				if(t.name == name){
@@ -175,7 +174,7 @@
 		if(!tutor && fallback){
 			tutor = { name: name };
 			tutor.colour = getTutorColour(tutor);
-			tutors.push(tutor);
+			tutors && tutors.push(tutor);
 		}
 
 		return tutor;

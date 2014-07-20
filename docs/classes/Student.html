@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Course - i-Learner Studio Admin API</title>
+    <title>Student - i-Learner Studio Admin API</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -108,7 +108,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>Course Class</h1>
+                        <h1>Student Class</h1>
 <div class="box meta">
     
 
@@ -116,13 +116,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/calendar.js.html#l340"><code>calendar.js:340</code></a>
+            Defined in: <a href="../files/members.js.html#l26"><code>members.js:26</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Calendar.html">Calendar</a>
+            Module: <a href="../modules/Members.html">Members</a>
         
     
 
@@ -132,8 +132,7 @@
 
 
 <div class="box intro">
-    <p>Class to deal with courses. Courses generally run for a number of weeks
-and contain lesson instances</p>
+    <p>Student class for dealing with students</p>
 
 </div>
 
@@ -190,7 +189,7 @@ and contain lesson instances</p>
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_lessons">lessons</a>
+                                <a href="#method_save">save</a>
 
                                 
                                 
@@ -221,7 +220,7 @@ and contain lesson instances</p>
             
                 <li class="arg">
                     
-                        <code>course</code>
+                        <code>student</code>
                     
                 </li>
             
@@ -254,7 +253,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l359"><code>calendar.js:359</code></a>
+        <a href="../files/members.js.html#l44"><code>members.js:44</code></a>
         
         </p>
 
@@ -265,7 +264,8 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Add a course to be tracked by the sdk</p>
+        <p>Add a student here for tracking which may have been generated elsewhere
+(single homogenous module solves this)</p>
 
     </div>
 
@@ -277,14 +277,14 @@ and contain lesson instances</p>
             
                 <li class="param">
                     
-                        <code class="param-name">course</code>
+                        <code class="param-name">student</code>
                         <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>course to add</p>
+                        <p>Student object</p>
 
                     </div>
 
@@ -310,7 +310,7 @@ and contain lesson instances</p>
             
                 <li class="arg">
                     
-                        <code>course</code>
+                        <code>student</code>
                     
                 </li>
             
@@ -347,7 +347,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l490"><code>calendar.js:490</code></a>
+        <a href="../files/members.js.html#l118"><code>members.js:118</code></a>
         
         </p>
 
@@ -358,8 +358,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Fetch details of a course</p>
-<p>Details  gained by fetching include payment information and fees</p>
+        <p>Fetch details about a student</p>
 
     </div>
 
@@ -371,7 +370,7 @@ and contain lesson instances</p>
             
                 <li class="param">
                     
-                        <code class="param-name">course</code>
+                        <code class="param-name">student</code>
                         <span class="type">Object</span>
                     
 
@@ -397,7 +396,7 @@ and contain lesson instances</p>
                     
                         <span class="type">Object</span>:
                     
-                    <p>Returns the same course object</p>
+                    <p>The same student object passed in</p>
 
                 
             </div>
@@ -454,7 +453,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l370"><code>calendar.js:370</code></a>
+        <a href="../files/members.js.html#l56"><code>members.js:56</code></a>
         
         </p>
 
@@ -465,7 +464,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Find courses matching given search parameters</p>
+        <p>Find students with specific conditions</p>
 
     </div>
 
@@ -484,7 +483,8 @@ and contain lesson instances</p>
                     
 
                     <div class="param-description">
-                         
+                        <p>A map of options</p>
+
                     </div>
 
                     
@@ -492,69 +492,14 @@ and contain lesson instances</p>
                             
                             <li class="param">
                                 
-                                    <code class="param-name optional">[code]</code>
+                                    <code class="param-name optional">[name]</code>
                                     <span class="type">String</span>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
                                 
 
                                 <div class="param-description">
-                                    
-                                </div>
+                                    <p>Only return students whose name <em>contains</em> this value</p>
 
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[title]</code>
-                                    <span class="type">String</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[year]</code>
-                                    <span class="type">Int</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[month]</code>
-                                    <span class="type">Int</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name optional">[tutor]</code>
-                                    <span class="type">Object</span>
-                                    <span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-
-                                <div class="param-description">
-                                    
                                 </div>
 
                                 
@@ -577,7 +522,7 @@ and contain lesson instances</p>
                     
                         <span class="type">Promise</span>:
                     
-                    <p>Promise of an array</p>
+                    <p>Promise of an array of student objects</p>
 
                 
             </div>
@@ -634,7 +579,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l347"><code>calendar.js:347</code></a>
+        <a href="../files/members.js.html#l32"><code>members.js:32</code></a>
         
         </p>
 
@@ -645,7 +590,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Get a specific course</p>
+        <p>Get a student specified by his ID</p>
 
     </div>
 
@@ -664,7 +609,7 @@ and contain lesson instances</p>
                     
 
                     <div class="param-description">
-                        <p>ID of course to get</p>
+                        <p>Student ID</p>
 
                     </div>
 
@@ -684,7 +629,7 @@ and contain lesson instances</p>
                     
                         <span class="type">Object</span>:
                     
-                    <p>Course object</p>
+                    <p>Object representing the student</p>
 
                 
             </div>
@@ -695,8 +640,8 @@ and contain lesson instances</p>
 </div>
 
                 
-                    <div id="method_lessons" class="method item">
-    <h3 class="name"><code>lessons</code></h3>
+                    <div id="method_save" class="method item">
+    <h3 class="name"><code>save</code></h3>
 
     
         <div class="args">
@@ -704,7 +649,7 @@ and contain lesson instances</p>
             
                 <li class="arg">
                     
-                        <code>course</code>
+                        <code>student</code>
                     
                 </li>
             
@@ -714,7 +659,7 @@ and contain lesson instances</p>
 
     
         <span class="returns-inline">
-            <span class="type">Promise</span>
+            <span class="type">Promise(Student)</span>
         </span>
     
 
@@ -741,7 +686,7 @@ and contain lesson instances</p>
             
         
         
-        <a href="../files/calendar.js.html#l573"><code>calendar.js:573</code></a>
+        <a href="../files/members.js.html#l274"><code>members.js:274</code></a>
         
         </p>
 
@@ -752,8 +697,7 @@ and contain lesson instances</p>
     </div>
 
     <div class="description">
-        <p>Get all lessons for this course
-[Sugar] for Lesson.find({course: this})</p>
+        <p>Save student back to the server</p>
 
     </div>
 
@@ -765,7 +709,7 @@ and contain lesson instances</p>
             
                 <li class="param">
                     
-                        <code class="param-name">course</code>
+                        <code class="param-name">student</code>
                         <span class="type">Object</span>
                     
 
@@ -789,9 +733,9 @@ and contain lesson instances</p>
             <div class="returns-description">
                 
                     
-                        <span class="type">Promise</span>:
+                        <span class="type">Promise(Student)</span>:
                     
-                    <p>Promise of an array</p>
+                    <p>Prmoise resolves when server confirms student has been saved succesfully</p>
 
                 
             </div>
