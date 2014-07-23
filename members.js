@@ -84,9 +84,7 @@
 		};
 
 		if(!_searches[hash]){
-			_searches[hash] = Promise.resolve(
-					$.post(iL.API_ROOT + "process_getMemberList.php", post_data, null, "json")
-				)
+			_searches[hash] = iL.query("process_getMemberList.php", post_data)
 				.then(function(data){
 					var out = [];
 					data.memberlist.forEach(function(item){
@@ -134,7 +132,7 @@
 		student = students[student.id] || student;
 		if(!_students[student.id]){
 			_students[student.id] = Promise.all([
-					$.post(iL.API_ROOT + "process_getMemberDetail.php", {memberID: student.id}, null, "json"),
+					iL.query("process_getMemberDetail.php", {memberID: student.id}),
 					findStudents({name: student.name})
 				]).then(function(array){
 					var data = array[0],
@@ -347,9 +345,8 @@
 				whyjoinusextendtext2: student.entryChannel2
 			};
 
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberInformation.php", post_data, null, "json")
-		).then(function(data){
+		return iL.query("process_updateMemberInformation.php", post_data)
+		.then(function(data){
 			if(!data || data.statuscode != "1"){
 				return Promise.reject(Error("Server Rejected Student"));
 			}
@@ -393,9 +390,8 @@
 				htmlselect_Discountvalue_val: invoice.originalAmount - invoice.amount,
 				htmlselect_Discounttype_val: 1	// dollars
 			};
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_updateMemberInvoice.php", post_data, null, "json")
-		).then(function(data){
+		return iL.query("process_updateMemberInvoice.php", post_data)
+		.then(function(data){
 			invoice.id = data.iID;
 			invoice.handledBy = data.handle;
 			invoice.paid = true;
@@ -418,9 +414,8 @@
 				membercourseinvoiceID: invoice.id,
 				reason: reason
 			};
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_removeMemberInvoice.php", post_data, null, "json")
-		).then(function(data){
+		return iL.query("process_removeMemberInvoice.php", post_data)
+		.then(function(data){
 			invoice.id = 0;
 			invoice.handledBy = undefined;
 			invoice.paid = false;
@@ -494,9 +489,8 @@
 				membercourseID: subscription.id,
 				courseScheduleID: subscription.lastLesson.id
 			};
-			return Promise.resolve(
-				$.post(iL.API_ROOT + "process_MemberCourseWithDrawal.php", post_data, "json")
-			).then(function(){
+			return iL.query("process_MemberCourseWithDrawal.php", post_data)
+			.then(function(){
 				// invalidate attendances
 				iL.Lesson
 					.future(subscription.lastLesson)
@@ -515,9 +509,8 @@
 				StudentCourseRegistrationDate: iL.Util.formatDate(new Date()),
 				StudentCoursePaymentcycle: 2 // [sic] per lesson
 			};
-			return Promise.resolve(
-				$.post(iL.API_ROOT + "process_updateMemberCourse.php", post_data, null, "json")
-			).then(function(data){
+			return iL.query("process_updateMemberCourse.php", post_data)
+			.then(function(data){
 				if(!subscription.id){
 					subscription.id = data.MemberCourseID;
 					addSubscription(subscription);
@@ -545,9 +538,8 @@
 	 * @return {Promise}
 	 */
 	function removeSubscription(subscription){
-		return Promise.resolve(
-			$.post(iL.API_ROOT + "process_cancelMemberCourse.php", {MemberCourseID: subscription.id}, null, "json")
-		).then(function(){
+		return iL.query("process_cancelMemberCourse.php", {MemberCourseID: subscription.id})
+		.then(function(){
 			// invalidate attendancess
 		});
 	}
