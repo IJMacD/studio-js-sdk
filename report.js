@@ -76,12 +76,7 @@
 		}
 
 		if(!_reports[hash]){
-			_reports[hash] = Promise.resolve(
-				$.post(iL.API_ROOT + "process_getMemberReportCardList.php",
-					post_data,
-					null,
-					"json")
-				)
+			_reports[hash] = iL.query("process_getMemberReportCardList.php", post_data)
 				.then(function(data){
 					var resultSet = [];
 					if(data.MemberReportCardList){
@@ -147,15 +142,15 @@
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function fetchReport(item){
-		var deferred = $.Deferred(),
-			promise = deferred.promise();
 
-		$.when(
-			$.post(iL.API_ROOT + "process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id, searchTerm: 3 },  null, "json"),
+		return Promise.all([
+			iL.query("process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id, searchTerm: 3 }),
 			getCourseLearningFocus(item.course)
-		)
-		.done(function(a1, focus){
-			var detail = a1[0].MemberReportCardDetail[0],
+		])
+		.then(function(results){
+			var a1 = results[0],
+				focus = results[1],
+				detail = a1.MemberReportCardDetail[0],
 				labels = "ap1label ap2label ap3label ap4label wh1label wh2label wh3label wh4label ap1progress ap2progress ap3progress ap4progress ap1value ap2value ap3value ap4value wh1value wh2value wh3value wh4value wh1progress wh2progress wh3progress wh4progress".split(" "),
 				o = {
 					ap1progress: "0",
@@ -198,11 +193,8 @@
 			// There should be no conflict with labels when merging into report stub
 			$.extend(item, o);
 
-			deferred.resolve(item);
-		})
-		.fail(deferred.reject);
-
-		return Promise.resolve(promise);
+			return item;
+		});
 	}
 	Report.fetch = fetchReport;
 
@@ -222,7 +214,7 @@
 			k = saveFields[i];
 			post_data[k] = item[k];
 		}
-		return $.post(iL.API_ROOT + "process_updateMemberReportCardDetail.php", post_data, null, "json");
+		return iL.query("process_updateMemberReportCardDetail.php", post_data);
 	}
 	Report.save = save;
 
@@ -293,22 +285,21 @@
 	 * @return {Promise} Promise of an array
 	 */
 	function getCourseLearningFocus(course){
-		var deferred,
-			post;
+		var deferred;
 		if(!learningObjectives[course.id]){
 			deferred = $.Deferred();
-			post = $.post(iL.API_ROOT + "process_getCourseLearningFocus.php", { coursename: course.title + " " + course.level }, null, "json");
-			post.done(function(data){
-				var focus = data.CourseFocusObject[0],
-					o = {};
-				if(focus){
-					o.ap1label = focus.ap1;
-					o.ap2label = focus.ap2;
-					o.ap3label = focus.ap3;
-					o.ap4label = focus.ap4;
-				}
-				deferred.resolve(o);
-			});
+			iL.query("process_getCourseLearningFocus.php", { coursename: course.title + " " + course.level })
+				.then(function(data){
+					var focus = data.CourseFocusObject[0],
+						o = {};
+					if(focus){
+						o.ap1label = focus.ap1;
+						o.ap2label = focus.ap2;
+						o.ap3label = focus.ap3;
+						o.ap4label = focus.ap4;
+					}
+					deferred.resolve(o);
+				});
 			learningObjectives[course.id] = deferred.promise();
 		}
 		return learningObjectives[course.id];
