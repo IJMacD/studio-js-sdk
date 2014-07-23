@@ -156,7 +156,9 @@
 								student.school = item.School;
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
-								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
+								student.birthdate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
+								// deprecated
+								student.birthDate = student.birthdate;
 
 								if(student.notes.match(existingOldRegex)){
 									student.existing = true;

@@ -692,6 +692,8 @@
 	 * @method find
 	 * @param options {object} Options
 	 * @param options.lesson {object} Lesson to fetch attendances for
+	 * @param [options.student] {object} Specific student to check for in combination with lesson
+	 * @param [options.fetch] {bool} Also fetch full details from the server (to include courseMemberID)
 	 * @return {Promise}
 	 */
 	function findAttendances(options){
