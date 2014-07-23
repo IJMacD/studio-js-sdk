@@ -319,7 +319,7 @@
 				MemberDetailRemarkPayment: student.notesPayment,
 				MemberDetailNameinChinese: student.nameChinese,
 				MemberDetailNickname: student.name,
-				MemberDetailBirthDay: iL.Util.formatDate(student.birthDate),
+				MemberDetailBirthDay: iL.Util.formatDate(student.birthdate),
 				MemberDetailGender: student.gender == "male" ? "1" : "0",
 				MemberDetailGrade: student.grade,
 				MemberDetailSchool: student.school,

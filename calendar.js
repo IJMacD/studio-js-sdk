@@ -249,7 +249,7 @@
 				coursescheduleID: lesson.id,
 				cssid: lesson.course.id,	// Duplicated Course ID, old and new possibly?
 				csid: lesson.room.id,		// Classroom ID
-				sdate: iL.formatDate(lesson.start),
+				sdate: iL.Util.formatDate(lesson.start),
 				timefrom: pad(startHour),	// Yes, these *must* be padded strings and 24-hour!
 				minutesfrom: pad(lesson.start.getMinutes()),
 				fromdt: startAP,			// Not sure if required
