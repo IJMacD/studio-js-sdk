@@ -67,7 +67,9 @@
 			post_data.searchDateTo = iL.Util.formatDate(options.to);
 		}
 
-		post_data.searchTerm = 3;
+		if(options.term){
+			post_data.searchTerm = options.term.id;
+		}
 
 		hash = JSON.stringify(post_data);
 

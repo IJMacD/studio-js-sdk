@@ -16,6 +16,7 @@
 
 		Tutor = iLearner.Tutor || {},
 		Room = iLearner.Room || {},
+		Term = iLearner.Term || {},
 		Util = iLearner.Util || {},
 
 		topNames = "Chan Chang Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung"
@@ -29,6 +30,7 @@
 		adminStaff,
 		classrooms,
 		tutors,
+		terms,
 
 		loading;
 
@@ -39,6 +41,7 @@
 
 	iLearner.Tutor = Tutor;
 	iLearner.Room = Room;
+	iLearner.Term = Term;
 	iLearner.Util = Util;
 
 	/* legacy */
@@ -79,6 +82,15 @@
 				adminStaff = data.AdminStaff;
 				classrooms = $.map(data.classroom, function(i){
 					return { id: i.crid, name: i.place }
+				});
+				terms = data.term.map(function(term){
+					return {
+						id: term.idStudioTerms,
+						year: term.TermYear,
+						name: term.Term,
+						start: new Date(term.Startdate),
+						end: new Date(term.Enddate)
+					}
 				});
 				tutors = $.map(data.tutor, function(t){
 					var tutor = { name: $.trim(t.n), id: t.mid };
@@ -208,7 +220,7 @@
 	 * Get all rooms
 	 *
 	 * @method all
-	 * @return {Promise} Promise of an array rooms
+	 * @return {Promise} Promise of an array of rooms
 	 */
 	function getRooms(id){
 		var classroom;
@@ -254,6 +266,79 @@
 		return classroom;
 	}
 	Room.find = findRoom;
+
+	/**
+	 * Class for using terms
+	 *
+	 * @class Term
+	 */
+
+	/**
+	 * Get all terms
+	 *
+	 * @method all
+	 * @return {Promise} Promise of an array of terms
+	 */
+	function allTerms(){
+		return loading.then(function(){return terms;});
+	}
+	Term.all = allTerms;
+
+	/**
+	 * Find a term based on criteria
+	 *
+	 * @method find
+	 * @param options {object} map of options
+	 * @return {Promise} Promise of an array of terms
+	 */
+	function findTerm(options){
+		if(!options){
+			return Promise.reject(new Error("No options specified for finding a term"));
+		}
+
+		return allTerms().then(function(terms){
+			var now,
+				term = Promise.reject(new Error("No options specified for finding a term"));
+
+			if(options.current){
+				now = new Date();
+
+				terms.forEach(function(t){
+					if(t.start < now && t.end > now){
+						term = t;
+						return false;
+					}
+				});
+			}
+			return term;
+		});
+	}
+	Term.find = findTerm;
+
+	/**
+	 * Get a term based on id
+	 *
+	 * @method find
+	 * @param id {int} ID
+	 * @return {object} Term
+	 */
+	function getTerm(id){
+		var term;
+
+		if(!terms){
+			return
+		}
+
+		terms.forEach(function(t){
+			if(t.id == id){
+				term = t;
+				return false;
+			}
+		});
+
+		return term;
+	}
+	Term.get = getTerm;
 
 	/**
 	 * Utility Class
