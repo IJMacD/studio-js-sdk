@@ -235,21 +235,25 @@
 			$.get(iL.API_ROOT + "comment.php")
 				.done(function(data){
 					var result = {
-						good: [],
-						average: [],
-						suggestions: [],
-						focus: []
-					};
-					result.good.regex = /good_comments\.push\("([^"]+)"\)/g;
-					result.average.regex = /average_comments\.push\("([^"]+)"\)/g;
-					result.suggestions.regex = /suggestions\.push\("([^"]+)"\)/g;
-					result.focus.regex = /focus\.push\("([^"]+)"\)/g;
+							comments: {},
+							improvement: {},
+							focus: []
+						},
 
-					$.each(result, function(i,item){
-						$.each(data.match(item.regex), function(i,comment){
-							item.regex.lastIndex = 0;
-							item.push(
-								item.regex.exec(comment)[1]
+						commentRegex = /^var ([a-z]+)_comments/igm,
+						improvementRegex = /^var ([a-z]+)_improvement/igm,
+
+						focusRegex = /focus\.push\("([^"]+)"\)/g,
+
+						name,
+						regex,
+						matches;
+
+					function parseComments(list, regex){
+						var match;
+						while(match = regex.exec(data)){
+							list.push(
+								match[1]
 									.replace("XXX",			"{ student.forename }")
 									.replace(/\bshe\b/g,	"{ pronounSubject }")
 									.replace(/\bShe\b/g,	"{ pronounSubjectCapitalize }")
@@ -265,9 +269,28 @@
 									.replace(/\bhim\b/g,	"{ pronounObject }")
 									.replace(/\bboy\b/g,	"{ nounGender }")
 							);
-						});
-						item.regex = undefined;
-					});
+						}
+					}
+
+					while(match = commentRegex.exec(data)){
+						name = match[1];
+						result.comments[name] = [];
+
+						regex = new RegExp(name + '_comments\\.push\\("([^"]+)"\\)', 'gi');
+
+						parseComments(result.comments[name], regex);
+					}
+
+					while(match = improvementRegex.exec(data)){
+						name = match[1];
+						result.improvement[name] = [];
+
+						regex = new RegExp(name + '_improvement\\.push\\("([^"]+)"\\)', 'gi');
+
+						parseComments(result.improvement[name], regex);
+					}
+
+					parseComments(result.focus, focusRegex)
 
 					comments.resolve(result);
 				});
