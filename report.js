@@ -15,7 +15,7 @@
 		comments,
 
 		learningDefaults = {wh1label: "Politeness", wh2label: "Attentiveness", wh3label: "Participation", wh4label: "Effort"},
-		saveFields = "idmembercoursereportcard searchTerm ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount".split(" ");
+		saveFields = "idmembercoursereportcard ap1label ap1value ap1progress ap2label ap2value ap2progress ap3label ap3value ap3progress ap4label ap4value ap4progress wh1label wh1value wh1progress wh2label wh2value wh2progress wh3label wh3value wh3progress wh4label wh4value wh4progress generalcomments suggestions learningfocus attendance lessoncount".split(" ");
 
 	window.iL = iLearner;
 	iLearner.Report = Report;
@@ -106,7 +106,7 @@
 									complete: (item.completed == "1"),
 									attendance: item.lessoncount - item.leavecount,
 									lessoncount: item.lessoncount,
-									searchTerm: 3
+									term: options.term
 								};
 
 							student.name = item.nickname;
@@ -144,9 +144,10 @@
 	 * @return {Promise} Returns a promise object which can be used to wait for results
 	 */
 	function fetchReport(item){
+		var term = item.term || {};
 
 		return Promise.all([
-			iL.query("process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id, searchTerm: 3 }),
+			iL.query("process_getMemberReportCardDetail.php", { membercourseID: item.subscription.id, searchTerm: term.id }),
 			getCourseLearningFocus(item.course)
 		])
 		.then(function(results){
@@ -212,6 +213,7 @@
 		var post_data = {},
 			i, k;
 		item.complete = true;
+		post_data.searchTerm = item.term && item.term.id;
 		for(i in saveFields){
 			k = saveFields[i];
 			post_data[k] = item[k];
