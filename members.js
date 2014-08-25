@@ -56,6 +56,7 @@
 	 */
 	function addStudent(student){
 		students[student.id] = student;
+		iL.Util.parseName(student);
 	}
 	Student.add = addStudent;
 

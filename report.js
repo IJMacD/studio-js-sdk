@@ -88,10 +88,15 @@
 								subscriptionID = item.membercourseid,
 								reportID = item.membercourseid,
 								student = iL.Student.get(studentID) || {
-									id: studentID
+									id: studentID,
+									name: item.nickname
 								},
 								course = iL.Course.get(courseID) || {
-									id: courseID
+									id: courseID,
+									title: item.coursename,
+									startTime: item.starttime,
+									endTime: item.endtime,
+									tutor: options.tutor
 								},
 								subscription = iL.Subscription.get(course, student) || {
 									id: subscriptionID,
@@ -106,17 +111,9 @@
 									complete: (item.completed == "1"),
 									attendance: item.lessoncount - item.leavecount,
 									lessoncount: item.lessoncount,
-									term: options.term
+									term: options.term,
+									startDate: new Date(item.startdate)
 								};
-
-							student.name = item.nickname;
-							course.title = item.coursename;
-							course.startTime = item.starttime;
-							course.endTime = item.endtime;
-
-							course.tutor = options.tutor;
-
-							iL.Util.parseName(student);
 
 							iL.Student.add(student);
 							iL.Course.add(course);
