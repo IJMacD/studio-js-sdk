@@ -312,6 +312,20 @@
 
 				return term;
 			}
+
+			if(options.mostRecent){
+				now = new Date();
+
+				terms.forEach(function(t){
+					term = t;
+					if(t.start < now && t.end > now){
+						return false;
+					}
+				});
+
+				return term;
+			}
+
 			return Promise.reject(new Error("No options specified for finding a term"))
 		});
 	}
