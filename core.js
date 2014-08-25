@@ -298,7 +298,7 @@
 
 		return allTerms().then(function(terms){
 			var now,
-				term = Promise.reject(new Error("No options specified for finding a term"));
+				term;
 
 			if(options.current){
 				now = new Date();
@@ -309,8 +309,10 @@
 						return false;
 					}
 				});
+
+				return term;
 			}
-			return term;
+			return Promise.reject(new Error("No options specified for finding a term"))
 		});
 	}
 	Term.find = findTerm;
