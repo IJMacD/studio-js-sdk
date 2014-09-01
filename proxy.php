@@ -9,7 +9,7 @@ if(strpos($request_uri,$script_name)===0){
 	$url = BASE_URL . $path;
 
 	$method = $_SERVER['REQUEST_METHOD'];
-	$response = proxy_request(BASE_URL.$path, ($method == "GET" ? $_GET : $_POST), $method);
+	$response = proxy_request($url, ($method == "GET" ? $_GET : $_POST), $method);
 
 	if($response['status'] == "ok"){
 

@@ -85,7 +85,9 @@
 		var	args = Array.prototype.slice.call(arguments),
 			options,
 			post_data,
-			hash;
+			hash,
+			startMoment,
+			endMoment;
 
 		if(args.length == 2){
 			return _relativeLessons(args[0], args[1]);
@@ -99,6 +101,23 @@
 
 		if(!options.start){
 			options.start = new Date;
+		}
+
+		if(options.end){
+			startMoment = moment(options.start);
+			endMoment = moment(options.end);
+			if(endMoment > startMoment && !startMoment.isSame(endMoment, 'day')){
+				return Promise.all(getAllDays(startMoment, endMoment)
+					.map(function(item){
+						var op = $.extend({},options);
+						op.start = item.toDate();
+						op.end = undefined;
+						return findLessons(op);
+					})
+				).then(function(days){
+					return days.concat.apply([], days);
+				});
+			}
 		}
 
 		post_data = {
@@ -894,6 +913,18 @@
 			outGrades[grade] = string.match(grade) ? 1 : 0;
 		});
 		return outGrades;
+	}
+
+	function getAllDays(start, end){
+		var out = [start],
+			current = start;
+
+		while(current < end){
+			current = current.clone().add(1, 'day');
+			out.push(current);
+		}
+
+		return out;
 	}
 
 }(window));
