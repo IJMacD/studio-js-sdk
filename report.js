@@ -193,6 +193,9 @@
 			// There should be no conflict with labels when merging into report stub
 			$.extend(item, o);
 
+			item.termfocus = item.learningfocusthisterm;
+			item.learningfocusthisterm = undefined;
+
 			return item;
 		});
 	}
@@ -215,6 +218,7 @@
 			k = saveFields[i];
 			post_data[k] = item[k];
 		}
+		post_data.learningfocusthisterm = item.termfocus;
 		return iL.query("process_updateMemberReportCardDetail.php", post_data);
 	}
 	Report.save = save;
