@@ -101,9 +101,13 @@
 	}
 
 	function query(url, data){
-		return Promise.resolve(
+		return new Promise(function(resolve, reject){
 			$.post(iL.Conf.API_ROOT + url, data, null, "json")
-		);
+				.then(resolve, function(xhr, status, error){
+					console.log(status + " in file " + url);
+					reject(error);
+				});
+		});
 	}
 
 	/**
@@ -152,7 +156,7 @@
 	 * @method find
 	 * @param name {string} Name of the tutor you with to fetch
 	 * @param [fallback] {boolean} If true will return a constructed object
-	 * even if a corresponding one  was not found on the server
+	 * even if a corresponding one	was not found on the server
 	 * @return {object} Object containing the details of the tutor
 	 */
 	function findTutor(name, fallback){
@@ -205,12 +209,12 @@
 	 */
 
 	 /**
-	  * Get a room by ID
-	  *
-	  * @method get
-	  * @param id {int} ID of the Room to get
-	  * @return {object} Object with details of the room
-	  */
+		* Get a room by ID
+		*
+		* @method get
+		* @param id {int} ID of the Room to get
+		* @return {object} Object with details of the room
+		*/
 	function getRoom(id){
 		return getRooms(id);
 	}
