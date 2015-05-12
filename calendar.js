@@ -95,6 +95,11 @@
 
 		options = $.isPlainObject(args[0]) ? args[0] : {};
 
+		if(options.id){
+			var lesson = getLesson(options.id);
+			return lesson ? Promise.resolve([lesson]) : Promise.reject("No method to search for individual lessons");
+		}
+
 		if(options.course){
 			return courseLessons(options.course);
 		}
