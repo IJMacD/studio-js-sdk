@@ -443,6 +443,23 @@
 				},
 			hash = JSON.stringify(post_data);
 
+		if(options.code){
+			var truncatedCode = options.code.replace(/[A-Z]+$/i,"");
+
+			if(options.code != truncatedCode){
+				return findCourses({code: truncatedCode}).then(function(courses){
+					var out;
+					courses.forEach(function(course){
+						if(course.code == options.code){
+							out = course;
+							return false;
+						}
+					});
+					return Promise.resolve([out]);
+				});
+			}
+		}
+
 		if(!_courses[hash]){
 			if(options.code){
 				$.each(courses, function(i,course){
