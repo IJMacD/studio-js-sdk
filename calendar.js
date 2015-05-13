@@ -11,7 +11,7 @@
 		Attendance = {},
 
 		/* Constants */
-		levelRegex = /\s*\w\d(?:\s?-\s?\w\d)?\s*/i,
+		levelRegex = /\s*[a-z]\d(?:\s?-\s?[a-z]\d)?\s*/i,
 		customLevels = [
 			{regex: /Trinity/, level: "K"},
 			{regex: /GCSE/, level: "S"},
