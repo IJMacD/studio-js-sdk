@@ -560,23 +560,27 @@
 	 * @return {Promise}
 	 */
 	function saveCourse(course){
-		var post_data = {
-				Action: "update",
-				courseid: course.id,
-				subject: subjectToNumber(course.subject),
-				tid: (course.tutor && course.tutor.id) || 0,
-				ccode: course.code,
-				subcode: null,
-				vacancy: 6,
-				discount: course.existingDiscount,
-				cname: course.title + " " + course.level,
-				status: 1, // Enabled?
-				cssid: 2, // UNKNOWN
-				payment: course.paymentCycle == "lesson" ? "2" : "1",
-				mfee: course.pricePerMonth || 0,
-				lfee: course.pricePerLesson || 0,
-				remark: course.notes
-			};
+		var code = course.code.replace(/[a-z]+$/i, ""),
+				subcode = course.code.substr(code.length),
+				post_data = {
+					Action: "update",
+					courseid: course.id,
+					subject: subjectToNumber(course.subject),
+					tid: (course.tutor && course.tutor.id) || 0,
+					ccode: code,
+					subcode: subcode,
+					vacancy: 6,
+					discount: course.existingDiscount,
+					cname: course.title + " " + course.level,
+					status: 1, // Enabled?
+					cssid: course.room.id,
+					payment: course.paymentCycle == "lesson" ? "2" : "1",
+					mfee: course.pricePerMonth || 0,
+					lfee: course.pricePerLesson || 0,
+					remark: course.notes,
+					reportcard: course.report,
+					cb201505promotion: course.promotion
+				};
 		$.extend(post_data, objectifyGrade(course.level));
 		return iL.query("process_updateCourse.php", post_data);
 	}
@@ -612,13 +616,15 @@
 					//course.code = details.CourseCode;
 					course.title = details.CourseName.replace(levelRegex, "");
 					course.room = iL.Room.get(details.DefaultClassroomID);
-					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "monthly";
+					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "month";
 					course.existingDiscount = details.DiscountForOldStudent;
 					course.pricePerLesson = details.LessonFee;
-					course.pricePerMonth = details.MonthlyFee;
+					course.pricePerMonth = details.Monthlyfee; // Note different capitalisation
 					course.notes = details.Remark == "null" ? "" : details.Remark;
 					course.tutor = tutor;
 					course.level = stringifyGrade(details);
+					course.report = details.reportcard;
+					course.promotion = details.cb201505promotion;
 
 					if(!course.level){
 						level = details.CourseName.match(levelRegex);
