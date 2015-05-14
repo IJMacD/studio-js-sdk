@@ -207,8 +207,6 @@
 
 						courses[course.id] = course;
 
-						lesson.attendees.length = 0;
-
 						// We have the attendees array now so we can
 						// pre-emptively resolve a promise for each of the lessons.
 						// // Warning these attendances don't contain `subscription` or `memberCourseID`
@@ -741,12 +739,15 @@
 	 * @param attendance {object}
 	 */
 	function addAttendance(attendance){
-		attendances[attendanceKey(attendance)] = attendance;
-		/**
-		 * @deprecated
-		 * Use Attendance.find instead
-		 */
-		attendance.lesson.attendees.push(attendance);
+		var key = attendanceKey(attendance);
+		if(!attendances[key]){
+			/**
+			 * This method of getting attendees will soon be deprecated.
+			 * Use Attendance.find instead
+			 */
+			attendance.lesson.attendees.push(attendance);
+		}
+		attendances[key] = attendance;
 	}
 	Attendance.add = addAttendance;
 
@@ -791,7 +792,6 @@
 						if(!lesson.attendees){
 							lesson.attendees = [];
 						}
-						lesson.attendees.length = 0;
 
 						$.each(data.coursestudent, function(i,item){
 							var student = iL.Student.get(item.MemberID) || {
@@ -908,7 +908,7 @@
 			return arguments[0].lesson.id + ":" + arguments[0].student.id;
 		}
 		if(!lesson || !student){
-			return
+			return null; //throw new Error("Need a lesson and a student for an attendance");
 		}
 		return lesson.id + ":" + student.id;
 	}
