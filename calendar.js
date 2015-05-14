@@ -100,6 +100,23 @@
 			return lesson ? Promise.resolve([lesson]) : Promise.reject("No method to search for individual lessons");
 		}
 
+		if(options.student){
+			var o = $.extend({},options);
+			o.student = undefined;
+			return findLessons(o).then(function(lessons){
+				return lessons.filter(function(lesson){
+					var hasStudent = false;
+					lesson.attendees.forEach(function(attendee){
+						if(attendee.student == options.student){
+							hasStudent = true;
+							return false;
+						}
+					});
+					return hasStudent;
+				});
+			});
+		}
+
 		if(options.course){
 			return courseLessons(options.course);
 		}
