@@ -104,7 +104,7 @@
 		return new Promise(function(resolve, reject){
 			$.post(iL.Conf.API_ROOT + url, data, null, "json")
 				.then(resolve, function(xhr, status, error){
-					console.log(status + " in file " + url);
+					console.error(status + " in file " + url);
 					reject(error);
 				});
 		});

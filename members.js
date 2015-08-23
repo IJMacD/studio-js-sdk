@@ -179,6 +179,7 @@
 								student.soco = item.isSOCO == "1";
 								student.entryChannel1 = item.whyjoinusextendtext1;
 								student.entryChannel2 = item.whyjoinusextendtext2;
+								student.isSuspended = item.suspend;
 
 								iL.Util.parseName(student);
 
@@ -315,11 +316,11 @@
 			post_data = {
 				Action: student.id ? "update" : "insert",
 				MemberID: student.id,
-				MemberDetailNameinEnglish: student.englishName,
+				MemberDetailNameinEnglish: student.name,
 				MemberDetailRemark: student.notes,
 				MemberDetailRemarkPayment: student.notesPayment,
 				MemberDetailNameinChinese: student.nameChinese,
-				MemberDetailNickname: student.name,
+				MemberDetailNickname: student.englishName,
 				MemberDetailBirthDay: iL.Util.formatDate(student.birthdate),
 				MemberDetailGender: student.gender == "male" ? "1" : "0",
 				MemberDetailGrade: student.grade,
@@ -343,7 +344,11 @@
 														   on the student */
 				GuardianDetailOfficeNo: guardian.phoneOffice,
 				whyjoinusextendtext1: student.entryChannel1,
-				whyjoinusextendtext2: student.entryChannel2
+				whyjoinusextendtext2: student.entryChannel2,
+				suspend: student.isSuspended,
+				MemberReturnYear: 0,
+				MemberReturnMonth:0,
+				MemberReturnDay:0
 			};
 
 		return iL.query("process_updateMemberInformation.php", post_data)
