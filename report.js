@@ -97,7 +97,7 @@
 									startTime: item.starttime,
 									endTime: item.endtime,
 									tutor: options.tutor,
-									code: item.coursecode.replace(/\<.*?\>/g, "")
+									code: item.coursecode && item.coursecode.replace(/\<.*?\>/g, "")
 								},
 								subscription = iL.Subscription.get(course, student) || {
 									id: subscriptionID,
