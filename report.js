@@ -87,6 +87,7 @@
 								courseID = item.courseID,
 								subscriptionID = item.membercourseid,
 								reportID = item.membercourseid,
+								term = (post_data.searchTerm ? iL.Term.get(post_data.searchTerm) : {}),
 								student = iL.Student.get(studentID) || {
 									id: studentID,
 									name: item.nickname
