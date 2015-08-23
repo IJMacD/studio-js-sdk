@@ -97,7 +97,7 @@
 									title: item.coursename,
 									startTime: item.starttime,
 									endTime: item.endtime,
-									tutor: options.tutor,
+									tutor: options.tutor, // should be iL.Tutor.get() or add check
 									code: item.coursecode && item.coursecode.replace(/\<.*?\>/g, "")
 								},
 								subscription = iL.Subscription.get(course, student) || {
@@ -114,7 +114,8 @@
 									attendance: item.lessoncount - item.leavecount,
 									lessoncount: item.lessoncount,
 									term: options.term,
-									startDate: new Date(item.startdate)
+									startDate: new Date(item.startdate),
+									tutor: options.tutor // should be iL.Tutor.get() or add check
 								};
 
 							iL.Student.add(student);
@@ -197,6 +198,20 @@
 
 			item.termfocus = item.learningfocusthisterm;
 			item.learningfocusthisterm = undefined;
+
+			// Additional check to see if report actually has been completed
+			// now that we have enough to verify.
+			try{
+				item.complete =
+					(
+						 item.complete
+					&& item.generalcomments.length > 0
+					&& item.suggestions.length > 0
+					&& item.learningfocus.length > 0
+					);
+			}catch(e){
+				item.complete = false;
+			}
 
 			return item;
 		});
