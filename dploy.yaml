@@ -1,0 +1,42 @@
+dev:
+    scheme: ftp
+    host: ftp.my-dev-server.com
+    port: 21
+    user: user
+    pass: password
+    check: true
+    path:
+        local: release/
+        remote: public_html/
+
+stage:
+    scheme: ftp
+    host: ftp.my-stage-server.com
+    port: 21
+    user: user
+    pass: password
+    check: true
+    path:
+        local: release/
+        remote: public_html/
+
+prod:
+    scheme: ftp
+    host: 192.168.0.138
+    port: 21
+    user: admin
+    pass: il3113881523849363
+    check: true
+    path:
+        local: /
+        remote: Web/dashboard/js/lib/studio-js-sdk
+    exclude:
+        - build.bat
+        - dploy.yaml
+        - .gitignore
+        - proxy.php
+        - build/**
+        - test/**
+        - docs/**
+        - docs-jquery/**
+        - "yui*"
