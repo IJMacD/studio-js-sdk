@@ -199,19 +199,7 @@
 			item.termfocus = item.learningfocusthisterm;
 			item.learningfocusthisterm = undefined;
 
-			// Additional check to see if report actually has been completed
-			// now that we have enough to verify.
-			try{
-				item.complete =
-					(
-						 item.complete
-					&& item.generalcomments.length > 0
-					&& item.suggestions.length > 0
-					&& item.learningfocus.length > 0
-					);
-			}catch(e){
-				item.complete = false;
-			}
+			isComplete(item);
 
 			return item;
 		});
@@ -229,7 +217,9 @@
 	function save(item){
 		var post_data = {},
 			i, k;
-		item.complete = true;
+
+		isComplete(item);
+
 		post_data.searchTerm = item.term && item.term.id;
 		for(i in saveFields){
 			k = saveFields[i];
@@ -239,6 +229,24 @@
 		return iL.query("process_updateMemberReportCardDetail.php", post_data);
 	}
 	Report.save = save;
+
+	function isComplete(item) {
+		// Additional check to see if report actually has been completed
+		// now that we have enough to verify.
+		try{
+			item.complete =
+				(
+					 item.complete
+				&& item.generalcomments.length > 0
+				&& item.suggestions.length > 0
+				&& item.learningfocus.length > 0
+				);
+		}catch(e){
+			item.complete = false;
+		}
+
+		return item.complete;
+	}
 
 	/**
 	 * Static method to get comment templates
