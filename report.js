@@ -201,6 +201,22 @@
 
 			isComplete(item);
 
+			// Some house keeping:
+			// Check to see if we can steal learning focii from this report if the
+			// server didn't give us any
+			if(!focus.ap1label && item.ap1label){
+				setCourseLearningFocus(item.course, "ap1label", item.ap1label);
+			}
+			if(!focus.ap2label && item.ap2label){
+				setCourseLearningFocus(item.course, "ap2label", item.ap2label);
+			}
+			if(!focus.ap3label && item.ap3label){
+				setCourseLearningFocus(item.course, "ap3label", item.ap3label);
+			}
+			if(!focus.ap4label && item.ap4label){
+				setCourseLearningFocus(item.course, "ap4label", item.ap4label);
+			}
+
 			return item;
 		});
 	}
@@ -334,12 +350,13 @@
 	 *
 	 * @method getCourseLearningFocus
 	 * @static
-	 * @param courseName {string}
-	 * @return {Promise} Promise of an array
+	 * @param course {object} Course object
+	 * @return {Promise} Promise of an object containing four descriptions
 	 */
 	function getCourseLearningFocus(course){
-		var deferred;
-		if(!learningObjectives[course.id]){
+		var deferred,
+				key = course.title + " " + course.level;
+		if(!learningObjectives[ key ]){
 			deferred = $.Deferred();
 			iL.query("process_getCourseLearningFocus.php", { coursename: course.title + " " + course.level })
 				.then(function(data){
@@ -353,10 +370,11 @@
 					}
 					deferred.resolve(o);
 				});
-			learningObjectives[course.id] = deferred.promise();
+			learningObjectives[ key ] = deferred.promise();
 		}
-		return learningObjectives[course.id];
+		return learningObjectives[ key ];
 	}
+	Report.getCourseLearningFocus = getCourseLearningFocus;
 
 	/**
 	 * Set course learning objective for a course
