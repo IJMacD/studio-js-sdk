@@ -252,8 +252,7 @@
 		try{
 			item.complete =
 				(
-					 item.complete
-				&& item.generalcomments.length > 0
+					item.generalcomments.length > 0
 				&& item.suggestions.length > 0
 				&& item.learningfocus.length > 0
 				);
