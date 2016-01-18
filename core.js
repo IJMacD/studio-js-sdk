@@ -63,7 +63,7 @@
 					currentUser = {
 						id:	memberID,
 						username: accountName,
-						name: data.result[0].currentusernickname
+						name: data.result[0].currentusernickname || accountName
 					};
 
 					if(!memberID){
