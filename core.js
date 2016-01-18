@@ -25,12 +25,14 @@
 			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui"
 			+ " Tuen Tung Wai Wan Wong Wong Wu Yam Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
-		memberID,
-		accountName,
+		memberID,	// Now part of currentUser
+		accountName, // Now part of currentUser
 		adminStaff,
 		classrooms,
 		tutors,
 		terms,
+
+		currentUser = null,
 
 		loading;
 
@@ -58,11 +60,17 @@
 					memberID = parseInt(data.result[0].mid);
 					accountName = data.result[0].acc;
 
+					currentUser = {
+						id:	memberID,
+						username: accountName,
+						name: data.result[0].currentusernickname
+					};
+
 					if(!memberID){
 						return Promise.reject(Error("No member ID"));
 					}
 
-					return data.result[0];
+					return currentUser;
 				}
 				else{
 					return Promise.reject(Error("Invalid data from the server"));
@@ -73,6 +81,7 @@
 
 	function Logout(){
 		iL.query("process_logout.php");
+		currentUser = null;
 	}
 	iLearner.Logout = Logout;
 
@@ -99,6 +108,16 @@
 				});
 			});
 	}
+
+	function getCurrentUser(){
+		return currentUser;
+	}
+	iLearner.getCurrentUser = getCurrentUser;
+
+	function getCurrentTutor(){
+		return currentUser && getTutors(currentUser.id);
+	}
+	iLearner.getCurrentTutor = getCurrentTutor;
 
 	function query(url, data){
 		return new Promise(function(resolve, reject){
