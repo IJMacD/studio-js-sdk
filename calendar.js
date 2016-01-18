@@ -23,6 +23,7 @@
 
 		chineseRegex = /[\u4E00-\u9FFF]/,
 		mathsRegex = /(math|數)/i,
+		spanishRegex = /Spanish/i,
 
 		/* data */
 		courses = {},
@@ -925,6 +926,8 @@
 			course.subject = "maths";
 		} else if(course.title.match(chineseRegex)){
 			course.subject = "chinese";
+		} else if(course.title.match(spanishRegex)){
+			course.subject = "spanish";
 		} else {
 			course.subject = "english";
 		}
@@ -937,6 +940,8 @@
 			return 3;
 		} else if(subject == "maths"){
 			return 2;
+		} else if(subject == "spanish"){
+			return 1;	// Spanish is treated as English
 		} else {
 			return 4;
 		}
