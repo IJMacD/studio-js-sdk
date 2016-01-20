@@ -443,8 +443,10 @@
 			person.chineseName = names[0] + " " + names[1] + " " + names[2];
 			person.englishName = person.chineseName;
 		}
-		else if(topNames.indexOf(names[0]) > -1){
+		else if(topNames.indexOf(names[0]) > -1 ||
+							person.name.indexOf(",") > -1 ){
 			// Name provided with English name at end
+			// (with or without a commma)
 
 			person.forename = names[3];
 			person.surname = names[0];
