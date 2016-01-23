@@ -92,15 +92,20 @@
 				classrooms = $.map(data.classroom, function(i){
 					return { id: i.crid, name: i.place }
 				});
-				terms = data.term.map(function(term){
-					return {
-						id: term.idStudioTerms,
-						year: term.TermYear,
-						name: term.Term,
-						start: new Date(term.Startdate),
-						end: new Date(term.Enddate)
-					}
-				});
+				if(data.term && data.term.map){
+					terms = data.term.map(function(term){
+						return {
+							id: term.idStudioTerms,
+							year: term.TermYear,
+							name: term.Term,
+							start: new Date(term.Startdate),
+							end: new Date(term.Enddate)
+						}
+					});
+				}
+				else {
+					terms = [];
+				}
 				tutors = $.map(data.tutor, function(t){
 					var tutor = { name: $.trim(t.n), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
