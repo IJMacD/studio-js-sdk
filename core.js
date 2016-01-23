@@ -395,10 +395,11 @@
 	 *
 	 * @method formatDate
 	 * @static
-	 * @param date {Date} Javascript Date object representing the date to format
+	 * @param date {Date|Moment} Javascript Date or Moment object representing the date to format
 	 * @return {string} Date in format `YYYY/m/d`
 	 */
 	function formatDate(date){
+		date = date.toDate ? date.toDate() : date;
 		return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 	}
 	Util.formatDate = formatDate;
