@@ -246,6 +246,8 @@
 
 						attendance.absent = item.Attendance == "0";
 
+						// TODO: Investigate bug - When reloading page from calendar ->
+						// Students with only two names have names reveresed until viewing detail page
 						iL.Util.parseName(student);
 
 						iL.Subscription.find({course: lesson.course, student: student})
@@ -421,14 +423,19 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
+
 		// Assume its come from outside, so apply our niceties
-		var match = course.title.match(levelRegex);
-		if(match){
-			course.title = course.title.replace(levelRegex, "");
-			course.level = match[0].replace(" ", "");
+		if(course.title){
+			var match = course.title.match(levelRegex);
+			if(match){
+				course.title = course.title.replace(levelRegex, "");
+				course.level = match[0].replace(" ", "");
+			}
 		}
 
 		courses[course.id] = course;
+
+		return course;
 	}
 	Course.add = addCourse;
 
@@ -612,6 +619,13 @@
 	 * @return {object} Returns the same course object
 	 */
 	function courseFetch(course){
+
+		// Sanity Check
+		if(getCourse(course.id) !== course){
+			throw Error("Duplicate Course object encountered");
+		}
+
+
 		if(!_courseDetails[course.id]){
 			_courseDetails[course.id] = Promise.all([
 					iL.query("process_getCourseDetail.php", { courseID: course.id }),
@@ -689,7 +703,20 @@
 						return a.start.getTime() < b.start.getTime() ? -1 : 1;
 					});
 
-					return course;
+					// If the course doesn't contain its code then it is incomplete.
+					// We need to perform a second lookup to gather the remaining data.
+					if(course.code)
+						return course;
+					else {
+						return iL.Course.find({
+							title: course.title,
+							tutor: course.tutor
+						}).then(function (courses) {
+							// Just return our original course now.
+							// All the extras should have already been magically added.
+							return course;
+						});
+					}
 				});
 		}
 		return _courseDetails[course.id];
