@@ -20,6 +20,7 @@
 			{regex: /Starters|Movers|Flyers/, level: "K"}
 		],
 		grades = "K1 K2 K3 P1 P2 P3 P4 P5 P6 F1 F2 F3 F4 F5 F6".split(" "),
+		timeRegex = /\((\d{4})-(\d{4})\)/,
 
 		chineseRegex = /[\u4E00-\u9FFF]/,
 		mathsRegex = /(math|數)/i,
@@ -165,8 +166,6 @@
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.Tutor, true),
-							level = item.Coursetitle.match(levelRegex),
-							courseTitle = item.Coursetitle.replace(levelRegex, ""),
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
 
@@ -184,27 +183,17 @@
 							};
 
 						course.code = item.CourseName;
-						course.title = courseTitle;
 						course.day = start.getDay();
 						course.startTime = item.Starttime;
 						course.endTime = item.endtime;
 						course.tutor = tutor;
 
+						_parseCourseTitle(course, item.Coursetitle);
+
+						_setTime(lesson.start, course.startTime);
+						_setTime(lesson.end, course.endTime);
+
 						_setSubject(course);
-
-						_setTime(start, item.Starttime);
-						_setTime(end, item.endtime);
-
-						level = level && level[0].replace(" ", "");
-						if(!level){
-							$.each(customLevels, function(i,cItem){
-								if(cItem.regex.test(courseTitle)){
-									level = cItem.level;
-									return false;
-								}
-							});
-						}
-						course.level = level;
 
 						courses[course.id] = course;
 
@@ -425,13 +414,7 @@
 	function addCourse(course){
 
 		// Assume its come from outside, so apply our niceties
-		if(course.title){
-			var match = course.title.match(levelRegex);
-			if(match){
-				course.title = course.title.replace(levelRegex, "");
-				course.level = match[0].replace(" ", "");
-			}
-		}
+		_parseCourseTitle(course);
 
 		courses[course.id] = course;
 
@@ -473,10 +456,26 @@
 		if(!_courses[hash]){
 			if(options.code){
 				$.each(courses, function(i,course){
+
+
+					// -------------------------------------------------------
+					// WARNING! -- Multiple instances with the same course code may be
+					// returned in any order. Must do more checks before returning the
+					// first one.
+					// Potentially check data.courseschedule as these are sorted by date.
+					// -------------------------------------------------------
+
+
 					if(course.code == options.code){
 						_courses[hash] = Promise.resolve([course]);
 						return false;
 					}
+
+					// -----------------------------------------------------
+					// END WARNING!
+					// --------------------------------------------------------
+
+
 				});
 				if(_courses[hash]){
 					return _courses[hash];
@@ -491,25 +490,14 @@
 
 					$.each(data.courselist, function(i,item){
 						var id = item.CourseID,
-							level = item.CourseName.match(levelRegex),
-							courseTitle = item.CourseName.replace(levelRegex, ""),
 							course = courses[id] || {
 								id: id,
 								lessons: []
 							};
 
-						level = level && level[0].replace(" ", "");
-						if(!level){
-							$.each(customLevels, function(i,cItem){
-								if(cItem.regex.test(courseTitle)){
-									level = cItem.level;
-									return false;
-								}
-							});
-						}
-						course.title = courseTitle;
 						course.code = item.coursecode;
-						course.level = level;
+
+						_parseCourseTitle(course, item.CourseName);
 
 						_setSubject(course);
 
@@ -535,12 +523,17 @@
 							};
 
 						course.day = start.getDay();
-						course.startTime = item.Starttime;
-						course.endTime = item.endtime;
+
+						if(!course.startTime)
+							course.startTime = item.Starttime;
+						if(!course.endTime)
+							course.endTime = item.endtime;
+
 						course.tutor = tutor;
 
-						_setTime(start, item.Starttime);
-						_setTime(end, item.endtime);
+						// TODO: This assumes no lesson can have a unique start/end time
+						_setTime(lesson.start, course.startTime);
+						_setTime(lesson.end, course.endTime);
 
 						lessons[lesson.id] = lesson;
 						lesson.course = course;
@@ -581,7 +574,11 @@
 					subcode: subcode,
 					vacancy: 6,
 					discount: course.existingDiscount,
-					cname: course.title + " " + course.level,
+					// TODO: Possible data corruption:
+					// We've stripped out (time)? and level now we're saving without it
+					// cname: course.title + " " + course.level,
+					// TODO: This is an alternative where changes to course title are not possible
+					cname: course.originalTitle,
 					status: 1, // Enabled?
 					cssid: course.room.id,
 					payment: course.paymentCycle == "lesson" ? "2" : "1",
@@ -612,7 +609,6 @@
 			throw Error("Duplicate Course object encountered");
 		}
 
-
 		if(!_courseDetails[course.id]){
 			_courseDetails[course.id] = Promise.all([
 					iL.query("process_getCourseDetail.php", { courseID: course.id }),
@@ -631,7 +627,6 @@
 
 					// This sometimes comes without suffix - can screw up links
 					//course.code = details.CourseCode;
-					course.title = details.CourseName.replace(levelRegex, "");
 					course.room = iL.Room.get(details.DefaultClassroomID);
 					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "month";
 					course.existingDiscount = details.DiscountForOldStudent;
@@ -643,10 +638,7 @@
 					course.report = details.reportcard;
 					course.promotion = details.cb201505promotion;
 
-					if(!course.level){
-						level = details.CourseName.match(levelRegex);
-						course.level = level && level[0];
-					}
+					_parseCourseTitle(course, details.CourseName);
 
 					if(!course.subject){
 						_setSubject(course);
@@ -675,8 +667,14 @@
 								attendees: []
 							};
 
-							_setTime(start, item.Starttime);
-							_setTime(end, item.Endtime);
+							if(!course.startTime)
+								course.startTime = item.Starttime;
+							if(!course.endTime)
+								course.endTime = item.Endtime;	// Caution! Inconsistant API
+
+							// TODO: This assumes no lesson can have a unique start/end time
+							_setTime(lesson.start, course.startTime);
+							_setTime(lesson.end, course.endTime);
 						}
 
 						if(course.lessons.indexOf(lesson) == -1){
@@ -944,6 +942,33 @@
 			course.subject = "spanish";
 		} else {
 			course.subject = "english";
+		}
+	}
+
+	function _parseCourseTitle(course, title){
+		title = title || course.originalTitle || course.title || "";
+
+		course.originalTitle = course.originalTitle || title;
+
+		var level = title.match(levelRegex),
+				time = title.match(timeRegex);
+
+		course.title = title.replace(levelRegex, "").replace(timeRegex, "");
+
+		level = level && level[0].replace(/\s+/, "");
+		if(!level){
+			$.each(customLevels, function(i,cItem){
+				if(cItem.regex.test(title)){
+					level = cItem.level;
+					return false;
+				}
+			});
+		}
+		course.level = level;
+
+		if(time){
+			course.startTime = time[1];
+			course.endTime = time[2];
 		}
 	}
 
