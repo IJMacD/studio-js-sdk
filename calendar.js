@@ -452,36 +452,23 @@
 	 * @return {Promise} Promise of an array
 	 */
 	function findCourses(options){
-		var now = new Date(),
-			post_data = options.code ?
-				{
-					searchCouseCode: options.code // [sic]
-				}
-			:
-				{
-					searchCourseTitle: options.title,
-					searchCourseCourseYear: options.year || now.getFullYear(),
-					searchCourseCourseMonth: options.month || (now.getMonth() + 1),
-					searchTutor: options.tutor && options.tutor.id
-				},
-			hash = JSON.stringify(post_data);
-
-		if(options.code){
-			var truncatedCode = options.code.replace(/[A-Z]+$/i,"");
-
-			if(options.code != truncatedCode){
-				return findCourses({code: truncatedCode}).then(function(courses){
-					var out;
-					courses.forEach(function(course){
-						if(course.code == options.code){
-							out = course;
-							return false;
-						}
-					});
-					return Promise.resolve([out]);
-				});
-			}
-		}
+		var truncatedCode = options.code && options.code.replace(/[A-Z]+$/i,""),
+				subcodeMatch = options.code && options.code.match(/[A-Z]+$/i),
+				subcode = subcodeMatch && subcodeMatch[0],
+				now = new Date(),
+				post_data = options.code ?
+					{
+						searchCouseCode: truncatedCode, // [sic]
+						searchSubCode: subcode
+					}
+				:
+					{
+						searchCourseTitle: options.title,
+						searchCourseCourseYear: options.year || now.getFullYear(),
+						searchCourseCourseMonth: options.month || (now.getMonth() + 1),
+						searchTutor: options.tutor && options.tutor.id
+					},
+				hash = JSON.stringify(post_data);
 
 		if(!_courses[hash]){
 			if(options.code){
@@ -832,7 +819,7 @@
 									id: subscriptionID,
 									course: lesson.course,
 									student: student
-								}
+								},
 								attendance = getAttendance(lesson, student) || {
 									lesson: lesson,
 									student: student
