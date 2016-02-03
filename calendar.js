@@ -195,6 +195,8 @@
 
 						_setSubject(course);
 
+						_setCoursePrice(course);
+
 						courses[course.id] = course;
 
 						// We have the attendees array now so we can
@@ -501,6 +503,8 @@
 
 						_setSubject(course);
 
+						_setCoursePrice(course);
+
 						courses[id] = course;
 						out.push(course);
 					});
@@ -643,6 +647,8 @@
 					if(!course.subject){
 						_setSubject(course);
 					}
+
+					_setCoursePrice(course);
 
 					if(!course.lessons){
 						course.lessons = [];
@@ -969,6 +975,20 @@
 		if(time){
 			course.startTime = time[1];
 			course.endTime = time[2];
+		}
+	}
+
+	function _setCoursePrice(course) {
+		var coursePrices = iL.getCoursePrices(),
+				prices;
+
+		if(coursePrices){
+			prices = coursePrices[course.title];
+
+			if(prices){
+				course.pricePerLesson = prices.pricePerLesson;
+				course.existingDiscount = prices.discountOldStudent;
+			}
 		}
 	}
 

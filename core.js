@@ -31,6 +31,7 @@
 		classrooms,
 		tutors,
 		terms,
+		coursePrices,
 
 		currentUser = null,
 
@@ -111,6 +112,18 @@
 					tutor.colour = getTutorColour(tutor);
 					return tutor;
 				});
+				// Sort through the raw data so that the calendar module can
+				// use it more easily later.
+				coursePrices = {};
+				data.courseprice.forEach(function(course){
+					var pricePerLesson = parseInt(course.priceperlesson),
+							discountOldStudent = parseInt(course.priceperlesson_oldstudent);
+					coursePrices[course.course] = {
+						pricePerLesson: pricePerLesson,
+						pricePerLessonOldStudent: pricePerLesson - discountOldStudent,
+						discountOldStudent: discountOldStudent
+					};
+				});
 			});
 	}
 
@@ -123,6 +136,14 @@
 		return currentUser && getTutors(currentUser.id);
 	}
 	iLearner.getCurrentTutor = getCurrentTutor;
+
+	/**
+	 * Undocumented internal function
+	 */
+	function getCoursePrices(){
+		return coursePrices;
+	}
+	iLearner.getCoursePrices = getCoursePrices;
 
 	function query(url, data){
 		return new Promise(function(resolve, reject){
