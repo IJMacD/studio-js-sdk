@@ -394,4 +394,41 @@
 	}
 	Report.setCourseLearningFocus = setCourseLearningFocus;
 
+	/**
+	 * Prepare reports for download as an Excel (.xlsx) file and return url to
+	 * download it.
+	 *
+	 * @method export
+	 * @static
+	 * @param tutor {object}
+	 * @param term {object}
+	 * @return {string} Url where spreadsheet ccan be found
+	 */
+	function exportReports(options) {
+		return iL.query("process_ExportReportCard.php", {
+			searchTutor: options.tutor.id,
+			searchTerm: options.term.id,
+			searchDateFrom: 0,
+			searchDateTo: 0,
+			G1:0,
+			G2:0,
+			G3:0,
+			G4:0,
+			G5:0,
+			G6:0,
+			G7:0,
+			G8:0,
+			G9:0,
+			G10:0,
+			G11:0,
+			G12:0
+		}).then(function(){}, function () {
+			// iL.query expects results to be JSON. This response is not JSON
+			// but we don't acctually care about the data. We just need to know
+			// when it finishes; so we attach to the catch handler.
+			return iL.Conf.API_ROOT + "tmpexcel.xlsx";
+		});
+	}
+	Report.export = exportReports;
+
 }(window));
