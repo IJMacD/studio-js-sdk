@@ -62,7 +62,7 @@
 
 		iL.Util.parseName(merged);
 
-		return student;
+		return merged;
 	}
 	Student.add = addStudent;
 
@@ -222,17 +222,22 @@
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
 								dateIndex,
-								course = iL.Course.get(courseID) || {
-									id: courseID
-								},
-								subscription = iL.Subscription.get(subscriptionID) || {
+								course = iL.Course.add({
+									id: courseID,
+									title: item.Coursename,
+									code: item.CourseCode,
+									/* This is the potential discount for existing students,
+									   on this subscription.
+									   The student is *not* necessarily entitled to this */
+									existingDiscount: parseInt(item.DiscountForOldStudent),
+									pricePerLesson: pricePerLesson
+								}),
+								subscription = iL.Subscription.add({
 									id: subscriptionID,
 									course: course,
 									student: student,
-									unpaid: 0,
-									lastPaymentIndex: 0,
-									invoices: []
-								},
+									withdrawn: item.withdrawal == "1"
+								}),
 
 								/*
 									- Discount, Amount, AmountAfterDiscount are for *PAID* invoices
@@ -254,19 +259,6 @@
 									memberID: item.memberID,
 									memberCourseID: item.membercourseID
 								};
-
-							course.title = item.Coursename;
-							course.code = item.CourseCode;
-							/* This is the potential discount for existing students,
-							   on this subscription.
-							   The student is *not* necessarily entitled to this */
-							course.existingDiscount = parseInt(item.DiscountForOldStudent);
-							course.pricePerLesson = pricePerLesson;
-
-							subscription.withdrawn = item.withdrawal == "1";
-
-							iL.Course.add(course);
-							iL.Subscription.add(subscription);
 
 							dateIndex = invoice.year * 100 + invoice.month;
 
@@ -481,12 +473,17 @@
 	 * @param subscription {object}
 	 */
 	function addSubscription(subscription){
-		var existing = subscriptions[subscription.id] || {},
+		var existing = subscriptions[subscription.id] || {
+					/** Defaults **/
+					unpaid: 0,
+					lastPaymentIndex: 0,
+					invoices: []
+				},
 				merged = $.extend(existing, subscription);
 
-		subscriptions[subscription.id] = subscription;
+		subscriptions[subscription.id] = merged;
 
-		return subscription;
+		return merged;
 	}
 	Subscription.add = addSubscription;
 

@@ -220,26 +220,22 @@
 					});
 
 					$.each(data.CalendarStudent, function(i,item){
-						var student = iL.Student.get(item.MemberID) || {
-								id: item.MemberID,
-								name: item.nickname,
-								photo: item.Accountname
-							},
-							lesson = lessons[item.CourseScheduleID],
-							attendance = getAttendance(lesson, student) || {
-								lesson: lesson,
-								student: student
-							};
+						var student = iL.Student.add({
+									id: item.MemberID,
+									name: item.nickname,
+									photo: item.Accountname
+								}),
+								lesson = lessons[item.CourseScheduleID],
+								attendance = getAttendance(lesson, student) || {
+									lesson: lesson,
+									student: student
+								};
 
 						if(!lesson){
 							return;
 						}
 
 						attendance.absent = item.Attendance == "0";
-
-						// TODO: Investigate bug - When reloading page from calendar ->
-						// Students with only two names have names reveresed until viewing detail page
-						iL.Util.parseName(student);
 
 						iL.Subscription.find({course: lesson.course, student: student})
 							.then(function(subscriptions){
@@ -250,7 +246,6 @@
 							});
 
 						iL.Attendance.add(attendance);
-						iL.Student.add(student);
 					});
 
 					return events;
@@ -815,29 +810,25 @@
 						}
 
 						$.each(data.coursestudent, function(i,item){
-							var student = iL.Student.get(item.MemberID) || {
+							var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.Lastname,
 									photo: item.Accountname
-								},
+								}),
 								subscriptionID = item.MemberCourseID,
-								subscription = iL.Subscription.get(subscriptionID) || {
+								subscription = iL.Subscription.add({
 									id: subscriptionID,
 									course: lesson.course,
 									student: student
-								},
+								}),
 								attendance = getAttendance(lesson, student) || {
 									lesson: lesson,
 									student: student
 								};
 
-							iL.Util.parseName(student);
-
 							attendance.subscription = subscription;
 							attendance.absent = item.absent == "1";
 
-							iL.Student.add(student);
-							iL.Subscription.add(subscription);
 							iL.Attendance.add(attendance);
 						});
 
