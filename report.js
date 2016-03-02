@@ -88,6 +88,7 @@
 								subscriptionID = item.membercourseid,
 								reportID = item.membercourseid,
 								term = (post_data.searchTerm ? iL.Term.get(post_data.searchTerm) : {}),
+								tutor = iL.Tutor.get(item.tutormemberID) || {},
 								student = iL.Student.get(studentID) || {
 									id: studentID,
 									name: item.nickname
@@ -97,7 +98,8 @@
 									title: item.coursename,
 									startTime: item.starttime,
 									endTime: item.endtime,
-									tutor: options.tutor, // should be iL.Tutor.get() or add check
+									day: dayNameToInt(item.dayname1),
+									tutor: tutor,
 									code: item.coursecode && item.coursecode.replace(/\<.*?\>/g, "")
 								},
 								subscription = iL.Subscription.get(course, student) || {
@@ -113,10 +115,13 @@
 									complete: (item.completed == "1"),
 									attendance: item.lessoncount - item.leavecount,
 									lessoncount: item.lessoncount,
-									term: options.term,
+									term: term,
 									startDate: new Date(item.startdate),
-									tutor: options.tutor // should be iL.Tutor.get() or add check
+									tutor: tutor
 								};
+
+							report.startDate.setHours(item.starttime.substr(0,2));
+							report.startDate.setMinutes(item.starttime.substr(2,2));
 
 							iL.Student.add(student);
 							iL.Course.add(course);
@@ -125,7 +130,9 @@
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
 
-							resultSet.push(report);
+							if(!options.student || options.student.id == report.student.id){
+								resultSet.push(report);
+							}
 						});
 					}
 					return resultSet;
@@ -135,6 +142,10 @@
 		return _reports[hash];
 	}
 	Report.find = find;
+
+	function dayNameToInt(name) {
+		return "Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" ").indexOf(name);
+	}
 
 	/**
 	 * Given a report stub this method provides the full report card details
