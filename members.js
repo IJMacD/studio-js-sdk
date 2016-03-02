@@ -55,8 +55,14 @@
 	 * @param student {object} Student object
 	 */
 	function addStudent(student){
-		students[student.id] = student;
-		iL.Util.parseName(student);
+		var existing = students[student.id] || {},
+				merged = $.extend(existing, student);
+
+		students[student.id] = merged;
+
+		iL.Util.parseName(merged);
+
+		return student;
 	}
 	Student.add = addStudent;
 
@@ -475,7 +481,12 @@
 	 * @param subscription {object}
 	 */
 	function addSubscription(subscription){
+		var existing = subscriptions[subscription.id] || {},
+				merged = $.extend(existing, subscription);
+
 		subscriptions[subscription.id] = subscription;
+
+		return subscription;
 	}
 	Subscription.add = addSubscription;
 

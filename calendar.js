@@ -414,13 +414,15 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
+		var existing = courses[course.id] || {},
+				merged = $.extend(existing, course);
 
 		// Assume its come from outside, so apply our niceties
-		_parseCourseTitle(course);
+		_parseCourseTitle(merged);
 
-		courses[course.id] = course;
+		courses[merged.id] = merged;
 
-		return course;
+		return merged;
 	}
 	Course.add = addCourse;
 

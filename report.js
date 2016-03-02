@@ -89,11 +89,11 @@
 								reportID = item.membercourseid,
 								term = (post_data.searchTerm ? iL.Term.get(post_data.searchTerm) : {}),
 								tutor = iL.Tutor.get(item.tutormemberID) || {},
-								student = iL.Student.get(studentID) || {
+								student = iL.Student.add({
 									id: studentID,
 									name: item.nickname
-								},
-								course = iL.Course.get(courseID) || {
+								}),
+								course = iL.Course.add({
 									id: courseID,
 									title: item.coursename,
 									startTime: item.starttime,
@@ -101,12 +101,12 @@
 									day: dayNameToInt(item.dayname1),
 									tutor: tutor,
 									code: item.coursecode && item.coursecode.replace(/\<.*?\>/g, "")
-								},
-								subscription = iL.Subscription.get(course, student) || {
+								}),
+								subscription = iL.Subscription.add({
 									id: subscriptionID,
 									student: student,
 									course: course
-								},
+								}),
 								report = {
 									id: reportID,
 									student: student,
@@ -122,10 +122,6 @@
 
 							report.startDate.setHours(item.starttime.substr(0,2));
 							report.startDate.setMinutes(item.starttime.substr(2,2));
-
-							iL.Student.add(student);
-							iL.Course.add(course);
-							iL.Subscription.add(subscription);
 
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
