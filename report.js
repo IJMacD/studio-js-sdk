@@ -128,8 +128,9 @@
 								report.endDate = undefined;
 							}
 							else {
-								report.endDate.setHours(item.endtime.substr(0,2));
-								report.endDate.setMinutes(item.endtime.substr(2,2));
+								// Should be the time of the *start* of the last lesson
+								report.endDate.setHours(item.starttime.substr(0,2));
+								report.endDate.setMinutes(item.starttime.substr(2,2));
 							}
 
 							// TODO: check if report already exists and don't replace it
