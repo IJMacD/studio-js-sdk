@@ -117,11 +117,20 @@
 									lessoncount: item.lessoncount,
 									term: term,
 									startDate: new Date(item.startdate),
+									endDate: new Date(item.enddate),
 									tutor: tutor
 								};
 
 							report.startDate.setHours(item.starttime.substr(0,2));
 							report.startDate.setMinutes(item.starttime.substr(2,2));
+
+							if(report.endDate > Date.now()){
+								report.endDate = undefined;
+							}
+							else {
+								report.endDate.setHours(item.endtime.substr(0,2));
+								report.endDate.setMinutes(item.endtime.substr(2,2));
+							}
 
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
