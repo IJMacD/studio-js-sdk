@@ -126,16 +126,20 @@
 							// TODO: check if report already exists and don't replace it
 							reports[item.id] = item;
 
-							if(!options.student || options.student.id == report.student.id){
-								resultSet.push(report);
-							}
+							resultSet.push(report);
 						});
 					}
 					return resultSet;
 				});
 		}
 
-		return _reports[hash];
+		return _reports[hash].then(function (reports) {
+			if(!options.student){
+				return reports;
+			}
+
+			return reports.filter(function (report) { return options.student.id == report.student.id });
+		});
 	}
 	Report.find = find;
 
