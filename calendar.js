@@ -169,18 +169,18 @@
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
 
-							course = courses[courseID] || {
+							course = addCourse({
 								id: courseID,
 								lessons: []
-							},
-							lesson = lessons[lessonID] || {
+							}),
+							lesson = addLesson({
 								id: lessonID,
 								start: start,
 								end: end,
 								room: iL.Room.find(item.Location),
 								tutor: tutor,
 								attendees: []
-							};
+							});
 
 						course.code = item.CourseName;
 						course.day = start.getDay();
@@ -226,10 +226,10 @@
 									photo: item.Accountname
 								}),
 								lesson = lessons[item.CourseScheduleID],
-								attendance = getAttendance(lesson, student) || {
+								attendance = addAttendance({
 									lesson: lesson,
 									student: student
-								};
+								});
 
 						if(!lesson){
 							return;
@@ -422,6 +422,22 @@
 	Course.add = addCourse;
 
 	/**
+	 * Add a lesson to be tracked by the sdk
+	 *
+	 * @method add
+	 * @param lesson {object} lesson to add
+	 */
+	function addLesson(lesson){
+		var existing = lessons[lesson.id] || {},
+				merged = $.extend(existing, lesson);
+
+		lessons[merged.id] = merged;
+
+		return merged;
+	}
+	Lesson.add = addLesson;
+
+	/**
 	 * Find courses matching given search parameters
 	 *
 	 * @method find
@@ -489,10 +505,10 @@
 
 					$.each(data.courselist, function(i,item){
 						var id = item.CourseID,
-							course = courses[id] || {
+							course = addCourse({
 								id: id,
 								lessons: []
-							};
+							});
 
 						course.code = item.coursecode;
 
@@ -502,7 +518,6 @@
 
 						_setCoursePrice(course);
 
-						courses[id] = course;
 						out.push(course);
 					});
 
@@ -513,15 +528,15 @@
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
 
-							course = courses[courseID],
-							lesson = lessons[lessonID] || {
+							course = getCourse(courseID),
+							lesson = addLesson({
 								id: lessonID,
 								start: start,
 								end: end,
 								room: iL.Room.find(item.location),
 								tutor: tutor,
 								attendees: []
-							};
+							});
 
 						course.day = start.getDay();
 
@@ -660,7 +675,7 @@
 							lesson = lessons[item.CourseScheduleID];
 						}
 						else {
-							lesson = {
+							lesson = addLesson({
 								id: item.CourseScheduleID,
 								start: start,
 								end: end,
@@ -668,7 +683,7 @@
 								tutor: iL.Tutor.get(item.TutorMemberID),
 								course: course,
 								attendees: []
-							};
+							});
 
 							if(!course.startTime)
 								course.startTime = item.Starttime;
@@ -684,7 +699,6 @@
 							course.lessons.push(lesson);
 						}
 
-						lessons[lesson.id] = lesson;
 					});
 
 					course.lessons.sort(function(a,b){
@@ -764,6 +778,8 @@
 			attendance.lesson.attendees.push(attendance);
 		}
 		attendances[key] = attendance;
+
+		return attendance;
 	}
 	Attendance.add = addAttendance;
 
@@ -821,15 +837,13 @@
 									course: lesson.course,
 									student: student
 								}),
-								attendance = getAttendance(lesson, student) || {
+								attendance = addAttendance({
 									lesson: lesson,
 									student: student
-								};
+								});
 
 							attendance.subscription = subscription;
 							attendance.absent = item.absent == "1";
-
-							iL.Attendance.add(attendance);
 						});
 
 						return lesson.attendees;
