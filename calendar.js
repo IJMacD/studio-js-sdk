@@ -226,16 +226,18 @@
 									photo: item.Accountname
 								}),
 								lesson = lessons[item.CourseScheduleID],
-								attendance = addAttendance({
-									lesson: lesson,
-									student: student
-								});
+								attendance;
 
 						if(!lesson){
+							console.warn("Attendance was provided for a lesson which does not exist: " + item.CourseScheduleID);
 							return;
 						}
 
-						attendance.absent = item.Attendance == "0";
+						attendance = addAttendance({
+							lesson: lesson,
+							student: student,
+							absent: item.Attendance == "0"
+						});
 
 						iL.Subscription.find({course: lesson.course, student: student})
 							.then(function(subscriptions){
@@ -244,8 +246,6 @@
 									attendance.subscription = subscriptions[0];
 								}
 							});
-
-						iL.Attendance.add(attendance);
 					});
 
 					return events;
@@ -771,6 +771,8 @@
 	function addAttendance(attendance){
 		var key = attendanceKey(attendance);
 		if(!attendances[key]){
+
+			// Add attendance to lesson's internal array
 			/**
 			 * This method of getting attendees will soon be deprecated.
 			 * Use Attendance.find instead
@@ -930,11 +932,14 @@
 	 * Takes either an attendance or a lesson/student pair
 	 */
 	function attendanceKey(lesson, student){
+		var attendance;
 		if(arguments.length == 1){
-			return arguments[0].lesson.id + ":" + arguments[0].student.id;
+			attendance = arguments[0];
+			lesson = attendance.lesson;
+			student = attendance.student;
 		}
 		if(!lesson || !student){
-			return null; //throw new Error("Need a lesson and a student for an attendance");
+			throw new Error("Need a lesson and a student for an attendance");
 		}
 		return lesson.id + ":" + student.id;
 	}
