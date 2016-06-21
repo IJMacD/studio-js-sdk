@@ -51,11 +51,13 @@ if(!function_exists('apache_request_headers')) {
 	}
 }
 
-function proxy_request($url, $data, $method) {
+function proxy_request($url, $data, $method, $headers=array()) {
 // Based on post_request from http://www.jonasjohn.de/snippets/php/post-request.htm
 
 	// Convert the data array into URL Parameters like a=b&foo=bar etc.
 	$data = http_build_query($data);
+	// Workaround for misinterpretation by server
+	$data = str_replace("&amp;", "&", $data);
 	$datalength = strlen($data);
 
 	// parse the given URL
@@ -83,7 +85,7 @@ function proxy_request($url, $data, $method) {
 
 		fputs($fp, "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
 
-		   $requestHeaders = apache_request_headers();
+		$requestHeaders = array_merge(apache_request_headers(), $headers);
 		while ((list($header, $value) = each($requestHeaders))) {
 			if($header == "Content-Length") {
 				fputs($fp, "Content-Length: $datalength\r\n");
