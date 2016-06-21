@@ -229,14 +229,17 @@
 								attendance;
 
 						if(!lesson){
-							console.warn("Attendance was provided for a lesson which does not exist: " + item.CourseScheduleID);
+							// Calendar data provides all students for day even when filtered by teacher
+							console.info("Attendance was provided for a lesson which does not exist: " + item.CourseScheduleID);
 							return;
 						}
 
 						attendance = addAttendance({
 							lesson: lesson,
 							student: student,
-							absent: item.Attendance == "0"
+							absent: item.Attendance == "0",
+							startDate: moment(item.StartDate),
+							endDate: moment(item.EndDate)
 						});
 
 						iL.Subscription.find({course: lesson.course, student: student})
