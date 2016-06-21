@@ -432,11 +432,17 @@
 	 */
 	function addLesson(lesson){
 		var existing = lessons[lesson.id] || {},
-				merged = $.extend(existing, lesson);
+				attendees = existing.attendees;
+		$.extend(existing, lesson);
 
-		lessons[merged.id] = merged;
+		// Save attendees from original if there were any set
+		// TODO: smarter merge
+		if(attendees && attendees.length)
+			existing.attendees = attendees;
 
-		return merged;
+		lessons[existing.id] = existing;
+
+		return existing;
 	}
 	Lesson.add = addLesson;
 
