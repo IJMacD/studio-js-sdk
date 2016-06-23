@@ -237,10 +237,17 @@
 						attendance = addAttendance({
 							lesson: lesson,
 							student: student,
+							// For some reason attendance always seems to be marked as "0" for make up classes
 							absent: item.Attendance == "0" && item.ismakeup == "0",
 							startDate: moment(item.StartDate),
 							endDate: moment(item.EndDate),
-							isMakeup: item.ismakeup == "1"
+							isMakeup: item.ismakeup == "1",
+							original: {
+								start: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_starttime.substr(0,2)+":"+item.ab_starttime.substr(2)),
+								end: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_endtime.substr(0,2)+":"+item.ab_endtime.substr(2)),
+								courseName: item.ab_coursename,
+								tutor: iL.Tutor.find(item.ab_tutor)
+							}
 						});
 
 						iL.Subscription.find({course: lesson.course, student: student})
@@ -780,15 +787,27 @@
 	 */
 	function addAttendance(attendance){
 		var key = attendanceKey(attendance);
-		if(!attendances[key]){
 
+		// If this is a new attendance
+		if(!attendances[key]){
 			// Add attendance to lesson's internal array
+			// TODO: better to always check and add only if necessary
 			/**
 			 * This method of getting attendees will soon be deprecated.
 			 * Use Attendance.find instead
 			 */
 			attendance.lesson.attendees.push(attendance);
 		}
+
+		// Fill in some defaults
+		if(!attendance.startDate) 					attendance.startDate = moment(null);
+		if(!attendance.endDate) 						attendance.endDate = moment(null);
+		if(!attendance.original) 						attendance.original = {};
+		if(!attendance.original.courseName) attendance.original.courseName = "";
+		if(!attendance.original.start) 			attendance.original.start = moment(null);
+		if(!attendance.original.end) 				attendance.original.end = moment(null);
+		if(!attendance.original.tutor) 			attendance.original.tutor = {name: "", color: "#000"};
+
 		attendances[key] = attendance;
 
 		return attendance;
@@ -851,7 +870,9 @@
 								}),
 								attendance = addAttendance({
 									lesson: lesson,
-									student: student
+									student: student,
+									absent: item.absent == "1",
+									isMakeup: item.isMakeup == "1"
 								});
 
 							attendance.subscription = subscription;
@@ -1056,6 +1077,16 @@
 		}
 
 		return out;
+	}
+
+	function delay(time) {
+		return function (result) {
+			return new Promise(function(resolve, reject) {
+				setTimeout(function () {
+					resolve(result);
+				}, time);
+			});
+		}
 	}
 
 }(window));
