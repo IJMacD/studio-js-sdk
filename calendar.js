@@ -237,9 +237,10 @@
 						attendance = addAttendance({
 							lesson: lesson,
 							student: student,
-							absent: item.Attendance == "0",
+							absent: item.Attendance == "0" && item.ismakeup == "0",
 							startDate: moment(item.StartDate),
-							endDate: moment(item.EndDate)
+							endDate: moment(item.EndDate),
+							isMakeup: item.ismakeup == "1"
 						});
 
 						iL.Subscription.find({course: lesson.course, student: student})
