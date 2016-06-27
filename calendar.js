@@ -1068,12 +1068,12 @@
 	}
 
 	function getAllDays(start, end){
-		var out = [start],
-			current = start;
+		var out = [],
+				next = start;
 
-		while(current < end){
-			current = current.clone().add(1, 'day');
-			out.push(current);
+		while(next < end){
+			out.push(next);
+			next = next.clone().add(1, 'day');
 		}
 
 		return out;
