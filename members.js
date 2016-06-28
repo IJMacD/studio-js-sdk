@@ -47,6 +47,10 @@
 	}
 	Student.get = getStudent;
 
+	function resolveStudent(student){
+		return students[student.id] || student;
+	}
+
 	/**
 	 * Add a student here for tracking which may have been generated elsewhere
 	 * (single homogenous module solves this)
@@ -55,14 +59,17 @@
 	 * @param student {object} Student object
 	 */
 	function addStudent(student){
-		var existing = students[student.id] || {},
-				merged = $.extend(existing, student);
+		var existing = resolveStudent(student) || {};
 
-		students[student.id] = merged;
+		if(existing != student){
+				$.extend(existing, student);
+		}
 
-		iL.Util.parseName(merged);
+		students[student.id] = existing;
 
-		return merged;
+		iL.Util.parseName(existing);
+
+		return existing;
 	}
 	Student.add = addStudent;
 
@@ -94,32 +101,30 @@
 			_searches[hash] = iL.query("process_getMemberList.php", post_data)
 				.then(function(data){
 					var out = [];
+
 					data.memberlist.forEach(function(item){
-						var id = item.memberID,
-							student = students[id] || {
-								id: id
-							},
-							name = (item.Lastname && item.nickname) ?
-								(item.Lastname.length > item.nickname.length ? item.Lastname : item.nickname) :
-								(item.Lastname || item.nickname);
+						var name = (item.Lastname && item.nickname) ?
+													(item.Lastname.length > item.nickname.length ?
+															item.Lastname : item.nickname
+													) : (item.Lastname || item.nickname),
+								registeredDate = new Date(item.RegDate),
+								student = addStudent({
+									id: item.memberID,
+									name: name.trim(),
+									nameZH: item.chiname,
+									gender: item.Gender == "1" ? "male" : "female",
+									grade: item.Grade,
+									account: item.AccountName,
+									photo: iL.Conf.PHOTO_URL + item.AccountName + ".jpg",
+									school: item.School,
+									phone: item.mobile,
+									registeredDate: registeredDate,
+									existing: registeredDate < existingCutoff
+								});
 
-						name = $.trim(name);
-						student.name = name;
-						student.gender = item.Gender == "1" ? "male" : "female";
-						student.grade = item.Grade;
-						student.account = item.AccountName;
-						student.photo = iL.Conf.PHOTO_URL + item.AccountName + ".jpg";
-						student.school = item.School;
-						student.phone = item.mobile;
-						student.registeredDate = new Date(item.RegDate);
-
-						student.existing = student.registeredDate < existingCutoff;
-
-						iL.Util.parseName(student);
-
-						students[id] = student;
 						out.push(student);
 					});
+
 					return out;
 				});
 		}
@@ -136,7 +141,7 @@
 	 * @return {object} The same student object passed in
 	 */
 	function fetchStudent(student){
-		student = students[student.id] || student;
+		student = resolveStudent(student);
 		if(!_students[student.id]){
 			_students[student.id] = Promise.all([
 					iL.query("process_getMemberDetail.php", {memberID: student.id}),
@@ -154,6 +159,7 @@
 							name = $.trim(name);
 							if(item.isStudent == "1"){
 								student.name = name;
+								student.nameZH = item.Chiname;
 								student.gender = item.Gender == "1" ? "male" : "female";
 								student.grade = item.Grade;
 								student.account = item.AccountName;
@@ -176,8 +182,8 @@
 								}
 
 								/* Not currently used but need to
-								   look after them in order to
-								   be able to save */
+									 look after them in order to
+									 be able to save */
 								student.notesPayment = item.RemarkAboutPayment;
 								student.nameChinese = item.Chiname;
 								student.schoolStart = item.schooltimefrom;
@@ -187,11 +193,11 @@
 								student.entryChannel2 = item.whyjoinusextendtext2;
 								student.isSuspended = item.suspend;
 
-								iL.Util.parseName(student);
-
 								student.guardians = guardians;
 
-								students[student.id] = student;
+								// The student should definetly already be being tracked at this
+								// point but no harm adding again for safety here right?
+								addStudent(student);
 
 								// break loop
 								return false;
@@ -227,8 +233,8 @@
 									title: item.Coursename,
 									code: item.CourseCode,
 									/* This is the potential discount for existing students,
-									   on this subscription.
-									   The student is *not* necessarily entitled to this */
+										 on this subscription.
+										 The student is *not* necessarily entitled to this */
 									existingDiscount: parseInt(item.DiscountForOldStudent),
 									pricePerLesson: pricePerLesson
 								}),
@@ -335,11 +341,12 @@
 				GuardianDetailAddress: guardian.address,
 				GuardianDetailOccupation: guardian.occupation,
 				GuardianDetailHomeNo: guardian.phoneHome,
-				GuardianDetailMobileNo: student.phone,	/* Be careful! At the moment this is echoed back for both the
-														   student and guardian but it is only saved under the guardian. We
-														   keep track of it as part of the student for simplicity, which is
-														   why we're using that value here - just incase it has been modified
-														   on the student */
+				/* Be careful! At the moment `student.phone` is echoed back for both the
+					 student and guardian but it is only saved under the guardian. We
+					 keep track of it as part of the student for simplicity, which is
+					 why we're using that value here - just incase it has been modified
+					 on the student */
+				GuardianDetailMobileNo: student.phone,
 				GuardianDetailOfficeNo: guardian.phoneOffice,
 				whyjoinusextendtext1: student.entryChannel1,
 				whyjoinusextendtext2: student.entryChannel2,
@@ -359,7 +366,6 @@
 				student.accountID = data.SAccount;
 				student.guardians[0].accountID = data.GAccount;
 				student.registeredDate = new Date();
-				iL.Util.parseName(student);
 				addStudent(student);
 			}
 			return student;

@@ -466,22 +466,21 @@
 			// Name provided with English name at end (with a comma)
 			// Could be 2, 3+ chinese names etc.
 
-			person.forename = names[names.length-1];
+			person.forename = person.name.substr(person.name.indexOf(",")+1).trim();
 			person.surname = names[0];
 			person.englishName = person.forename + " " + person.surname;
-			person.chineseName = names.slice(0,names.length-1).join(" ");
+			person.chineseName = person.name.substr(0,person.name.indexOf(",")).trim();
 		}
 		else if(names.length == 3){
 			// Assume no English name
 
-			person.forename = "";
+			person.forename = names[1] + " " + names[2];
 			person.surname = names[0];
 			person.chineseName = names[0] + " " + names[1] + " " + names[2];
 			person.englishName = person.chineseName;
 		}
 		else if(topNames.indexOf(names[0]) > -1){
-			// Name provided with English name at end
-			// (without a comma)
+			// Name provided with English name at end (without a comma)
 
 			person.forename = names[3];
 			person.surname = names[0];
