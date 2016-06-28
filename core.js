@@ -462,6 +462,15 @@
 			person.englishName = names[0] + " " + names[1];
 			person.chineseName = person.englishName;
 		}
+		else if(person.name.indexOf(",") > -1){
+			// Name provided with English name at end (with a comma)
+			// Could be 2, 3+ chinese names etc.
+
+			person.forename = names[names.length-1];
+			person.surname = names[0];
+			person.englishName = person.forename + " " + person.surname;
+			person.chineseName = names.slice(0,names.length-1).join(" ");
+		}
 		else if(names.length == 3){
 			// Assume no English name
 
@@ -470,10 +479,9 @@
 			person.chineseName = names[0] + " " + names[1] + " " + names[2];
 			person.englishName = person.chineseName;
 		}
-		else if(topNames.indexOf(names[0]) > -1 ||
-							person.name.indexOf(",") > -1 ){
+		else if(topNames.indexOf(names[0]) > -1){
 			// Name provided with English name at end
-			// (with or without a commma)
+			// (without a comma)
 
 			person.forename = names[3];
 			person.surname = names[0];
