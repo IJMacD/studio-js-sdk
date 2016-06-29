@@ -55,6 +55,23 @@
 
 		options = options || {};
 
+		if(!options.tutor || !options.term){
+			// The server requires these! We can't search without them
+
+			if(options.student){
+				// We can't search the server but we can search our cache
+				var result = [];
+				for(id in reports){
+					if(reports[id].student.id == options.student.id){
+						result.push(reports[id]);
+					}
+				}
+				return Promise.resolve(result);
+			}
+
+			return Promise.reject(new Error("iL.Report.find(): tutor and term are required"));
+		}
+
 		if(options.tutor){
 			post_data.searchTutor = options.tutor.id || options.tutor;
 		}
@@ -77,7 +94,9 @@
 			_reports[hash] = undefined;
 		}
 
-		if(!_reports[hash]){
+		// If this particular query hasn't been run before start it now
+		// with the exception that the query *must* specify a tutor and a term
+		if(!_reports[hash] && post_data.searchTutor && post_data.searchTerm){
 			_reports[hash] = iL.query("process_getMemberReportCardList.php", post_data)
 				.then(function(data){
 					var resultSet = [];
@@ -107,7 +126,7 @@
 									student: student,
 									course: course
 								}),
-								report = {
+								report = addReport({
 									id: reportID,
 									student: student,
 									course: course,
@@ -119,7 +138,7 @@
 									startDate: new Date(item.startdate),
 									endDate: new Date(item.enddate),
 									tutor: tutor
-								};
+								});
 
 							report.startDate.setHours(item.starttime.substr(0,2));
 							report.startDate.setMinutes(item.starttime.substr(2,2));
@@ -133,9 +152,6 @@
 								report.endDate.setMinutes(item.starttime.substr(2,2));
 							}
 
-							// TODO: check if report already exists and don't replace it
-							reports[item.id] = item;
-
 							resultSet.push(report);
 						});
 					}
@@ -144,14 +160,33 @@
 		}
 
 		return _reports[hash].then(function (reports) {
-			if(!options.student){
-				return reports;
+			if(options.student){
+				return reports.filter(function (report) { return options.student.id == report.student.id });
 			}
 
-			return reports.filter(function (report) { return options.student.id == report.student.id });
+			return reports;
 		});
 	}
 	Report.find = find;
+
+	/**
+	 * Add a report to be tracked by this module
+	 *
+	 * @method add
+	 * @param report {object} Object specifying initial properties
+	 * @return {object} The newly created object or original if it already existed
+	 */
+	function addReport(report) {
+
+		// TODO: check if report already exists and don't replace it
+		if(reports[report.id]){
+			console.debug("About to replace report entry");
+		}
+		reports[report.id] = report;
+
+		return report;
+	}
+	Report.add = addReport;
 
 	function dayNameToInt(name) {
 		return "Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" ").indexOf(name);
@@ -212,7 +247,7 @@
 
 			$.extend(o, detail);
 
-			o.tutor = undefined;
+			o.tutor = iL.Tutor.find(o.tutor);
 
 			// There should be no conflict with labels when merging into report stub
 			$.extend(item, o);
