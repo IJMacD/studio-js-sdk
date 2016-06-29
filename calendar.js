@@ -420,17 +420,21 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
-		var existing = courses[course.id] || {},
-				merged = $.extend(existing, course);
+		var existing = resolveCourse(course) || {};
+		$.extend(existing, course);
 
 		// Assume its come from outside, so apply our niceties
-		_parseCourseTitle(merged);
+		_parseCourseTitle(existing);
 
-		courses[merged.id] = merged;
+		courses[existing.id] = existing;
 
-		return merged;
+		return existing;
 	}
 	Course.add = addCourse;
+
+	function resolveCourse(course) {
+		return courses[course.id] || course;
+	}
 
 	/**
 	 * Add a lesson to be tracked by the sdk
@@ -637,10 +641,7 @@
 	 */
 	function courseFetch(course){
 
-		// Sanity Check
-		if(getCourse(course.id) !== course){
-			throw Error("Duplicate Course object encountered");
-		}
+		course = resolveCourse(course);
 
 		if(!_courseDetails[course.id]){
 			_courseDetails[course.id] = Promise.all([
@@ -650,8 +651,15 @@
 				.then(function(results){
 					var data = results[0],
 						details = data.coursedetail[0],
-						tutor = iL.Tutor.get(details.TutorMemberID),
+						tutor,
 						level;
+
+					if(!details){
+						// Course does not exist
+						return Promise.reject("Course does not exist");
+					}
+
+					tutor = iL.Tutor.get(details.TutorMemberID);
 
 					if(!tutor && course.tutor){
 						tutor = course.tutor;
@@ -744,14 +752,15 @@
 
 	/**
 	 * Get all lessons for this course
-	 * [Sugar] for Lesson.find({course: this})
+	 * implementation for Lesson.find({course: course})
 	 *
-	 * @deprecated
-	 * @method lessons
+	 * @private
+	 * @method courselessons
 	 * @param course {object}
 	 * @return {Promise} Promise of an array
 	 */
 	function courseLessons(course){
+		course = resolveCourse(course);
 		return courseFetch(course)
 			.then(function(){
 				return course.lessons;
