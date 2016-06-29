@@ -168,53 +168,46 @@
 							tutor = iL.Tutor.find(item.Tutor, true),
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
+							startTime = item.Starttime,
+							endTime = item.endtime, // Caution! Inconsistant API
+							course,
+							lesson;
 
-							course = addCourse({
-								id: courseID,
-								lessons: []
-							}),
-							lesson = addLesson({
-								id: lessonID,
-								start: start,
-								end: end,
-								room: iL.Room.find(item.Location),
-								tutor: tutor,
-								attendees: []
-							});
+						course = addCourse({
+							id: courseID,
+							code: item.CourseName,
+							day: start.getDay(),
+							tutor: tutor,
+							originalTitle: item.Coursetitle
+						});
 
-						course.code = item.CourseName;
-						course.day = start.getDay();
-						course.startTime = item.Starttime;
-						course.endTime = item.endtime;
-						course.tutor = tutor;
+						// We can helpfully set the standard start time for the course if
+						// it has not already been set
+						// TODO: This assumes all lesson have the same start/end time
+						if(!course.startTime)
+							course.startTime = startTime;
+						if(!course.endTime)
+							course.endTime = endTime;
 
-						_parseCourseTitle(course, item.Coursetitle);
+						_setTime(start, startTime);
+						_setTime(end, endTime);
 
-						_setTime(lesson.start, course.startTime);
-						_setTime(lesson.end, course.endTime);
+						lesson = addLesson({
+							id: lessonID,
+							course: course,
+							start: start,
+							end: end,
+							room: iL.Room.find(item.Location),
+							tutor: tutor
+						});
 
-						_setSubject(course);
 
-						_setCoursePrice(course);
-
-						courses[course.id] = course;
 
 						// We have the attendees array now so we can
 						// pre-emptively resolve a promise for each of the lessons.
 						// // Warning these attendances don't contain `subscription` or `memberCourseID`
 						// // To get hold of these you must call `Attendance.fetch()`
 						_attendees[lesson.id] = Promise.resolve(lesson.attendees);
-
-						lessons[lesson.id] = lesson;
-						lesson.course = course;
-
-						if(!course.lessons){
-							course.lessons = [];
-						}
-
-						if(course.lessons.indexOf(lesson) == -1){
-							course.lessons.push(lesson);
-						}
 
 						events.push(lesson);
 					});
@@ -420,11 +413,23 @@
 	 * @param course {object} course to add
 	 */
 	function addCourse(course){
-		var existing = resolveCourse(course) || {};
-		$.extend(existing, course);
+		var existing = resolveCourse(course);
+
+		if(existing != course)
+			$.extend(existing, course);
+
+		if(!existing.lessons){
+			existing.lessons = [];
+		}
 
 		// Assume its come from outside, so apply our niceties
 		_parseCourseTitle(existing);
+
+		if(!existing.subject){
+			_setSubject(existing);
+		}
+
+		_setCoursePrice(existing);
 
 		courses[existing.id] = existing;
 
@@ -443,14 +448,27 @@
 	 * @param lesson {object} lesson to add
 	 */
 	function addLesson(lesson){
-		var existing = lessons[lesson.id] || {},
-				attendees = existing.attendees;
-		$.extend(existing, lesson);
+		var existing = lessons[lesson.id] || lesson,
+				// Save existing attendess so we can compare later
+				attendees = existing.attendees,
+				course;
 
-		// Save attendees from original if there were any set
+		if(existing != lesson)
+			$.extend(existing, lesson);
+
+		// Choose where to take attendees array from
 		// TODO: smarter merge
-		if(attendees && attendees.length)
+		if(attendees && attendees.length) {
 			existing.attendees = attendees;
+		}
+		else if (!existing.attendees) {
+			existing.attendees = [];
+		}
+
+		course = existing.course;
+		if(course && course.lessons.indexOf(existing) == -1) {
+			course.lessons.push(existing);
+		}
 
 		lessons[existing.id] = existing;
 
@@ -528,16 +546,9 @@
 						var id = item.CourseID,
 							course = addCourse({
 								id: id,
-								lessons: []
+								code: item.coursecode,
+								originalTitle: item.CourseName
 							});
-
-						course.code = item.coursecode;
-
-						_parseCourseTitle(course, item.CourseName);
-
-						_setSubject(course);
-
-						_setCoursePrice(course);
 
 						out.push(course);
 					});
@@ -548,40 +559,31 @@
 							tutor = iL.Tutor.find(item.tutorname, true),
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
-
-							course = getCourse(courseID),
-							lesson = addLesson({
-								id: lessonID,
-								start: start,
-								end: end,
-								room: iL.Room.find(item.location),
-								tutor: tutor,
-								attendees: []
-							});
-
-						course.day = start.getDay();
-
-						if(!course.startTime)
-							course.startTime = item.Starttime;
-						if(!course.endTime)
-							course.endTime = item.endtime;
-
-						course.tutor = tutor;
+							startTime = item.Starttime,
+							endTime = item.endtime,
+							course,
+							lesson;
 
 						// TODO: This assumes no lesson can have a unique start/end time
-						_setTime(lesson.start, course.startTime);
-						_setTime(lesson.end, course.endTime);
+						_setTime(start, startTime);
+						_setTime(end, endTime);
 
-						lessons[lesson.id] = lesson;
-						lesson.course = course;
+						course = addCourse({
+							id: courseID,
+							day: start.getDay(),
+							startTime: startTime,
+							endTime: endTime,
+							tutor: tutor
+						}),
+						lesson = addLesson({
+							id: lessonID,
+							course: course,
+							start: start,
+							end: end,
+							room: iL.Room.find(item.location),
+							tutor: tutor
+						});
 
-						if(!course.lessons){
-							course.lessons = [];
-						}
-
-						if(course.lessons.indexOf(lesson) == -1){
-							course.lessons.push(lesson);
-						}
 					});
 
 					return out;
@@ -668,61 +670,47 @@
 
 					// This sometimes comes without suffix - can screw up links
 					//course.code = details.CourseCode;
-					course.room = iL.Room.get(details.DefaultClassroomID);
-					course.paymentCycle = details.DefaultPaymentCycle == "2" ? "lesson" : "month";
-					course.existingDiscount = details.DiscountForOldStudent;
-					course.pricePerLesson = details.LessonFee;
-					course.pricePerMonth = details.Monthlyfee; // Note different capitalisation
-					course.notes = details.Remark == "null" ? "" : details.Remark;
-					course.tutor = tutor;
-					course.level = stringifyGrade(details);
-					course.report = details.reportcard;
-					course.promotion = details.cb201505promotion;
-
-					_parseCourseTitle(course, details.CourseName);
-
-					if(!course.subject){
-						_setSubject(course);
-					}
-
-					_setCoursePrice(course);
-
-					if(!course.lessons){
-						course.lessons = [];
-					}
+					addCourse({
+						id: course.id,
+						originalTitle: details.CourseName,
+						room: iL.Room.get(details.DefaultClassroomID),
+						paymentCycle: details.DefaultPaymentCycle == "2" ? "lesson" : "month",
+						existingDiscount: details.DiscountForOldStudent,
+						pricePerLesson: details.LessonFee,
+						pricePerMonth: details.Monthlyfee, // Note different capitalisation
+						notes: details.Remark == "null" ? "" : details.Remark,
+						tutor: tutor,
+						level: stringifyGrade(details),
+						report: details.reportcard,
+						promotion: details.cb201505promotion
+					});
 
 					$.each(data.coursedetailschedule, function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
+							startTime = item.Starttime,
+							endTime = item.Endtime,	// Caution! Inconsistant API
 							lesson;
 
-						if(lessons[item.CourseScheduleID]){
-							lesson = lessons[item.CourseScheduleID];
-						}
-						else {
-							lesson = addLesson({
-								id: item.CourseScheduleID,
-								start: start,
-								end: end,
-								room: iL.Room.get(item.ClassroomID),
-								tutor: iL.Tutor.get(item.TutorMemberID),
-								course: course,
-								attendees: []
-							});
+						// We can helpfully set the standard start time for the course if
+						// it has not already been set
+						// TODO: This assumes all lesson have the same start/end time
+						if(!course.startTime)
+							course.startTime = startTime;
+						if(!course.endTime)
+							course.endTime = endTime;
 
-							if(!course.startTime)
-								course.startTime = item.Starttime;
-							if(!course.endTime)
-								course.endTime = item.Endtime;	// Caution! Inconsistant API
+						_setTime(start, startTime);
+						_setTime(end, endTime);
 
-							// TODO: This assumes no lesson can have a unique start/end time
-							_setTime(lesson.start, course.startTime);
-							_setTime(lesson.end, course.endTime);
-						}
-
-						if(course.lessons.indexOf(lesson) == -1){
-							course.lessons.push(lesson);
-						}
+						lesson = addLesson({
+							id: item.CourseScheduleID,
+							course: course,
+							start: start,
+							end: end,
+							room: iL.Room.get(item.ClassroomID),
+							tutor: iL.Tutor.get(item.TutorMemberID)
+						});
 
 					});
 
@@ -1003,8 +991,8 @@
 		}
 	}
 
-	function _parseCourseTitle(course, title){
-		title = title || course.originalTitle || course.title || "";
+	function _parseCourseTitle(course){
+		title = course.originalTitle || course.title || "";
 
 		course.originalTitle = course.originalTitle || title;
 
