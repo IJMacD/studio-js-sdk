@@ -162,6 +162,10 @@
 					var data = results[0],
 						events = [];
 
+					if(!data.CalendarStudent.length){
+						throw new Error("Not logged in");
+					}
+
 					$.each(data.CalendarCourse, function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
@@ -308,7 +312,7 @@
 		return iL.query('process_updateCourseSchedule.php',post_data)
 			.then(function(data){
 				if(data.statuscode != 1){
-					return Promise.reject();
+					return Promise.reject(new Error("Server rejected changes"));
 				}
 			});
 	}

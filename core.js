@@ -27,7 +27,7 @@
 
 		memberID,	// Now part of currentUser
 		accountName, // Now part of currentUser
-		adminStaff,
+		adminStaff = {},
 		classrooms,
 		tutors,
 		terms,
@@ -52,8 +52,6 @@
 
 	iL.query = query;
 
-	getInitData();
-
 	function Login(user, pass){
 		return query("process_login.php", { login: user, password: pass })
 			.then(function(data){
@@ -62,7 +60,7 @@
 					accountName = data.result[0].acc;
 
 					currentUser = {
-						id:	memberID,
+						id: memberID,
 						username: accountName,
 						name: data.result[0].currentusernickname || accountName
 					};
@@ -81,7 +79,7 @@
 	iLearner.Login = Login;
 
 	function Logout(){
-		iL.query("process_logout.php");
+		iL.query("process_logout.php", null, "text");
 		currentUser = null;
 	}
 	iLearner.Logout = Logout;
@@ -89,7 +87,13 @@
 	function getInitData(){
 		loading = iL.query("process_getinitdata.php")
 			.then(function(data){
-				adminStaff = data.AdminStaff;
+				data.AdminStaff.forEach(function (staff) {
+					var obj = {
+						id: staff.MemberID,
+						name: staff.user
+					};
+					adminStaff[obj.id] = obj;
+				});
 				classrooms = $.map(data.classroom, function(i){
 					return { id: i.crid, name: i.place }
 				});
@@ -125,7 +129,48 @@
 					};
 				});
 			});
+		// Check if we're already logged in.
+		checkLogin().then(function (user) {
+			currentUser = user;
+		})
+
 	}
+
+	function checkLogin() {
+		return Promise.all([
+			iL.Tutor.all(),
+			iL.query("index.php", null, "text").then(function (data) {
+				var match = data.match(/mid = "(\d+)"/);
+				if(match){
+					return match[1];
+				}
+				return Promise.reject("Not logged in");
+			})
+		]).then(function (results) {
+			var tutors = results[0],
+					id = results[1],
+					user = iL.Tutor.get(id);
+
+			if(!user){
+				user = adminStaff[id];
+			}
+
+			if(user){
+				return {
+					id: user.id,
+					username: user.name,
+					name: user.name
+				};
+			}
+
+			return {
+				id: id,
+				username: "user" + id,
+				name: "User " + id
+			};
+		});
+	}
+	iLearner.checkLogin = checkLogin;
 
 	function getCurrentUser(){
 		return currentUser;
@@ -145,9 +190,10 @@
 	}
 	iLearner.getCoursePrices = getCoursePrices;
 
-	function query(url, data){
+	function query(url, data, type){
+		if(!type) type = "json";
 		return new Promise(function(resolve, reject){
-			$.post(iL.Conf.API_ROOT + url, data, null, "json")
+			$.post(iL.Conf.API_ROOT + url, data, null, type)
 				.then(resolve, function(xhr, status, error){
 					console.error(status + " in file " + url);
 					reject(error);
@@ -497,6 +543,8 @@
 		}
 	}
 	Util.parseName = parseName;
+
+	getInitData();
 
 	window.iLearner = iLearner;
 }(window));
