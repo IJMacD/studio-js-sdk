@@ -148,11 +148,21 @@
 			sDate: iL.Util.formatDate(options.start)
 		};
 
-		if(options.tutor){
-			post_data.Tutor = options.tutor.id;
-		}
-
 		hash = JSON.stringify(post_data);
+
+		// If the hash under the curent configuration has been satified already
+		// i.e. we've already fetched the whole day
+		// we can save a request and just filter ourselves.
+		//
+		// If however we haven't yet fetched the day we'll try to keep this request
+		// fast by only fetching one tutor from the server.
+		// We may still fetch the whole day later.
+		if(!_lessons[hash] && options.tutor) {
+			// We haven't previously loaded the day so throw in the tutor requirement
+			// to speed this request up and rehash
+			post_data.Tutor = options.tutor.id;
+			hash = JSON.stringify(post_data);
+		}
 
 		if(!_lessons[hash]){
 			_lessons[hash] = Promise.all([
@@ -260,9 +270,22 @@
 				});
 		}
 
-		return _lessons[hash];
+		return _lessons[hash]
+			.then(function (lessons) {
+				if(options.tutor){
+					return lessons.filter(byTutor(options.tutor));
+				}
+				return lessons;
+			});
 	}
 	Lesson.find = findLessons;
+
+	// Filter function
+	function byTutor(tutor) {
+		return function (lesson) {
+			return lesson.tutor == tutor;
+		}
+	}
 
 	/**
 	 * Save lesson changes back to the server
