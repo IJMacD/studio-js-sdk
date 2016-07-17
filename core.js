@@ -35,7 +35,8 @@
 
 		currentUser = null,
 
-		loading;
+		loading,
+		_checkLogin;
 
 	window.iL = iLearner;
 	window.iLearner = iLearner;
@@ -137,38 +138,45 @@
 	}
 
 	function checkLogin() {
-		return Promise.all([
-			iL.Tutor.all(),
-			iL.query("index.php", null, "text").then(function (data) {
-				var match = data.match(/mid = "(\d+)"/);
-				if(match){
-					return match[1];
+		if(!_checkLogin){
+			_checkLogin = Promise.all([
+				iL.Tutor.all(),
+				iL.query("index.php", null, "text").then(function (data) {
+					var match = data.match(/mid = "(\d+)"/);
+					if(match){
+						return match[1];
+					}
+					return Promise.reject("Not logged in");
+				})
+			]).then(function (results) {
+				// So that we can fetch fresh results later
+				// We only want one pending request at a time
+				_checkLogin = null;
+
+				var tutors = results[0],
+						id = results[1],
+						user = iL.Tutor.get(id);
+
+				if(!user){
+					user = adminStaff[id];
 				}
-				return Promise.reject("Not logged in");
-			})
-		]).then(function (results) {
-			var tutors = results[0],
-					id = results[1],
-					user = iL.Tutor.get(id);
 
-			if(!user){
-				user = adminStaff[id];
-			}
+				if(user){
+					return {
+						id: user.id,
+						username: user.name,
+						name: user.name
+					};
+				}
 
-			if(user){
 				return {
-					id: user.id,
-					username: user.name,
-					name: user.name
+					id: id,
+					username: "user" + id,
+					name: "User " + id
 				};
-			}
-
-			return {
-				id: id,
-				username: "user" + id,
-				name: "User " + id
-			};
-		});
+			});
+		}
+		return _checkLogin;
 	}
 	iLearner.checkLogin = checkLogin;
 
