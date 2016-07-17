@@ -91,7 +91,7 @@
 				data.AdminStaff.forEach(function (staff) {
 					var obj = {
 						id: staff.MemberID,
-						name: staff.user
+						name: staff.User
 					};
 					adminStaff[obj.id] = obj;
 				});
