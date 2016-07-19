@@ -230,7 +230,8 @@
 						var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.nickname,
-									photo: item.Accountname
+									photo: item.Accountname,
+									grade: item.grade
 								}),
 								lesson = lessons[item.CourseScheduleID],
 								attendance;
