@@ -172,10 +172,6 @@
 					var data = results[0],
 						events = [];
 
-					if(!data.CalendarStudent.length){
-						throw new Error("Not logged in");
-					}
-
 					$.each(data.CalendarCourse, function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
