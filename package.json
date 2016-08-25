@@ -1,0 +1,23 @@
+{
+  "name": "studio-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IJMacD/studio-js-sdk.git"
+  },
+  "author": "Iain MacDonald",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IJMacD/studio-js-sdk/issues"
+  },
+  "homepage": "https://github.com/IJMacD/studio-js-sdk#readme"
+}
