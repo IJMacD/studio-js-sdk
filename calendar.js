@@ -1068,9 +1068,6 @@
 				course.levelNumeric = offset + parseInt(match[2]);
 			}
 		}
-		else {
-			console.warn("Unable to parse level: ", course.originalTitle);
-		}
 
 		if(time){
 			course.startTime = time[1];
