@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/IJMacD/studio-js-sdk/issues"
   },
-  "homepage": "https://github.com/IJMacD/studio-js-sdk#readme"
+  "homepage": "https://github.com/IJMacD/studio-js-sdk#readme",
+  "dependencies": {
+    "moment": "^2.14.1"
+  }
 }
