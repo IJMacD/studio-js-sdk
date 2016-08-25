@@ -188,7 +188,7 @@
 							code: item.CourseName,
 							day: start.getDay(),
 							tutor: tutor,
-							originalTitle: item.Coursetitle
+							title: item.Coursetitle
 						});
 
 						// We can helpfully set the standard start time for the course if
@@ -571,7 +571,7 @@
 							course = addCourse({
 								id: id,
 								code: item.coursecode,
-								originalTitle: item.CourseName
+								title: item.CourseName
 							});
 
 						out.push(course);
@@ -696,7 +696,7 @@
 					//course.code = details.CourseCode;
 					addCourse({
 						id: course.id,
-						originalTitle: details.CourseName,
+						title: details.CourseName,
 						room: iL.Room.get(details.DefaultClassroomID),
 						paymentCycle: details.DefaultPaymentCycle == "2" ? "lesson" : "month",
 						existingDiscount: details.DiscountForOldStudent,
@@ -1035,6 +1035,42 @@
 			});
 		}
 		course.level = level;
+
+		if(level){
+			var match = level.match(/([KPSFL])(\d)/),
+					offset = 0,
+					courseMatch;
+			course.levelNumeric = 0;
+			if(match){
+				switch(match[1]){
+					case "K":
+						offset = 0;
+						break;
+					case "P":
+						offset = 6;
+						break;
+					case "S":
+					case "F":
+						offset = 12;
+						break;
+					case "L":
+						if(course.title.indexOf("Critical") != -1){
+							offset = 6;
+						}
+						else if (course.title.indexOf("Advanced Grammar") != -1){
+							offset = 5;
+						}
+						else if(course.title.indexOf("Pre-School") != -1){
+							offset = 0;
+						}
+						break;
+				}
+				course.levelNumeric = offset + parseInt(match[2]);
+			}
+		}
+		else {
+			console.warn("Unable to parse level: ", course.originalTitle);
+		}
 
 		if(time){
 			course.startTime = time[1];
