@@ -7,7 +7,6 @@
 	 */
 	var iLearner = window.iLearner || {},
 		iL = iLearner,
-		$ = window.jQuery,
 
 		defaults = {
 			API_ROOT: "/",
@@ -41,7 +40,8 @@
 	window.iL = iLearner;
 	window.iLearner = iLearner;
 
-	iL.Conf = $.extend({}, defaults, iL.Conf);
+	// iL.Conf = {...defaults, ...iL.Conf};
+	iL.Conf = defaults;
 
 	iLearner.Tutor = Tutor;
 	iLearner.Room = Room;
@@ -49,7 +49,7 @@
 	iLearner.Util = Util;
 
 	/* legacy */
-	iL.API_ROOT = iL.Conf.API_ROOT;
+	// iL.API_ROOT = iL.Conf.API_ROOT;
 
 	iL.query = query;
 
@@ -95,7 +95,7 @@
 					};
 					adminStaff[obj.id] = obj;
 				});
-				classrooms = $.map(data.classroom, function(i){
+				classrooms = data.classroom.map(function(i){
 					return { id: i.crid, name: i.place }
 				});
 				if(data.term && data.term.map){
@@ -112,8 +112,8 @@
 				else {
 					terms = [];
 				}
-				tutors = $.map(data.tutor, function(t){
-					var tutor = { name: $.trim(t.n), id: t.mid };
+				tutors = data.tutor.map(function(t){
+					var tutor = { name: t.n.trim(), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
 					return tutor;
 				});
@@ -136,6 +136,7 @@
 		})
 
 	}
+	iL.getInitData = getInitData;
 
 	function checkLogin() {
 		if(!_checkLogin){
@@ -200,10 +201,27 @@
 
 	function query(url, data, type){
 		if(!type) type = "json";
+
+		var formData = [];
+		if(data){
+			Object.keys(data).forEach(function (key) {
+				formData.push(key + "=" + encodeURIComponent(data[key]));
+			});
+		}
+
 		return new Promise(function(resolve, reject){
-			$.post(iL.Conf.API_ROOT + url, data, null, type)
-				.then(resolve, function(xhr, status, error){
-					console.error(status + " in file " + url);
+			fetch(iL.Conf.API_ROOT + url, {
+					method: 'post',
+					body: formData.join("&"),
+					headers: new Headers({
+						"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+					}),
+					credentials: 'include'
+				})
+				.then(function (result){
+					resolve(type == "json" ? result.json() : result.text());
+				}, function(error){
+					console.error(error);
 					reject(error);
 				});
 		});
@@ -238,7 +256,7 @@
 	function getTutors(id){
 		var tutor;
 		if(tutors && id){
-			$.each(tutors, function(i,t){
+			tutors.forEach(function(i,t){
 				if(t.id == id){
 					tutor = t;
 					return false;
@@ -265,10 +283,10 @@
 			return { name: "", colour: "#999999" };
 		}
 
-		name = $.trim(name);
+		name = name.trim();
 
 		if(tutors){
-			$.each(tutors, function(i,t){
+			tutors.forEach(function(i,t){
 				if(t.name == name){
 					tutor = t;
 					return false;
@@ -329,7 +347,7 @@
 		var classroom;
 
 		if(classrooms && id){
-			$.each(classrooms, function(i,c){
+			classrooms.forEach(function(i,c){
 				if(c.id == id){
 					classroom = c;
 					return false;
@@ -358,7 +376,7 @@
 		}
 
 		if(classrooms){
-			$.each(classrooms, function(i,c){
+			classrooms.forEach(function(i,c){
 				if(c.name == name){
 					classroom = c;
 					return false;
@@ -493,7 +511,7 @@
 	 * @param person {object} Object with a `name` property
 	 */
 	function parseName(person){
-		person.name = $.trim(person.name);
+		person.name = person.name.trim();
 
 		var names = person.name.match(/\w+/g);
 
@@ -551,8 +569,6 @@
 		}
 	}
 	Util.parseName = parseName;
-
-	getInitData();
 
 	window.iLearner = iLearner;
 }(window));

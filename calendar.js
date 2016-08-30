@@ -95,7 +95,7 @@
 			return _relativeLessons(args[0], args[1]);
 		}
 
-		options = $.isPlainObject(args[0]) ? args[0] : {};
+		options = typeof args[0] == "object" ? args[0] : {};
 
 		if(options.id){
 			var lesson = getLesson(options.id);
@@ -103,7 +103,7 @@
 		}
 
 		if(options.student){
-			var o = $.extend({},options);
+			var o = JSON.parse(JSON.stringify(options));
 			o.student = undefined;
 			return findLessons(o).then(function(lessons){
 				return lessons.filter(function(lesson){
@@ -133,7 +133,7 @@
 			if(endMoment > startMoment && !startMoment.isSame(endMoment, 'day')){
 				return Promise.all(getAllDays(startMoment, endMoment)
 					.map(function(item){
-						var op = $.extend({},options);
+						var op = JSON.parse(JSON.stringify(options));
 						op.start = item.toDate();
 						op.end = undefined;
 						return findLessons(op);
@@ -172,7 +172,7 @@
 					var data = results[0],
 						events = [];
 
-					$.each(data.CalendarCourse, function(i,item){
+					data.CalendarCourse.forEach(function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.Tutor, true),
@@ -222,7 +222,7 @@
 						events.push(lesson);
 					});
 
-					$.each(data.CalendarStudent, function(i,item){
+					data.CalendarStudent.forEach(function(i,item){
 						var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.nickname,
@@ -262,8 +262,12 @@
 								}
 							});
 					});
+					// const loadAttendances = lessons => Promise.all(lessons.map(function(_){return iL.Attendance.find({lesson:_});}));
 
 					return events;
+				})
+				.catch(function(e){
+					console.log(e);
 				});
 		}
 
@@ -439,8 +443,9 @@
 	function addCourse(course){
 		var existing = resolveCourse(course);
 
-		if(existing != course)
-			$.extend(existing, course);
+		// TODO: Re-implement
+		// if(existing != course)
+		// 	$.extend(existing, course);
 
 		if(!existing.lessons){
 			existing.lessons = [];
@@ -477,8 +482,9 @@
 				attendees = existing.attendees,
 				course;
 
-		if(existing != lesson)
-			$.extend(existing, lesson);
+		// TODO: Re-implement
+		// if(existing != lesson)
+		// 	$.extend(existing, lesson);
 
 		// Choose where to take attendees array from
 		// TODO: smarter merge
@@ -533,7 +539,7 @@
 
 		if(!_courses[hash]){
 			if(options.code){
-				$.each(courses, function(i,course){
+				courses.forEach(function(i,course){
 
 
 					// -------------------------------------------------------
@@ -566,7 +572,7 @@
 					var data = results[0],
 						out = [];
 
-					$.each(data.courselist, function(i,item){
+					data.courselist.forEach(function(i,item){
 						var id = item.CourseID,
 							course = addCourse({
 								id: id,
@@ -577,7 +583,7 @@
 						out.push(course);
 					});
 
-					$.each(data.courseschedule, function(i,item){
+					data.courseschedule.forEach(function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.tutorname, true),
@@ -651,7 +657,9 @@
 					reportcard: course.report,
 					cb201505promotion: course.promotion
 				};
-		$.extend(post_data, objectifyGrade(course.level));
+		// TODO: Re-implement
+		throw Error("Unimplmented");
+		// $.extend(post_data, objectifyGrade(course.level));
 		return iL.query("process_updateCourse.php", post_data);
 	}
 	Course.save = saveCourse;
@@ -709,7 +717,7 @@
 						promotion: details.cb201505promotion
 					});
 
-					$.each(data.coursedetailschedule, function(i,item){
+					data.coursedetailschedule.forEach(function(i,item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							startTime = item.Starttime,
@@ -877,7 +885,7 @@
 							lesson.attendees = [];
 						}
 
-						$.each(data.coursestudent, function(i,item){
+						data.coursestudent.forEach(function(i,item){
 							var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.Lastname,
@@ -935,7 +943,7 @@
 	 * @return {array} returns an array of the attendances you passed in
 	 */
 	function fetchAttendance(attendance){
-		if($.isArray(attendance)){
+		if(attendance.map){
 			return attendance.map(fetchAttendance);
 		}
 
@@ -1027,7 +1035,7 @@
 
 		level = level && level[0].replace(/\s+/, "");
 		if(!level){
-			$.each(customLevels, function(i,cItem){
+			customLevels.forEach(function(i,cItem){
 				if(cItem.regex.test(title)){
 					level = cItem.level;
 					return false;
