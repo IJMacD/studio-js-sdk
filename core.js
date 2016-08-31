@@ -256,7 +256,7 @@
 	function getTutors(id){
 		var tutor;
 		if(tutors && id){
-			tutors.forEach(function(i,t){
+			tutors.forEach(function(t){
 				if(t.id == id){
 					tutor = t;
 					return false;
@@ -286,7 +286,7 @@
 		name = name.trim();
 
 		if(tutors){
-			tutors.forEach(function(i,t){
+			tutors.forEach(function(t){
 				if(t.name == name){
 					tutor = t;
 					return false;
@@ -347,7 +347,7 @@
 		var classroom;
 
 		if(classrooms && id){
-			classrooms.forEach(function(i,c){
+			classrooms.forEach(function(c){
 				if(c.id == id){
 					classroom = c;
 					return false;
@@ -376,7 +376,7 @@
 		}
 
 		if(classrooms){
-			classrooms.forEach(function(i,c){
+			classrooms.forEach(function(c){
 				if(c.name == name){
 					classroom = c;
 					return false;

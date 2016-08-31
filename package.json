@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/IJMacD/studio-js-sdk#readme",
   "dependencies": {
-    "moment": "^2.14.1"
+    "moment": "^2.14.1",
+    "spark-md5": "^2.0.2"
   }
 }

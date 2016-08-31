@@ -61,9 +61,10 @@
 	function addStudent(student){
 		var existing = resolveStudent(student) || {};
 
-		if(existing != student){
-				$.extend(existing, student);
-		}
+		// TODO: Re-implement
+		// if(existing != student){
+		// 		$.extend(existing, student);
+		// }
 
 		students[student.id] = existing;
 
@@ -152,11 +153,11 @@
 						guardian,
 						subs = [];
 					if(data.memberdetail){
-						$.each(data.memberdetail, function(i,item){
+						data.memberdetail.forEach(function(item){
 							var name = (item.lastname && item.Nickname) ?
 								(item.lastname.length > item.Nickname.length ? item.lastname : item.Nickname) :
 								(item.lastname || item.Nickname);
-							name = $.trim(name);
+							name = name.trim();
 							if(item.isStudent == "1"){
 								student.name = name;
 								student.nameZH = item.Chiname;
@@ -221,7 +222,7 @@
 						});
 					}
 					if(data.memberCourseBalance){
-						$.each(data.memberCourseBalance, function(i,item){
+						data.memberCourseBalance.forEach(function(item){
 							var courseID = item.CourseID,
 								subscriptionID = item.membercourseID,
 								lessonCount = parseInt(item.Nooflesson),
@@ -307,11 +308,11 @@
 		student.notes = student.notes.replace(existingRegex, "");
 
 		if(student.existing){
-			student.notes = $.trim(student.notes.replace(existingNewRegex, ""));
+			student.notes = student.notes.replace(existingNewRegex, "").trim();
 			student.notes += student.notes.length ? "\n" : "";
 			student.notes += "Existing Student";
 		}else{
-			student.notes = $.trim(student.notes.replace(existingOldRegex, ""));
+			student.notes = student.notes.replace(existingOldRegex, "").trim();
 			student.notes += student.notes.length ? "\n" : "";
 			student.notes += "New Student";
 		}
@@ -462,7 +463,8 @@
 	 */
 	function findSubscription(options){
 		var out = [];
-		$.each(subscriptions, function(i, subscription){
+		Object.keys(subscriptions).forEach(function(key){
+			var subscription = subscriptions[key];
 			if(subscription.course == options.course &&
 				subscription.student == options.student){
 				out.push(subscription);
@@ -484,10 +486,12 @@
 					unpaid: 0,
 					lastPaymentIndex: 0,
 					invoices: []
-				},
-				merged = $.extend(existing, subscription);
+				};
+				// TODO: Re-implement
+				// merged = $.extend(existing, subscription);
 
-		subscriptions[subscription.id] = merged;
+		// subscriptions[subscription.id] = merged;
+		subscriptions[subscription.id] = existing;
 
 		return merged;
 	}

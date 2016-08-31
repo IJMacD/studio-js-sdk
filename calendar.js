@@ -172,7 +172,7 @@
 					var data = results[0],
 						events = [];
 
-					data.CalendarCourse.forEach(function(i,item){
+					data.CalendarCourse.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.Tutor, true),
@@ -222,7 +222,7 @@
 						events.push(lesson);
 					});
 
-					data.CalendarStudent.forEach(function(i,item){
+					data.CalendarStudent.forEach(function(item){
 						var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.nickname,
@@ -266,9 +266,9 @@
 
 					return events;
 				})
-				.catch(function(e){
-					console.log(e);
-				});
+				// .catch(function(e){
+				// 	console.error(e);
+				// });
 		}
 
 		return _lessons[hash]
@@ -539,7 +539,7 @@
 
 		if(!_courses[hash]){
 			if(options.code){
-				courses.forEach(function(i,course){
+				courses.forEach(function(course){
 
 
 					// -------------------------------------------------------
@@ -572,7 +572,7 @@
 					var data = results[0],
 						out = [];
 
-					data.courselist.forEach(function(i,item){
+					data.courselist.forEach(function(item){
 						var id = item.CourseID,
 							course = addCourse({
 								id: id,
@@ -583,7 +583,7 @@
 						out.push(course);
 					});
 
-					data.courseschedule.forEach(function(i,item){
+					data.courseschedule.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.tutorname, true),
@@ -717,7 +717,7 @@
 						promotion: details.cb201505promotion
 					});
 
-					data.coursedetailschedule.forEach(function(i,item){
+					data.coursedetailschedule.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							startTime = item.Starttime,
@@ -885,7 +885,7 @@
 							lesson.attendees = [];
 						}
 
-						data.coursestudent.forEach(function(i,item){
+						data.coursestudent.forEach(function(item){
 							var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.Lastname,
@@ -1035,7 +1035,7 @@
 
 		level = level && level[0].replace(/\s+/, "");
 		if(!level){
-			customLevels.forEach(function(i,cItem){
+			customLevels.forEach(function(cItem){
 				if(cItem.regex.test(title)){
 					level = cItem.level;
 					return false;
