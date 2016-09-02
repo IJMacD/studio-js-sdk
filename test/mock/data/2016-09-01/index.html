@@ -1,0 +1,122 @@
+	
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<style>
+.hotkey {
+	color:green;
+}
+</style>
+<script>
+
+</script>
+<title>English studio - course management</title>
+	<LINK REL=StyleSheet HREF="studiocrms.css" TYPE="text/css">
+	<link rel="stylesheet" href="themes/base/jquery.ui.all.css">
+	<SCRIPT language=JavaScript src="js/jquery-1.7.1.min.js"></SCRIPT>
+	<script src="js/jquery.ui.core.js"></script>
+	<script src="js/jquery.ui.widget.js"></script>
+	<script src="js/jquery.ui.mouse.js"></script>
+	<script src="js/jquery.ui.draggable.js"></script>
+	<script src="js/jquery.ui.datepicker.js"></script>
+	<script src="js/json2.js"></script>
+	<script src="js/jquery.autogrowtextarea.min.js"></script>
+	<!--<link rel="stylesheet" href="/dashboard/css/bootstrap.min.css" />-->
+	
+
+	
+	<script>
+		var mid = "";
+	mid = "3967";mid2 = "3967";var cansave = true;var shhh = false;var replymessage = false;	
+	</script>	
+	
+	<script src="js/plugin-CourseManagement.js"></script>
+	<script src="js/plugin-MemberManagement.js"></script>
+	<script src="js/plugin-CalendarView.js"></script>
+<script src="js/plugin-CalendarViewK.js"></script>	
+	<script src="js/plugin-SubscriptionReport.js"></script>
+	<script src="js/plugin-FeeCollectionRecordv2.js"></script>
+	<script src="js/plugin-Message.js"></script>
+	<script src="js/plugin-ReportCard.js"></script>
+	<script src="js/plugin-tutorplan.js"></script>
+	<script src="js/plugin-Stock.js"></script>
+	<script src="js/StudioManagement.js"></script>
+	
+	
+</head>
+<body style="margin-top:0px; margin-left:0px;overflow-y:scroll">
+
+<div id="StudioManagementDiv" style="width:100%;"></div>
+<div style="position:fixed;bottom:3px;right:13px;z-index:3;">
+	<table id="controlbuttontable" cellpadding="3" cellspacing=0 class="shadow" style="border-style:solid;border-width:1px;background-color:silver;">
+		<tr>
+
+			<td>
+				<input style="width:135px;" id="buttonMemberManagement" type="button" value="Member management" class="controlbuttonclass1 functionbutton" >
+			</td>
+			<td>
+				<input style="width:130px;" id="buttonCourseManagement" type="button" value="Course management" class="controlbuttonclass1 functionbutton" >
+			</td>
+
+			<td style="">
+				<input style="width:140px;" id="buttonFeeRecord" type="button" value="Fee Collection Record" class="controlbuttonclass1 functionbutton" >
+			</td>			
+<!--		
+			<td>
+				<input style="width:120px;" id="buttonCalendarView" type="button" value="Calendar" class="controlbuttonclass1" >
+			</td>
+-->
+			<td>
+				<input style="width:90px;" id="buttonCalendarView2" type="button" value="Calendar" class="controlbuttonclass1 functionbutton" >
+			</td>			
+			
+			<td>
+				<input style="width:120px;" id="buttonSubscriptionReport" type="button" value="Subscription report" class="controlbuttonclass1 functionbutton" >
+			</td>			
+			<td>
+				<input style="width:100px;" id="buttonReportcard" type="button" value="Report card" class="controlbuttonclass1 functionbutton" >
+			</td>
+			<td>
+				<input style="width:120px;" id="buttonReportcard2" type="button" value="Report card(iain)" class="controlbuttonclass1 functionbutton" >
+			</td>			
+			
+			<td>
+				<input style="width:120px;" id="buttonStrategicplan" type="button" value="Strategic plan" class="controlbuttonclass1 functionbutton" >
+			</td>			
+			
+			<td>
+				<input style="width:120px;;" id="buttonStockManagement" type="button" value="Bookworm Club" class="controlbuttonclass1 functionbutton" >
+			</td>			
+
+			<td>
+				<input style="width:90px;" id="buttonChangePassword" type="button" value="Password" class="controlbuttonclass1 functionbutton" >
+			</td>
+
+						
+			<td>
+				<input style="width:140px;display:none" id="buttonLogout" type="button" value="Logout (Iain)" class="controlbuttonclass1 functionbutton" >
+			</td>
+			
+			
+		</tr>
+	</table>
+</div>
+
+<script>
+	tutormodeonly = false;
+	var admin = "0";
+	$(document).ready(function() {
+
+		if ( replymessage == true ) {
+			
+			//alert("R");
+		} else {
+			$("#buttonFeeRecord").hide();$("#buttonStrategicplan").hide();$("#buttonMemberManagement").hide();$("#buttonCourseManagement").hide();$("#buttonSubscriptionReport").hide();$("#buttonStockManagement").hide();tutormodeonly = true;		}
+	});
+
+
+
+</script>
+
+</body>
+</html>

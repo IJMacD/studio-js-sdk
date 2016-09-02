@@ -18,11 +18,8 @@ if(strpos($request_uri,$script_name)===0){
 			header($headerLine);
 		}
 
-		header("Access-Control-Allow-Origin: *");
 		$requestHeaders = apache_request_headers();
 		
-		// echo "hi";
-		// var_dump($requestHeaders);
 		if(isset($requestHeaders['Origin'])){
 			header("Access-Control-Allow-Origin: " . $requestHeaders['Origin']);
 			header("Access-Control-Allow-Credentials: true");
