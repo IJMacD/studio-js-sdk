@@ -230,12 +230,20 @@
 									grade: item.grade
 								}),
 								lesson = lessons[item.CourseScheduleID],
-								attendance;
+								attendance,
+								originalStart,
+								originalEnd;
 
 						if(!lesson){
 							// Calendar data provides all students for day even when filtered by teacher
 							console.info("Attendance was provided for a lesson which does not exist: " + item.CourseScheduleID);
 							return;
+						}
+
+						if(item.ab_scheduledate){
+							// Pre-compute to avoid moment complaining
+							originalStart = item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_starttime.substr(0,2)+":"+item.ab_starttime.substr(2);
+							originalEnd = item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_endtime.substr(0,2)+":"+item.ab_endtime.substr(2);
 						}
 
 						attendance = addAttendance({
@@ -247,8 +255,8 @@
 							endDate: moment(item.EndDate),
 							isMakeup: item.ismakeup == "1",
 							original: {
-								start: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_starttime.substr(0,2)+":"+item.ab_starttime.substr(2)),
-								end: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_endtime.substr(0,2)+":"+item.ab_endtime.substr(2)),
+								start: originalStart,
+								end: originalEnd,
 								courseName: item.ab_coursename,
 								tutor: iL.Tutor.find(item.ab_tutor)
 							}
