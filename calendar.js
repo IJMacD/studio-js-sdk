@@ -1037,9 +1037,11 @@
 		course.level = level;
 
 		if(level){
-			var match = level.match(/([KPSFL])(\d)/),
-					offset = 0,
-					courseMatch;
+			var isPre = /Pre/.test(level),
+				match = level.match(/([KPSFL])(\d)/),
+				offset = 0,
+				courseMatch;
+
 			course.levelNumeric = 0;
 			if(match){
 				switch(match[1]){
@@ -1065,8 +1067,12 @@
 						}
 						break;
 				}
+				if(isPre) {
+					offset -= 1;
+				}
 				course.levelNumeric = offset + parseInt(match[2]);
 			}
+
 		}
 
 		if(time){
