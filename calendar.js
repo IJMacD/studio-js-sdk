@@ -1066,6 +1066,9 @@
 						else if(course.title.indexOf("Pre-School") != -1){
 							offset = 0;
 						}
+						else {
+							offset = 6;
+						}
 						break;
 				}
 				if(isPre) {
