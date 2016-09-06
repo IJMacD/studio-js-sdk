@@ -199,8 +199,8 @@
 						if(!course.endTime)
 							course.endTime = endTime;
 
-						_setTime(start, startTime);
-						_setTime(end, endTime);
+						_setTime(start, course.startTime);
+						_setTime(end, course.endTime);
 
 						lesson = addLesson({
 							id: lessonID,
@@ -588,17 +588,18 @@
 							course,
 							lesson;
 
-						// TODO: This assumes no lesson can have a unique start/end time
-						_setTime(start, startTime);
-						_setTime(end, endTime);
-
 						course = addCourse({
 							id: courseID,
 							day: start.getDay(),
 							startTime: startTime,
 							endTime: endTime,
 							tutor: tutor
-						}),
+						});
+
+						// TODO: This assumes no lesson can have a unique start/end time
+						_setTime(start, course.startTime);
+						_setTime(end, course.endTime);
+
 						lesson = addLesson({
 							id: lessonID,
 							course: course,
@@ -724,8 +725,8 @@
 						if(!course.endTime)
 							course.endTime = endTime;
 
-						_setTime(start, startTime);
-						_setTime(end, endTime);
+						_setTime(start, course.startTime);
+						_setTime(end, course.endTime);
 
 						lesson = addLesson({
 							id: item.CourseScheduleID,
@@ -1021,7 +1022,7 @@
 		course.originalTitle = course.originalTitle || title;
 
 		var level = title.match(levelRegex),
-				time = title.match(timeRegex);
+			time = title.match(timeRegex);
 
 		course.title = title.replace(levelRegex, "").replace(timeRegex, "");
 
@@ -1038,7 +1039,7 @@
 
 		if(level){
 			var isPre = /Pre/.test(level),
-				match = level.match(/([KPSFL])(\d)/),
+				match = level.match(/([KPSFL])(\d\d?)/),
 				offset = 0,
 				courseMatch;
 
