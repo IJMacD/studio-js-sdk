@@ -1057,18 +1057,17 @@
 						offset = 12;
 						break;
 					case "L":
-						if(course.title.indexOf("Critical") != -1){
-							offset = 6;
-						}
-						else if (course.title.indexOf("Advanced Grammar") != -1){
-							offset = 5;
-						}
-						else if(course.title.indexOf("Pre-School") != -1){
+						if(course.title.indexOf("Pre-School") != -1){
 							offset = 0;
 						}
 						else {
 							offset = 6;
 						}
+						
+						// I used to adjust for AGR being one-level offset from normal
+						// however it makes booklet counting difficult (for example)
+						//
+						// if (course.title.indexOf("Advanced Grammar") != -1){ offset = 5; }
 						break;
 				}
 				if(isPre) {
