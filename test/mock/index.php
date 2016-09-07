@@ -34,8 +34,13 @@ function echoFile($name){
 		echo file_get_contents($filename);
 	}
 	else {
-		echo '{"error":true}';
-		echo $filename;
+		$raw_filename = "data/" . $DATA_DIR . "/" . $name;
+		if(file_exists($raw_filename)) {
+			echo file_get_contents($raw_filename);
+		}
+		else {
+			echo '{"error":true}';
+		}
 	}
 }
 
@@ -50,11 +55,11 @@ switch ($request) {
 			$_POST['login'] == "tutor" &&
 			$_POST['password'] == "itutor123") 
 		{
-			echoFile("login-success");
+			echoFile("login");
 		}
 		else
 		{
-			echoFile("login-fail");
+			echoFile("login");
 		}
 		break;
 	
@@ -104,6 +109,5 @@ switch ($request) {
 		break;
 
 	default:
-		# code...
-		break;
+		echoFile("index.html");
 }
