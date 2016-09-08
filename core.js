@@ -21,7 +21,7 @@
 		topNames = "Chan Chau Chang Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung"
 			+ " Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay"
 			+ " Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Mak Man Mang Mo Mok Ng Ngai Ngan Pak Pang Poon Sek Shek Sheung"
-			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui"
+			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsoi Tsui"
 			+ " Tuen Tung Wai Wan Wong Wong Wu Yam Yan Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
 		memberID,	// Now part of currentUser
