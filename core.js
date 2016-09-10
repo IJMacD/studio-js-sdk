@@ -14,6 +14,7 @@
 		},
 
 		Tutor = iLearner.Tutor || {},
+		User = iLearner.User || {},
 		Room = iLearner.Room || {},
 		Term = iLearner.Term || {},
 		Util = iLearner.Util || {},
@@ -29,6 +30,7 @@
 		adminStaff = {},
 		classrooms,
 		tutors,
+		users = {},
 		terms,
 		coursePrices,
 
@@ -44,6 +46,7 @@
 	iL.Conf = defaults;
 
 	iLearner.Tutor = Tutor;
+	iLearner.User = User;
 	iLearner.Room = Room;
 	iLearner.Term = Term;
 	iLearner.Util = Util;
@@ -65,6 +68,8 @@
 						username: accountName,
 						name: data.result[0].currentusernickname || accountName
 					};
+
+					currentUser.colour = getTutorColour(currentUser);
 
 					if(!memberID){
 						return Promise.reject(Error("No member ID"));
@@ -93,7 +98,9 @@
 						id: staff.MemberID,
 						name: staff.User
 					};
+					obj.colour = getTutorColour(obj);
 					adminStaff[obj.id] = obj;
+					users[obj.id] = obj;
 				});
 				classrooms = data.classroom.map(function(i){
 					return { id: i.crid, name: i.place }
@@ -115,6 +122,7 @@
 				tutors = data.tutor.map(function(t){
 					var tutor = { name: t.n.trim(), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
+					users[tutor.id] = tutor;
 					return tutor;
 				});
 				// Sort through the raw data so that the calendar module can
@@ -133,6 +141,7 @@
 		// Check if we're already logged in.
 		checkLogin().then(function (user) {
 			currentUser = user;
+			user.colour = getTutorColour(user);
 		})
 
 	}
@@ -226,6 +235,24 @@
 				});
 		});
 	}
+
+	/**
+	 * Used for interacting with users
+	 *
+	 * @class User
+	 */
+
+	/**
+	 * Get a single user specified by his ID
+	 *
+	 * @method get
+	 * @param id {int} ID of the user you with to fetch
+	 * @return {object} Object containing the details of the user
+	 */
+	function getUser(id){
+		return users[id];
+	}
+	User.get = getUser;
 
 	/**
 	 * Used for interacting with tutors
