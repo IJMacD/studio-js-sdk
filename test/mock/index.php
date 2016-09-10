@@ -108,6 +108,28 @@ switch ($request) {
 		}
 		break;
 
+	case 'process_getMemberDetail.php':
+		if(isset($_POST['memberID']))
+		{
+			if($_POST['memberID'] == "4798")
+			{
+				echoFile("getMemberDetail");
+			}
+		}
+		
+		break;
+
+	case 'process_getNotes.php':
+		if(isset($_POST['student_id']))
+		{
+			if($_POST['student_id'] == "4798")
+			{
+				echoFile("getNotes");
+			}
+		}
+		
+		break;
+
 	default:
 		echoFile("index.html");
 }
