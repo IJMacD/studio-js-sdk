@@ -121,7 +121,7 @@
                   if(!note.lesson) {
                     note.lesson = iL.Lesson.get(message.lesson_id);
                   }
-                }).catch(()=>{}));
+                }).catch(function(){}));
             }
 
             // Lesson fetch does not exist
