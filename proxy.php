@@ -19,7 +19,7 @@ if(strpos($request_uri,$script_name)===0){
 		}
 
 		$requestHeaders = apache_request_headers();
-		
+
 		if(isset($requestHeaders['Origin'])){
 			header("Access-Control-Allow-Origin: " . $requestHeaders['Origin']);
 			header("Access-Control-Allow-Credentials: true");
@@ -96,6 +96,8 @@ function proxy_request($url, $data, $method, $headers=array()) {
 		while ((list($header, $value) = each($requestHeaders))) {
 			if($header == "Content-Length") {
 				fputs($fp, "Content-Length: $datalength\r\n");
+			} else if($header == "Referer") {
+				fputs($fp, "Referer: http://192.168.0.138/studio/\r\n");
 			} else if($header !== "Connection" && $header !== "Host") {
 				fputs($fp, "$header: $value\r\n");
 			}

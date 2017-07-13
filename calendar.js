@@ -145,7 +145,14 @@
 		}
 
 		post_data = {
-			sDate: iL.Util.formatDate(options.start)
+			Name: "",
+			sDate: iL.Util.formatDate(options.start),
+			Tutor: "",
+			shhh: 0,
+			tutorweeklyschedule: 0, // options.tutor ? 1 : 0,
+			searchCoursetype: "",
+			searchCourselevel: "",
+			centreid: "0 , 1",
 		};
 
 		hash = JSON.stringify(post_data);
@@ -292,7 +299,7 @@
 	// Filter function
 	function byTutor(tutor) {
 		return function (lesson) {
-			return lesson.tutor == tutor;
+			return lesson.tutor.id == tutor.id;
 		}
 	}
 

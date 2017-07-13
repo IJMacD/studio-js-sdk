@@ -43,7 +43,7 @@
 	window.iLearner = iLearner;
 
 	// iL.Conf = {...defaults, ...iL.Conf};
-	iL.Conf = defaults;
+	iL.Conf = iL.Conf || defaults;
 
 	iLearner.Tutor = Tutor;
 	iLearner.User = User;
@@ -103,7 +103,7 @@
 					users[obj.id] = obj;
 				});
 				classrooms = data.classroom.map(function(i){
-					return { id: i.crid, name: i.place }
+					return { id: i.crid, name: i.place, centre: parseInt(i.centreID) }
 				});
 				if(data.term && data.term.map){
 					terms = data.term.map(function(term){
