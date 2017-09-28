@@ -20,7 +20,7 @@
 			{regex: /Starters|Movers|Flyers/, level: "K"}
 		],
 		grades = "K1 K2 K3 P1 P2 P3 P4 P5 P6 F1 F2 F3 F4 F5 F6".split(" "),
-		timeRegex = /\((\d{4})-(\d{4})\)/,
+		timeRegex = /\((\d{2}:?\d{2})-(\d{2}:?\d{2})\)/,
 
 		chineseRegex = /[\u4E00-\u9FFF]/,
 		mathsRegex = /(math|數)/i,
@@ -200,11 +200,16 @@
 
 						// We can helpfully set the standard start time for the course if
 						// it has not already been set
-						// TODO: This assumes all lesson have the same start/end time
 						if(!course.startTime)
 							course.startTime = startTime;
 						if(!course.endTime)
 							course.endTime = endTime;
+
+						// TODO: This assumes all lesson have the same start/end time
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
 
 						_setTime(start, startTime);
 						_setTime(end, endTime);
@@ -604,22 +609,27 @@
 							tutor = iL.Tutor.find(item.tutorname, true),
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
-							startTime = item.Starttime,
-							endTime = item.endtime,
-							course,
+							// startTime = item.Starttime,
+							// endTime = item.endtime,
+							course = getCourse(courseID),
 							lesson;
 
 						// TODO: This assumes no lesson can have a unique start/end time
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
+
 						_setTime(start, startTime);
 						_setTime(end, endTime);
 
-						course = addCourse({
-							id: courseID,
-							day: start.getDay(),
-							startTime: startTime,
-							endTime: endTime,
-							tutor: tutor
-						}),
+						// course = addCourse({
+						// 	id: courseID,
+						// 	day: start.getDay(),
+						// 	startTime: startTime,
+						// 	endTime: endTime,
+						// 	tutor: tutor
+						// }),
 						lesson = addLesson({
 							id: lessonID,
 							course: course,
@@ -744,8 +754,13 @@
 						// TODO: This assumes all lesson have the same start/end time
 						if(!course.startTime)
 							course.startTime = startTime;
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+
 						if(!course.endTime)
 							course.endTime = endTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
 
 						_setTime(start, startTime);
 						_setTime(end, endTime);
@@ -1093,8 +1108,8 @@
 		}
 
 		if(time){
-			course.startTime = time[1];
-			course.endTime = time[2];
+			course.startTime = time[1].replace(":", "");
+			course.endTime = time[2].replace(":", "");
 		}
 	}
 
