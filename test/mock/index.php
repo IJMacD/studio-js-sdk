@@ -53,7 +53,7 @@ switch ($request) {
 		if(isset($_POST['login']) &&
 			isset($_POST['password']) &&
 			$_POST['login'] == "tutor" &&
-			$_POST['password'] == "itutor123") 
+			$_POST['password'] == "itutor123")
 		{
 			echoFile("login");
 		}
@@ -62,9 +62,9 @@ switch ($request) {
 			echoFile("login");
 		}
 		break;
-	
+
 	case 'process_getCalendarData.php':
-		if(isset($_POST['Tutor']))
+		if(isset($_POST['Tutor']) && strlen($_POST['Tutor']))
 		{
 			if($_POST['Tutor'] == "3639")
 			{
@@ -89,7 +89,7 @@ switch ($request) {
 				echoFile("getCourseDetail-2807");
 			}
 		}
-		
+
 		break;
 
 	case 'process_getMemberReportCardList.php':
@@ -116,7 +116,7 @@ switch ($request) {
 				echoFile("getMemberDetail");
 			}
 		}
-		
+
 		break;
 
 	case 'process_getNotes.php':
@@ -127,7 +127,7 @@ switch ($request) {
 				echoFile("getNotes");
 			}
 		}
-		
+
 		break;
 
 	default:

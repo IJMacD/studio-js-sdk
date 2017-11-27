@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /c/studio-js-sdk/test/mock
+RewriteBase /c/ilearner/studio/admin-js-sdk/test/mock
 RewriteRule ^index\.php$ - [L]
-RewriteRule . /c/studio-js-sdk/test/mock/index.php [L]
+RewriteRule . /c/ilearner/studio/admin-js-sdk/test/mock/index.php [L]
 </IfModule>
