@@ -7,7 +7,6 @@
 	 */
 	var iLearner = window.iLearner || {},
 		iL = iLearner,
-		$ = window.jQuery,
 
 		defaults = {
 			API_ROOT: "/",
@@ -15,6 +14,7 @@
 		},
 
 		Tutor = iLearner.Tutor || {},
+		User = iLearner.User || {},
 		Room = iLearner.Room || {},
 		Term = iLearner.Term || {},
 		Util = iLearner.Util || {},
@@ -22,7 +22,7 @@
 		topNames = "Chan Chau Chang Cheng Cheung Chin Ching Chiu Choi Chow Chu Chui Chun Chung Fan Fong Foo Fu Fung"
 			+ " Ha Hau Heung Ho Hon Hong Hooi Hui Hung Ka Kam Keung Kiu Ko Kok Kong Ku Kung Kwok Lai Lam Lau Lay"
 			+ " Lee Leung Li Liu Lo Loong Lui Luk Lung Ma Mak Man Mang Mo Mok Ng Ngai Ngan Pak Pang Poon Sek Shek Sheung"
-			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsui"
+			+ " Shiu Sit Siu So Suen Sum Sung Sze Tai Tam Tang Tin Ting To Tong Tong Tou Tsang Tse Tseung Tso Tsoi Tsui"
 			+ " Tuen Tung Wai Wan Wong Wong Wu Yam Yan Yau Yeung Yim Yip Yiu Yu Yue Yuen".split(" "),
 
 		memberID,	// Now part of currentUser
@@ -30,6 +30,7 @@
 		adminStaff = {},
 		classrooms,
 		tutors,
+		users = {},
 		terms,
 		coursePrices,
 
@@ -41,15 +42,17 @@
 	window.iL = iLearner;
 	window.iLearner = iLearner;
 
-	iL.Conf = $.extend({}, defaults, iL.Conf);
+	// iL.Conf = {...defaults, ...iL.Conf};
+	iL.Conf = iL.Conf || defaults;
 
 	iLearner.Tutor = Tutor;
+	iLearner.User = User;
 	iLearner.Room = Room;
 	iLearner.Term = Term;
 	iLearner.Util = Util;
 
 	/* legacy */
-	iL.API_ROOT = iL.Conf.API_ROOT;
+	// iL.API_ROOT = iL.Conf.API_ROOT;
 
 	iL.query = query;
 
@@ -65,6 +68,8 @@
 						username: accountName,
 						name: data.result[0].currentusernickname || accountName
 					};
+
+					currentUser.colour = getTutorColour(currentUser);
 
 					if(!memberID){
 						return Promise.reject(Error("No member ID"));
@@ -93,10 +98,12 @@
 						id: staff.MemberID,
 						name: staff.User
 					};
+					obj.colour = getTutorColour(obj);
 					adminStaff[obj.id] = obj;
+					users[obj.id] = obj;
 				});
-				classrooms = $.map(data.classroom, function(i){
-					return { id: i.crid, name: i.place }
+				classrooms = data.classroom.map(function(i){
+					return { id: i.crid, name: i.place, centre: parseInt(i.centreID) }
 				});
 				if(data.term && data.term.map){
 					terms = data.term.map(function(term){
@@ -112,9 +119,10 @@
 				else {
 					terms = [];
 				}
-				tutors = $.map(data.tutor, function(t){
-					var tutor = { name: $.trim(t.n), id: t.mid };
+				tutors = data.tutor.map(function(t){
+					var tutor = { name: t.n.trim(), id: t.mid };
 					tutor.colour = getTutorColour(tutor);
+					users[tutor.id] = tutor;
 					return tutor;
 				});
 				// Sort through the raw data so that the calendar module can
@@ -133,9 +141,11 @@
 		// Check if we're already logged in.
 		checkLogin().then(function (user) {
 			currentUser = user;
+			user.colour = getTutorColour(user);
 		})
 
 	}
+	iL.getInitData = getInitData;
 
 	function checkLogin() {
 		if(!_checkLogin){
@@ -200,14 +210,49 @@
 
 	function query(url, data, type){
 		if(!type) type = "json";
+
+		var formData = [];
+		if(data){
+			Object.keys(data).forEach(function (key) {
+				formData.push(key + "=" + encodeURIComponent(data[key]));
+			});
+		}
+
 		return new Promise(function(resolve, reject){
-			$.post(iL.Conf.API_ROOT + url, data, null, type)
-				.then(resolve, function(xhr, status, error){
-					console.error(status + " in file " + url);
+			fetch(iL.Conf.API_ROOT + url, {
+					method: 'post',
+					body: formData.join("&"),
+					headers: new Headers({
+						"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+					}),
+					credentials: 'include'
+				})
+				.then(function (result){
+					resolve(type == "json" ? result.json() : result.text());
+				}, function(error){
+					console.error(error);
 					reject(error);
 				});
 		});
 	}
+
+	/**
+	 * Used for interacting with users
+	 *
+	 * @class User
+	 */
+
+	/**
+	 * Get a single user specified by his ID
+	 *
+	 * @method get
+	 * @param id {int} ID of the user you with to fetch
+	 * @return {object} Object containing the details of the user
+	 */
+	function getUser(id){
+		return users[id];
+	}
+	User.get = getUser;
 
 	/**
 	 * Used for interacting with tutors
@@ -238,7 +283,7 @@
 	function getTutors(id){
 		var tutor;
 		if(tutors && id){
-			$.each(tutors, function(i,t){
+			tutors.forEach(function(t){
 				if(t.id == id){
 					tutor = t;
 					return false;
@@ -265,10 +310,10 @@
 			return { name: "", colour: "#999999" };
 		}
 
-		name = $.trim(name);
+		name = name.trim();
 
 		if(tutors){
-			$.each(tutors, function(i,t){
+			tutors.forEach(function(t){
 				if(t.name == name){
 					tutor = t;
 					return false;
@@ -329,7 +374,7 @@
 		var classroom;
 
 		if(classrooms && id){
-			$.each(classrooms, function(i,c){
+			classrooms.forEach(function(c){
 				if(c.id == id){
 					classroom = c;
 					return false;
@@ -358,7 +403,7 @@
 		}
 
 		if(classrooms){
-			$.each(classrooms, function(i,c){
+			classrooms.forEach(function(c){
 				if(c.name == name){
 					classroom = c;
 					return false;
@@ -493,7 +538,7 @@
 	 * @param person {object} Object with a `name` property
 	 */
 	function parseName(person){
-		person.name = $.trim(person.name);
+		person.name = person.name.trim();
 
 		var names = person.name.match(/\w+/g);
 
@@ -551,8 +596,6 @@
 		}
 	}
 	Util.parseName = parseName;
-
-	getInitData();
 
 	window.iLearner = iLearner;
 }(window));

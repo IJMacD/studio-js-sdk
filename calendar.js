@@ -20,7 +20,7 @@
 			{regex: /Starters|Movers|Flyers/, level: "K"}
 		],
 		grades = "K1 K2 K3 P1 P2 P3 P4 P5 P6 F1 F2 F3 F4 F5 F6".split(" "),
-		timeRegex = /\((\d{4})-(\d{4})\)/,
+		timeRegex = /\((\d{2}:?\d{2})-(\d{2}:?\d{2})\)/,
 
 		chineseRegex = /[\u4E00-\u9FFF]/,
 		mathsRegex = /(math|數)/i,
@@ -95,7 +95,7 @@
 			return _relativeLessons(args[0], args[1]);
 		}
 
-		options = $.isPlainObject(args[0]) ? args[0] : {};
+		options = typeof args[0] == "object" ? args[0] : {};
 
 		if(options.id){
 			var lesson = getLesson(options.id);
@@ -103,7 +103,7 @@
 		}
 
 		if(options.student){
-			var o = $.extend({},options);
+			var o = JSON.parse(JSON.stringify(options));
 			o.student = undefined;
 			return findLessons(o).then(function(lessons){
 				return lessons.filter(function(lesson){
@@ -133,7 +133,7 @@
 			if(endMoment > startMoment && !startMoment.isSame(endMoment, 'day')){
 				return Promise.all(getAllDays(startMoment, endMoment)
 					.map(function(item){
-						var op = $.extend({},options);
+						var op = JSON.parse(JSON.stringify(options));
 						op.start = item.toDate();
 						op.end = undefined;
 						return findLessons(op);
@@ -145,7 +145,14 @@
 		}
 
 		post_data = {
-			sDate: iL.Util.formatDate(options.start)
+			Name: "",
+			sDate: iL.Util.formatDate(options.start),
+			Tutor: "",
+			shhh: 0,
+			tutorweeklyschedule: 0, // options.tutor ? 1 : 0,
+			searchCoursetype: "",
+			searchCourselevel: "",
+			centreid: "0 , 1",
 		};
 
 		hash = JSON.stringify(post_data);
@@ -172,7 +179,7 @@
 					var data = results[0],
 						events = [];
 
-					$.each(data.CalendarCourse, function(i,item){
+					data.CalendarCourse.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.Tutor, true),
@@ -193,14 +200,19 @@
 
 						// We can helpfully set the standard start time for the course if
 						// it has not already been set
-						// TODO: This assumes all lesson have the same start/end time
 						if(!course.startTime)
 							course.startTime = startTime;
 						if(!course.endTime)
 							course.endTime = endTime;
 
-						_setTime(start, course.startTime);
-						_setTime(end, course.endTime);
+						// TODO: This assumes all lesson have the same start/end time
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
+
+						_setTime(start, startTime);
+						_setTime(end, endTime);
 
 						lesson = addLesson({
 							id: lessonID,
@@ -222,7 +234,7 @@
 						events.push(lesson);
 					});
 
-					$.each(data.CalendarStudent, function(i,item){
+					data.CalendarStudent.forEach(function(item){
 						var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.nickname,
@@ -230,12 +242,20 @@
 									grade: item.grade
 								}),
 								lesson = lessons[item.CourseScheduleID],
-								attendance;
+								attendance,
+								originalStart,
+								originalEnd;
 
 						if(!lesson){
 							// Calendar data provides all students for day even when filtered by teacher
 							console.info("Attendance was provided for a lesson which does not exist: " + item.CourseScheduleID);
 							return;
+						}
+
+						if(item.ab_scheduledate){
+							// Pre-compute to avoid moment complaining
+							originalStart = item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_starttime.substr(0,2)+":"+item.ab_starttime.substr(2);
+							originalEnd = item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_endtime.substr(0,2)+":"+item.ab_endtime.substr(2);
 						}
 
 						attendance = addAttendance({
@@ -247,8 +267,8 @@
 							endDate: moment(item.EndDate),
 							isMakeup: item.ismakeup == "1",
 							original: {
-								start: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_starttime.substr(0,2)+":"+item.ab_starttime.substr(2)),
-								end: moment(item.ab_scheduledate.split("-").reverse().join("-") + "T" + item.ab_endtime.substr(0,2)+":"+item.ab_endtime.substr(2)),
+								start: originalStart,
+								end: originalEnd,
 								courseName: item.ab_coursename,
 								tutor: iL.Tutor.find(item.ab_tutor)
 							}
@@ -262,9 +282,13 @@
 								}
 							});
 					});
+					// const loadAttendances = lessons => Promise.all(lessons.map(function(_){return iL.Attendance.find({lesson:_});}));
 
 					return events;
-				});
+				})
+				// .catch(function(e){
+				// 	console.error(e);
+				// });
 		}
 
 		return _lessons[hash]
@@ -280,7 +304,7 @@
 	// Filter function
 	function byTutor(tutor) {
 		return function (lesson) {
-			return lesson.tutor == tutor;
+			return lesson.tutor.id == tutor.id;
 		}
 	}
 
@@ -439,8 +463,9 @@
 	function addCourse(course){
 		var existing = resolveCourse(course);
 
-		if(existing != course)
-			$.extend(existing, course);
+		// TODO: Re-implement
+		// if(existing != course)
+		// 	$.extend(existing, course);
 
 		if(!existing.lessons){
 			existing.lessons = [];
@@ -477,8 +502,9 @@
 				attendees = existing.attendees,
 				course;
 
-		if(existing != lesson)
-			$.extend(existing, lesson);
+		// TODO: Re-implement
+		// if(existing != lesson)
+		// 	$.extend(existing, lesson);
 
 		// Choose where to take attendees array from
 		// TODO: smarter merge
@@ -533,7 +559,7 @@
 
 		if(!_courses[hash]){
 			if(options.code){
-				$.each(courses, function(i,course){
+				courses.forEach(function(course){
 
 
 					// -------------------------------------------------------
@@ -566,7 +592,7 @@
 					var data = results[0],
 						out = [];
 
-					$.each(data.courselist, function(i,item){
+					data.courselist.forEach(function(item){
 						var id = item.CourseID,
 							course = addCourse({
 								id: id,
@@ -577,29 +603,33 @@
 						out.push(course);
 					});
 
-					$.each(data.courseschedule, function(i,item){
+					data.courseschedule.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							tutor = iL.Tutor.find(item.tutorname, true),
 							courseID = item.CourseID,
 							lessonID = item.CourseScheduleID,
-							startTime = item.Starttime,
-							endTime = item.endtime,
-							course,
+							// startTime = item.Starttime,
+							// endTime = item.endtime,
+							course = getCourse(courseID),
 							lesson;
 
-						course = addCourse({
-							id: courseID,
-							day: start.getDay(),
-							startTime: startTime,
-							endTime: endTime,
-							tutor: tutor
-						});
-
 						// TODO: This assumes no lesson can have a unique start/end time
-						_setTime(start, course.startTime);
-						_setTime(end, course.endTime);
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
 
+						_setTime(start, startTime);
+						_setTime(end, endTime);
+
+						// course = addCourse({
+						// 	id: courseID,
+						// 	day: start.getDay(),
+						// 	startTime: startTime,
+						// 	endTime: endTime,
+						// 	tutor: tutor
+						// }),
 						lesson = addLesson({
 							id: lessonID,
 							course: course,
@@ -652,7 +682,9 @@
 					reportcard: course.report,
 					cb201505promotion: course.promotion
 				};
-		$.extend(post_data, objectifyGrade(course.level));
+		// TODO: Re-implement
+		throw Error("Unimplmented");
+		// $.extend(post_data, objectifyGrade(course.level));
 		return iL.query("process_updateCourse.php", post_data);
 	}
 	Course.save = saveCourse;
@@ -710,7 +742,7 @@
 						promotion: details.cb201505promotion
 					});
 
-					$.each(data.coursedetailschedule, function(i,item){
+					data.coursedetailschedule.forEach(function(item){
 						var start = new Date(item.ScheduleDate),
 							end = new Date(item.ScheduleDate),
 							startTime = item.Starttime,
@@ -722,8 +754,13 @@
 						// TODO: This assumes all lesson have the same start/end time
 						if(!course.startTime)
 							course.startTime = startTime;
+						// inherit startTime from course (in case time was in course title)
+						startTime = course.startTime;
+
 						if(!course.endTime)
 							course.endTime = endTime;
+						// inherit endTime from course (in case time was in course title)
+						endTime = course.endTime;
 
 						_setTime(start, course.startTime);
 						_setTime(end, course.endTime);
@@ -878,7 +915,7 @@
 							lesson.attendees = [];
 						}
 
-						$.each(data.coursestudent, function(i,item){
+						data.coursestudent.forEach(function(item){
 							var student = iL.Student.add({
 									id: item.MemberID,
 									name: item.Lastname,
@@ -936,7 +973,7 @@
 	 * @return {array} returns an array of the attendances you passed in
 	 */
 	function fetchAttendance(attendance){
-		if($.isArray(attendance)){
+		if(attendance.map){
 			return attendance.map(fetchAttendance);
 		}
 
@@ -1028,7 +1065,7 @@
 
 		level = level && level[0].replace(/\s+/, "");
 		if(!level){
-			$.each(customLevels, function(i,cItem){
+			customLevels.forEach(function(cItem){
 				if(cItem.regex.test(title)){
 					level = cItem.level;
 					return false;
@@ -1063,7 +1100,7 @@
 						else {
 							offset = 6;
 						}
-						
+
 						// I used to adjust for AGR being one-level offset from normal
 						// however it makes booklet counting difficult (for example)
 						//
@@ -1079,8 +1116,8 @@
 		}
 
 		if(time){
-			course.startTime = time[1];
-			course.endTime = time[2];
+			course.startTime = time[1].replace(":", "");
+			course.endTime = time[2].replace(":", "");
 		}
 	}
 

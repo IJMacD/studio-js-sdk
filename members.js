@@ -14,6 +14,7 @@
 		existingRegex = /\b\n?(Existing|New) Student\b/gi,
 		existingOldRegex = /\b(old|existing)\b/gi,
 		existingNewRegex = /\b(new)\b/gi,
+		dayNumberArray = "SUN MON TUE WED THU FRI SAT".split(" "),
 
 		/* Parameters */
 		existingCutoff = new Date(2014, 0, 1),
@@ -61,9 +62,10 @@
 	function addStudent(student){
 		var existing = resolveStudent(student) || {};
 
-		if(existing != student){
-				$.extend(existing, student);
-		}
+		// TODO: Re-implement
+		// if(existing != student){
+		// 		$.extend(existing, student);
+		// }
 
 		students[student.id] = existing;
 
@@ -85,9 +87,9 @@
 		var now = new Date(),
 			post_data = {
 				// Case-insensitive searching
-				searchStudentName: options.name && options.name.toLowerCase(),
-				searchStudentMobile: options.phone,
-				searchStudentSchool: options.school,
+				searchStudentName: options.name || "",
+				searchStudentMobile: options.phone || "",
+				searchStudentSchool: options.school || "",
 				searchStudentCourseYear: options.year === undefined ? now.getFullYear() : options.year,
 				searchStudentCourseMonth: options.month === undefined ? (now.getMonth() + 1) : options.month
 			},
@@ -143,20 +145,17 @@
 	function fetchStudent(student){
 		student = resolveStudent(student);
 		if(!_students[student.id]){
-			_students[student.id] = Promise.all([
-					iL.query("process_getMemberDetail.php", {memberID: student.id}),
-					findStudents({name: student.name})
-				]).then(function(array){
-					var data = array[0],
-						guardians = [],
+			_students[student.id] = iL.query("process_getMemberDetail.php", {memberID: student.id})
+				.then(function(data){
+					var guardians = [],
 						guardian,
 						subs = [];
 					if(data.memberdetail){
-						$.each(data.memberdetail, function(i,item){
+						data.memberdetail.forEach(function(item){
 							var name = (item.lastname && item.Nickname) ?
 								(item.lastname.length > item.Nickname.length ? item.lastname : item.Nickname) :
 								(item.lastname || item.Nickname);
-							name = $.trim(name);
+							name = name.trim();
 							if(item.isStudent == "1"){
 								student.name = name;
 								student.nameZH = item.Chiname;
@@ -167,15 +166,18 @@
 								student.school = item.School;
 								student.phone = item.Mobile;
 								student.notes = item.Remarks;
-								student.birthdate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
-								// deprecated
-								student.birthDate = student.birthdate;
+								student.notesPayment = item.RemarkAboutPayment;
+								student.birthDate = new Date(item.BirthYear, item.BirthMonth - 1, item.BirthDay);
+								student.registeredDate = new Date(item.RegDate);
 
-								if(student.notes.match(existingOldRegex)){
+								if(student.notes.match(existingOldRegex) || student.notesPayment.match(existingOldRegex)){
 									student.existing = true;
 								}
-								else if(student.notes.match(existingNewRegex)){
+								else if(student.notes.match(existingNewRegex) || student.notesPayment.match(existingNewRegex)){
 									student.existing = false;
+								}
+								else if (student.registeredDate < existingCutoff){
+									student.existing = true;
 								}
 								else {
 									student.existing = !!student.existing;
@@ -184,8 +186,6 @@
 								/* Not currently used but need to
 									 look after them in order to
 									 be able to save */
-								student.notesPayment = item.RemarkAboutPayment;
-								student.nameChinese = item.Chiname;
 								student.schoolStart = item.schooltimefrom;
 								student.schoolEnd = item.schooltimeto;
 								student.soco = item.isSOCO == "1";
@@ -207,7 +207,7 @@
 									accountID: item.AccountName,
 									relationship: item.Relationship,
 									name: item.lastname,
-									nameChinese: item.Chiname,
+									nameZH: item.Chiname,
 									nickname: item.Nickname,
 									email: item.emailaddress,
 									address: item.Address,
@@ -221,13 +221,16 @@
 						});
 					}
 					if(data.memberCourseBalance){
-						$.each(data.memberCourseBalance, function(i,item){
+						data.memberCourseBalance.forEach(function(item){
 							var courseID = item.CourseID,
 								subscriptionID = item.membercourseID,
 								lessonCount = parseInt(item.Nooflesson),
 								fullPrice = parseInt(item.shouldpaid),
 								pricePerLesson = fullPrice / lessonCount,
 								dateIndex,
+								dayNumber = dayNumberArray.indexOf(item.ts.substring(0, 3)),
+								startTime = item.ts.substring(4, 8),
+								endTime = item.ts.substring(12, 16),
 								course = iL.Course.add({
 									id: courseID,
 									title: item.Coursename,
@@ -236,7 +239,11 @@
 										 on this subscription.
 										 The student is *not* necessarily entitled to this */
 									existingDiscount: parseInt(item.DiscountForOldStudent),
-									pricePerLesson: pricePerLesson
+									pricePerLesson: pricePerLesson,
+									tutor: iL.Tutor.find(item.tutorname),
+									day: dayNumber,
+									startTime: startTime,
+									endTime: endTime
 								}),
 								subscription = iL.Subscription.add({
 									id: subscriptionID,
@@ -276,6 +283,10 @@
 
 							if(!invoice.paid){
 								subscription.unpaid += 1;
+
+								if(!invoice.overdue && !invoice.dueNow){
+									subscription.isActive = true;
+								}
 							}
 
 							if(subs.indexOf(subscription) == -1){
@@ -307,11 +318,11 @@
 		student.notes = student.notes.replace(existingRegex, "");
 
 		if(student.existing){
-			student.notes = $.trim(student.notes.replace(existingNewRegex, ""));
+			student.notes = student.notes.replace(existingNewRegex, "").trim();
 			student.notes += student.notes.length ? "\n" : "";
 			student.notes += "Existing Student";
 		}else{
-			student.notes = $.trim(student.notes.replace(existingOldRegex, ""));
+			student.notes = student.notes.replace(existingOldRegex, "").trim();
 			student.notes += student.notes.length ? "\n" : "";
 			student.notes += "New Student";
 		}
@@ -323,7 +334,7 @@
 				MemberDetailNameinEnglish: student.name,
 				MemberDetailRemark: student.notes,
 				MemberDetailRemarkPayment: student.notesPayment,
-				MemberDetailNameinChinese: student.nameChinese,
+				MemberDetailNameinChinese: student.nameZH,
 				MemberDetailNickname: student.englishName,
 				MemberDetailBirthDay: iL.Util.formatDate(student.birthdate),
 				MemberDetailGender: student.gender == "male" ? "1" : "0",
@@ -335,7 +346,7 @@
 				GuardianDetailMemberID: guardian.accountID,
 				GuardianDetailRelationship: guardian.relationship,
 				GuardianDetailNameinEnglish: guardian.name,
-				GuardianDetailNameinChinese: guardian.nameChinese,
+				GuardianDetailNameinChinese: guardian.nameZH,
 				GuardianDetailNickname: guardian.nickname,
 				GuardianDetailEmail: guardian.email,
 				GuardianDetailAddress: guardian.address,
@@ -462,7 +473,8 @@
 	 */
 	function findSubscription(options){
 		var out = [];
-		$.each(subscriptions, function(i, subscription){
+		Object.keys(subscriptions).forEach(function(key){
+			var subscription = subscriptions[key];
 			if(subscription.course == options.course &&
 				subscription.student == options.student){
 				out.push(subscription);
@@ -483,16 +495,25 @@
 					/** Defaults **/
 					unpaid: 0,
 					lastPaymentIndex: 0,
-					invoices: []
-				},
-				merged = $.extend(existing, subscription);
+					invoices: [],
+					isActive: false
+				};
+				
+				extend(existing, subscription);
 
-		subscriptions[subscription.id] = merged;
+		subscriptions[subscription.id] = existing;
 
-		return merged;
+		return existing;
 	}
 	Subscription.add = addSubscription;
 
+	function extend(obj, props) {
+			for(var prop in props) {
+					if(props.hasOwnProperty(prop)) {
+							obj[prop] = props[prop];
+					}
+			}
+	}
 	/**
 	 * Save a subscription to the server
 	 *
